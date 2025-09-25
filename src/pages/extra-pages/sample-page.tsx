@@ -19,28 +19,13 @@ import {
 } from '@mui/material';
 
 // project import
-import MainCard from 'components/MainCard';
-import IconButton from 'components/@extended/IconButton';
-import AnalyticsDataCard from 'components/cards/statistics/AnalyticsDataCard';
 
-import WelcomeBanner from 'sections/dashboard/analytics/WelcomeBanner';
-import IncomeChart from 'sections/dashboard/analytics/IncomeChart';
-import MarketingCardChart from 'sections/dashboard/analytics/MarketingCardChart';
-import OrdersCardChart from 'sections/dashboard/analytics/OrdersCardChart';
-import OrdersList from 'sections/dashboard/analytics/OrdersList';
-import PageViews from 'sections/dashboard/analytics/PageViews';
-import ReportChart from 'sections/dashboard/analytics/ReportChart';
-import SalesCardChart from 'sections/dashboard/analytics/SalesCardChart';
+
 // import SalesChart from 'sections/dashboard/SalesChart';
-import TransactionHistory from 'sections/dashboard/analytics/TransactionHistory';
-import UsersCardChart from 'sections/dashboard/analytics/UsersCardChart';
-import LabelledTasks from 'sections/dashboard/analytics/LabelledTasks';
-import ReaderCard from 'sections/dashboard/analytics/ReaderCard';
-import AcquisitionChannels from 'sections/dashboard/analytics/AcquisitionChannels';
 
 // assets
 import { DownloadOutlined, CaretDownOutlined, BarChartOutlined, CalendarOutlined, FileTextOutlined } from '@ant-design/icons';
-import ReportCard from 'components/cards/statistics/ReportCard';
+// import ReportCard from 'components/cards/statistics/ReportCard';
 import MapComponent from 'sections/map/maps-component';
 
 import { getStations, Station } from 'api/maps-api';
@@ -151,12 +136,10 @@ const DashboardAnalytics = () => {
 
   return (
     <Grid container rowSpacing={4.5} columnSpacing={3}>
-      <Grid item xs={12}>
-        <WelcomeBanner />
-      </Grid>
+   
 
       {/* row 1 */}
-      <Grid item xs={12} lg={3} sm={6}>
+      {/* <Grid item xs={12} lg={3} sm={6}>
         <ReportCard
           primary={stations.length}
           secondary="Active Sensors"
@@ -182,7 +165,7 @@ const DashboardAnalytics = () => {
       </Grid>
       <Grid item xs={12} lg={3} sm={6}>
         <ReportCard primary="50µg/m³" secondary="Average AQI" color={theme.palette.primary.main} iconPrimary={DownloadOutlined} />
-      </Grid>
+      </Grid> */}
       <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />
 
       {/* row 2 */}
@@ -212,9 +195,7 @@ const DashboardAnalytics = () => {
           </Grid>
           <Grid item />
         </Grid>
-        <MainCard sx={{ mt: 2 }} >
           <SensorsTable stations={stations} />
-        </MainCard>
       </Grid>
 
       {/* row 4 */}

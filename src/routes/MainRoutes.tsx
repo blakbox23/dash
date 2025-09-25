@@ -16,7 +16,7 @@ const MaintenanceComingSoon = Loadable(lazy(() => import('pages/maintenance/comi
 
 const AppContactUS = Loadable(lazy(() => import('pages/contact-us')));
 // render - sample page
-const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
+// const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 const Overview = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
 
 // ==============================|| MAIN ROUTING ||============================== //
@@ -34,38 +34,38 @@ const MainRoutes = {
         }
       ]
     },
-    {
-      path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
-      children: [
-        {
-          path: 'contact-us',
-          element: <AppContactUS />
-        }
-      ]
-    },
-    {
-      path: '/maintenance',
-      element: <PagesLayout />,
-      children: [
-        {
-          path: '404',
-          element: <MaintenanceError />
-        },
-        {
-          path: '500',
-          element: <MaintenanceError500 />
-        },
-        {
-          path: 'under-construction',
-          element: <MaintenanceUnderConstruction />
-        },
-        {
-          path: 'coming-soon',
-          element: <MaintenanceComingSoon />
-        }
-      ]
-    }
+    // {
+    //   path: '/',
+    //   element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
+    //   children: [
+    //     {
+    //       path: 'contact-us',
+    //       element: <AppContactUS />
+    //     }
+    //   ]
+    // },
+    // {
+    //   path: '/maintenance',
+    //   element: <PagesLayout />,
+    //   children: [
+    //     {
+    //       path: '404',
+    //       element: <MaintenanceError />
+    //     },
+    //     {
+    //       path: '500',
+    //       element: <MaintenanceError500 />
+    //     },
+    //     {
+    //       path: 'under-construction',
+    //       element: <MaintenanceUnderConstruction />
+    //     },
+    //     {
+    //       path: 'coming-soon',
+    //       element: <MaintenanceComingSoon />
+    //     }
+    //   ]
+    // }
   ]
 };
 
