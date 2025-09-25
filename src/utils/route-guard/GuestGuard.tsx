@@ -17,7 +17,7 @@ const GuestGuard = ({ children }: GuardProps) => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate(location?.state?.from ? location?.state?.from : APP_DEFAULT_PATH, {
+      navigate(location?.state?.from ? location?.state?.from : '/overview', {
         state: {
           from: ''
         },

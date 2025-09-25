@@ -51,13 +51,13 @@ const MainCard = forwardRef<HTMLDivElement, MainCardProps>(
       children,
       subheader,
       content = true,
-      contentSX = {},
+      contentSX,
       darkTitle,
       divider = true,
       elevation,
       secondary,
       shadow,
-      sx = {},
+      sx,
       title,
       modal = false,
       ...others
@@ -65,25 +65,33 @@ const MainCard = forwardRef<HTMLDivElement, MainCardProps>(
     ref
   ) => {
     const theme = useTheme();
-    boxShadow = theme.palette.mode === ThemeMode.DARK ? boxShadow || true : boxShadow;
+
+    // fallback to avoid undefined customShadows
+    const resolvedShadow = shadow || theme?.customShadows?.z1 || 'inherit';
+
+    // boxShadow logic
+    const resolvedBoxShadow =
+      boxShadow && (!border || theme.palette.mode === ThemeMode.DARK)
+        ? resolvedShadow
+        : 'inherit';
 
     return (
       <Card
         elevation={elevation || 0}
         ref={ref}
-        {...others}
+        {...(others || {})}
         sx={{
+          ...(sx ?? {}),
           position: 'relative',
           border: border ? '1px solid' : 'none',
           borderRadius: 1,
           borderColor:
-            theme.palette.mode === ThemeMode.DARK ? theme.palette.divider : theme.palette.grey.A800,
-          boxShadow:
-            boxShadow && (!border || theme.palette.mode === ThemeMode.DARK)
-              ? shadow || theme.customShadows.z1
-              : 'inherit',
+            theme.palette.mode === ThemeMode.DARK
+              ? theme.palette.divider
+              : theme.palette.grey.A800,
+          boxShadow: resolvedBoxShadow,
           ':hover': {
-            boxShadow: boxShadow ? shadow || theme.customShadows.z1 : 'inherit'
+            boxShadow: boxShadow ? resolvedShadow : 'inherit'
           },
           ...(modal && {
             position: 'absolute' as const,
@@ -96,8 +104,7 @@ const MainCard = forwardRef<HTMLDivElement, MainCardProps>(
               minHeight: 'auto',
               maxHeight: `calc(100vh - 200px)`
             }
-          }),
-          ...sx
+          })
         }}
       >
         {/* card header and action */}
@@ -122,8 +129,11 @@ const MainCard = forwardRef<HTMLDivElement, MainCardProps>(
         {title && divider && <Divider />}
 
         {/* card content */}
-        {content && <CardContent sx={contentSX}>{children}</CardContent>}
-        {!content && children}
+        {content ? (
+          <CardContent sx={contentSX ?? {}}>{children}</CardContent>
+        ) : (
+          children
+        )}
       </Card>
     );
   }
