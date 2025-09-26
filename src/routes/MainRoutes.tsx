@@ -36,36 +36,67 @@ const MainRoutes = {
     },
     {
       path: '/',
-      element: <SimpleLayout layout={SimpleLayoutType.SIMPLE} />,
+      element: <DashboardLayout />,
       children: [
         {
-          path: 'contact-us',
-          element: <AppContactUS />
+          path: 'analytics',
+          element: <MaintenanceUnderConstruction />
         }
       ]
     },
+
     {
-      path: '/maintenance',
-      element: <PagesLayout />,
+      path: '/',
+      element: <DashboardLayout />,
       children: [
         {
-          path: '404',
-          element: <MaintenanceError />
-        },
-        {
-          path: '500',
-          element: <MaintenanceError500 />
-        },
-        {
-          path: 'under-construction',
+          path: 'alerts',
           element: <MaintenanceUnderConstruction />
-        },
-        {
-          path: 'coming-soon',
-          element: <MaintenanceComingSoon />
         }
       ]
-    }
+    },
+
+    {
+      path: '/',
+      element: <DashboardLayout />,
+      children: [
+        {
+          path: 'feedback',
+          element: <MaintenanceUnderConstruction />
+        }
+      ]
+    },
+
+
+
+
+
+
+
+
+
+    // {
+    //   path: '/maintenance',
+    //   element: <PagesLayout />,
+    //   children: [
+    //     {
+    //       path: '404',
+    //       element: <MaintenanceError />
+    //     },
+    //     {
+    //       path: '500',
+    //       element: <MaintenanceError500 />
+    //     },
+    //     {
+    //       path: 'under-construction',
+    //       element: <MaintenanceUnderConstruction />
+    //     },
+    //     {
+    //       path: 'coming-soon',
+    //       element: <MaintenanceComingSoon />
+    //     }
+    //   ]
+    // }
   ]
 };
 

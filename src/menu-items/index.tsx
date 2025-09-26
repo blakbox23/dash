@@ -1,16 +1,17 @@
 // project import
-import samplePage from './overview';
-import other from './other';
-import pages from './pages';
+import overview from './overview';
+import feedback from './feedback';
+import analytics from './analytics';
+import alerts from './alerts';
 
 // types
 import { NavItemType } from 'types/menu';
-import overview from './overview';
+import pages from './pages';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems: { items: NavItemType[] } = {
-  items: [overview]
+  items: [overview, analytics, alerts, feedback]
 };
 
 export default menuItems;
