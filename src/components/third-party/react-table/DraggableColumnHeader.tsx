@@ -27,8 +27,6 @@ const DraggableColumnHeader: FC<{ header: Header<TableDataProps, unknown>; table
   // const { columnOrder } = getState();
   const { column } = header;
 
-  console.log('header')
-  console.log(header)
   // const [{ isOverCurrent }, dropRef] = useDrop({
   //   accept: 'column',
   //   drop: (draggedColumn: Column<TableDataProps>) => {

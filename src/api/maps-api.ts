@@ -4,7 +4,7 @@ import useSWR, { mutate } from "swr";
 import { fetcher } from "utils/axios";
 
 const api = axios.create({
-baseURL: "http://40.81.230.185/api/v1",
+baseURL: "/api/v1/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -34,29 +34,29 @@ export const getStations = async () => {
   };
 
 
-  export function useGetStations(page: number = 0, size: number = 10) {
-    const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);
+  // export function useGetStations(page: number = 0, size: number = 10) {
+  //   const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);
   
-    const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.stations, fetchWithParams, {
-      revalidateIfStale: true,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    });
+  //   const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.stations, fetchWithParams, {
+  //     revalidateIfStale: true,
+  //     revalidateOnFocus: false,
+  //     revalidateOnReconnect: false,
+  //   });
   
-    useEffect(() => {
-      mutate(endpoints.key + endpoints.stations);
-    }, [page, size]);
+  //   useEffect(() => {
+  //     mutate(endpoints.key + endpoints.stations);
+  //   }, [page, size]);
   
-    const memoizedValue = useMemo(
-      () => ({
-        stations: data?.content,
-        totalElements: data?.totalElements,
-        // demosLoading: isLoading,
-        // demosError: error,
-        // demosValidating: isValidating,
-        // demosEmpty: !isLoading && !data?.content?.length,
-      }),
-      [data, error, isLoading, isValidating],
-    );
-    return memoizedValue;
-  }
+  //   const memoizedValue = useMemo(
+  //     () => ({
+  //       stations: data?.content,
+  //       totalElements: data?.totalElements,
+  //       // demosLoading: isLoading,
+  //       // demosError: error,
+  //       // demosValidating: isValidating,
+  //       // demosEmpty: !isLoading && !data?.content?.length,
+  //     }),
+  //     [data, error, isLoading, isValidating],
+  //   );
+  //   return memoizedValue;
+  // }
