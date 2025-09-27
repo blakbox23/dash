@@ -13,11 +13,11 @@ const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/500')));
 const MaintenanceUnderConstruction = Loadable(lazy(() => import('pages/maintenance/under-construction')));
 const MaintenanceComingSoon = Loadable(lazy(() => import('pages/maintenance/coming-soon')));
+const Analytics = Loadable(lazy(() => import('pages/analytics')));
 
 const AppContactUS = Loadable(lazy(() => import('pages/contact-us')));
 // render - sample page
-const SamplePage = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
-const Overview = Loadable(lazy(() => import('pages/extra-pages/sample-page')));
+const Overview = Loadable(lazy(() => import('pages/overview')));
 
 // ==============================|| MAIN ROUTING ||============================== //
 
@@ -40,7 +40,7 @@ const MainRoutes = {
       children: [
         {
           path: 'analytics',
-          element: <MaintenanceUnderConstruction />
+          element: <Analytics />
         }
       ]
     },
