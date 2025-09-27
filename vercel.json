@@ -1,13 +1,18 @@
-  {
-    "builds": [
-      {
-        "src": "package.json",
-        "use": "@vercel/static-build"
-      }
-    ],
-    "routes": [
-      { "handle": "filesystem" },
-      { "src": "/.*", "dest": "/" }
-    ]
-  }
-  
+{
+  "builds": [
+    {
+      "src": "package.json",
+      "use": "@vercel/static-build"
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "http://40.81.230.185/api/:path*/"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
+  ]
+}

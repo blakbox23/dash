@@ -21,6 +21,7 @@ import MapComponent from 'sections/map/maps-component';
 import { getStations, Station } from 'api/maps-api';
 import Legend from 'components/Legend';
 import SensorsTable from 'sections/dashboard/analytics/SensorsTable';
+import UmbrellaTable from 'sections/table';
 
 type PollutantType = 'aqi' | 'pm25' | 'pm10';
 
@@ -183,12 +184,13 @@ const DashboardAnalytics = () => {
       <Grid item xs={12} md={12} lg={12}>
         <Grid container alignItems="center" justifyContent="space-between">
           <Grid item>
-            <Typography variant="h5">Sensor data</Typography>
+            <Typography variant="h5">Current reading</Typography>
           </Grid>
           <Grid item />
         </Grid>
         <MainCard sx={{ mt: 2 }} >
-          <SensorsTable stations={stations} />
+          {/* <SensorsTable stations={stations} /> */}
+          <UmbrellaTable />
         </MainCard>
       </Grid>
 

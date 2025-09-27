@@ -4,7 +4,7 @@ import useSWR, { mutate } from "swr";
 import { fetcher } from "utils/axios";
 
 const api = axios.create({
-baseURL: "http://40.81.230.185/api/v1",
+baseURL: "/api/v1/",
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,36 +27,53 @@ export interface Station {
     sensorType?: string;
   }
 
+  export interface HistoricalData {
+    pm25: number;
+    aqi: number;
+    timestamp: string | number | Date;
+    pm10: number;
+    date: string;
+    avg_aqi: number;
+    avg_pm25: number;
+    avg_pm10: number;
+  }
+
   
 export const getStations = async () => {
     const response = await api.get("/stations");
     return response.data;
   };
 
+  export const getHistoricalData = async (sensorId= '1', period=24) => {
+    const response = await api.get(`/sensors/${sensorId}/readings/?range=${period}`);
+    return response.data;
+  };
+  
 
-  export function useGetStations(page: number = 0, size: number = 10) {
-    const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);
+
+  // export function useGetStations(page: number = 0, size: number = 10) {
+  //   const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);
   
-    const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.stations, fetchWithParams, {
-      revalidateIfStale: true,
-      revalidateOnFocus: false,
-      revalidateOnReconnect: false,
-    });
+  //   const { data, isLoading, error, isValidating } = useSWR(endpoints.key + endpoints.stations, fetchWithParams, {
+  //     revalidateIfStale: true,
+  //     revalidateOnFocus: false,
+  //     revalidateOnReconnect: false,
+  //   });
   
-    useEffect(() => {
-      mutate(endpoints.key + endpoints.stations);
-    }, [page, size]);
+  //   useEffect(() => {
+  //     mutate(endpoints.key + endpoints.stations);
+  //   }, [page, size]);
   
-    const memoizedValue = useMemo(
-      () => ({
-        stations: data?.content,
-        totalElements: data?.totalElements,
-        // demosLoading: isLoading,
-        // demosError: error,
-        // demosValidating: isValidating,
-        // demosEmpty: !isLoading && !data?.content?.length,
-      }),
-      [data, error, isLoading, isValidating],
-    );
-    return memoizedValue;
-  }
+  //   const memoizedValue = useMemo(
+  //     () => ({
+  //       stations: data?.content,
+  //       totalElements: data?.totalElements,
+  //       // demosLoading: isLoading,
+  //       // demosError: error,
+  //       // demosValidating: isValidating,
+  //       // demosEmpty: !isLoading && !data?.content?.length,
+  //     }),
+  //     [data, error, isLoading, isValidating],
+  //   );
+  //   return memoizedValue;
+  // }

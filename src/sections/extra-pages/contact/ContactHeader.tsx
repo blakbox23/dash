@@ -72,7 +72,7 @@ function ContactHeader() {
           <Box sx={{ width: { xs: 320, sm: 320, md: 500, lg: 600 } }}>
             <img
               src={worldMap}
-              alt="mantis"
+              alt="air-dash"
               style={{
                 width: '100%'
               }}

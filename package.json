@@ -1,6 +1,6 @@
 {
-  "name": "mantis-react-ts",
-  "version": "3.1.0",
+  "name": "air-dash",
+  "version": "1.0.0",
   "private": true,
   "dependencies": {
     "@ant-design/colors": "^7.0.0",

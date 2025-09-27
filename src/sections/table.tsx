@@ -84,9 +84,11 @@ import {
 } from '@ant-design/icons';
 import Avatar from 'components/@extended/Avatar';
 import makeData from './data/react-table';
+import { getStations } from 'api/maps-api';
 
 export type TableDataProps = {
   id: number;
+  sensorId: string;
   firstName: string;
   lastName: string;
   fullName: string;
@@ -472,7 +474,21 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
 const UmbrellaTable = () => {
   const theme = useTheme();
 
-  const [data, setData] = useState<TableDataProps[]>(() => makeData(20));
+  const [data, setData] = useState<TableDataProps[]>(() => []);
+
+    useEffect(() => {
+      const fetchStations = async () => {
+        try {
+          const stationsData = await getStations();
+          setData(stationsData);
+        } catch (err: any) {
+          console.log(err.message || 'Failed to load stations');
+        }
+      };
+  
+      // Initial fetch
+      fetchStations();
+    }, []);
 
   const columns = useMemo<ColumnDef<TableDataProps>[]>(
     () => [
@@ -525,95 +541,116 @@ const UmbrellaTable = () => {
           className: 'cell-center'
         }
       },
+      // {
+      //   id: 'avatar',
+      //   header: 'Avatar',
+      //   accessorKey: 'avatar',
+      //   enableColumnFilter: false,
+      //   enableGrouping: false,
+      //   cell: (cell) => <Avatar alt="Avatar 1" size="sm" src={getImageUrl(`avatar-${cell.getValue()}.png`, ImagePath.USERS)} />,
+      //   meta: {
+      //     className: 'cell-center'
+      //   }
+      // },
       {
-        id: 'avatar',
-        header: 'Avatar',
-        accessorKey: 'avatar',
-        enableColumnFilter: false,
-        enableGrouping: false,
-        cell: (cell) => <Avatar alt="Avatar 1" size="sm" src={getImageUrl(`avatar-${cell.getValue()}.png`, ImagePath.USERS)} />,
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      {
-        id: 'fullName',
+        id: 'name',
         header: 'Name',
         footer: 'Name',
-        accessorKey: 'fullName',
+        accessorKey: 'name',
         dataType: 'text',
         enableGrouping: false
       },
       {
-        id: 'email',
-        header: 'Email',
-        footer: 'Email',
-        accessorKey: 'email',
+        id: 'sensorId',
+        header: 'Sensor ID',
+        footer: 'Sensor ID',
+        accessorKey: 'sensorId',
         dataType: 'text',
         enableGrouping: false
       },
       {
-        id: 'age',
-        header: 'Age',
-        footer: 'Age',
-        accessorKey: 'age',
+        id: 'aqi',
+        header: 'AQI',
+        footer: 'AQI',
+        accessorKey: 'aqi',
         dataType: 'text',
         meta: {
           className: 'cell-right'
         }
       },
+      // {
+      //   id: 'role',
+      //   header: 'Role',
+      //   footer: 'Role',
+      //   accessorKey: 'role',
+      //   dataType: 'text',
+      //   enableGrouping: false,
+      //   filterFn: fuzzyFilter,
+      //   sortingFn: fuzzySort
+      // },
       {
-        id: 'role',
-        header: 'Role',
-        footer: 'Role',
-        accessorKey: 'role',
+        id: 'pm25',
+        header: 'PM 2.5',
+        footer: 'PM 2.5',
+        accessorKey: 'pm25',
         dataType: 'text',
-        enableGrouping: false,
-        filterFn: fuzzyFilter,
-        sortingFn: fuzzySort
+        meta: {
+          className: 'cell-right'
+        }        
       },
       {
-        id: 'contact',
-        header: 'Contact',
-        footer: 'Contact',
-        accessorKey: 'contact',
+        id: 'pm10',
+        header: 'PM 10',
+        footer: 'PM 10',
+        accessorKey: 'pm10',
         dataType: 'text',
-        enableGrouping: false
-      },
-      {
-        id: 'country',
-        header: 'Country',
-        footer: 'Country',
-        accessorKey: 'country',
-        dataType: 'text',
-        enableGrouping: false
-      },
-      {
-        id: 'visits',
-        header: 'Visits',
-        footer: 'Visits',
-        accessorKey: 'visits',
-        dataType: 'text',
-        enableGrouping: false,
         meta: {
           className: 'cell-right'
         }
       },
-      {
-        id: 'status',
-        header: 'Status',
-        footer: 'Status',
-        accessorKey: 'status',
-        dataType: 'select'
-      },
-      {
-        id: 'progress',
-        header: 'Profile Progress',
-        footer: 'Profile Progress',
-        accessorKey: 'progress',
-        dataType: 'progress',
-        enableGrouping: false
-      },
+  
+      // {
+      //   id: 'contact',
+      //   header: 'Contact',
+      //   footer: 'Contact',
+      //   accessorKey: 'contact',
+      //   dataType: 'text',
+      //   enableGrouping: false
+      // },
+      // {
+      //   id: 'country',
+      //   header: 'Country',
+      //   footer: 'Country',
+      //   accessorKey: 'country',
+      //   dataType: 'text',
+      //   enableGrouping: false
+      // },
+      // {
+      //   id: 'visits',
+      //   header: 'Visits',
+      //   footer: 'Visits',
+      //   accessorKey: 'visits',
+      //   dataType: 'text',
+      //   enableGrouping: false,
+      //   meta: {
+      //     className: 'cell-right'
+      //   }
+      // },
+      // {
+      //   id: 'status',
+      //   header: 'Status',
+      //   footer: 'Status',
+      //   accessorKey: 'status',
+      //   dataType: 'select'
+      // },
+      // {
+      //   id: 'progress',
+      //   header: 'Profile Progress',
+      //   footer: 'Profile Progress',
+      //   accessorKey: 'progress',
+      //   dataType: 'progress',
+      //   enableGrouping: false
+      // },
       // {
       //   id: 'edit',
       //   header: 'Actions',

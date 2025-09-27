@@ -16,7 +16,7 @@ function UnderConstruction() {
     <Grid container spacing={4} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: '100vh', py: 2 }}>
       <Grid item xs={12}>
         <Box sx={{ width: { xs: 300, sm: 480 } }}>
-          <img src={construction} alt="mantis" style={{ width: '100%', height: 'auto' }} />
+          <img src={construction} alt="airdash" style={{ width: '100%', height: 'auto' }} />
         </Box>
       </Grid>
       <Grid item xs={12}>

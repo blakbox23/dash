@@ -44,7 +44,7 @@ function ComingSoon() {
       <Grid container spacing={4} direction="column" alignItems="center" justifyContent="center" sx={{ minHeight: '100vh', py: 2 }}>
         <Grid item xs={12}>
           <Box sx={{ height: { xs: 310, sm: 420 }, width: { xs: 360, sm: 'auto' } }}>
-            <img src={coming} alt="mantis" style={{ height: '100%', width: '100%' }} />
+            <img src={coming} alt="air-dash" style={{ height: '100%', width: '100%' }} />
           </Box>
         </Grid>
         <Grid item xs={12}>
@@ -71,7 +71,7 @@ function ComingSoon() {
         <Grid item xs={12} sx={{ width: { xs: 380, md: '40%', lg: '30%' } }}>
           <Stack spacing={2} sx={{ mt: 2 }}>
             <Typography align="center" color="textSecondary">
-              Be the first to be notified when Mantis launches.
+              Be the first to be notified when AirDash launches.
             </Typography>
             <Stack direction="row" spacing={1}>
               <TextField fullWidth placeholder="Email Address" />

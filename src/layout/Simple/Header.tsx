@@ -101,14 +101,14 @@ const Header = () => {
               <Link className="header-link" color="white" component={RouterLink} to="#" underline="none">
                 Components
               </Link>
-              <Link className="header-link" color="white" href="https://codedthemes.gitbook.io/mantis/" target="_blank" underline="none">
+              <Link className="header-link" color="white" href="https://codedthemes.gitbook.io/airdash/" target="_blank" underline="none">
                 Documentation
               </Link>
               <Box sx={{ display: 'inline-block' }}>
                 <AnimateButton>
                   <Button
                     component={Link}
-                    href="https://mui.com/store/items/mantis-react-admin-dashboard-template/"
+                    href="https://mui.com/store/items/nairobi-air-dashboard-template/"
                     disableElevation
                     color="primary"
                     variant="contained"
@@ -181,7 +181,7 @@ const Header = () => {
                     </Link>
                     <Link
                       style={{ textDecoration: 'none' }}
-                      href="https://github.com/codedthemes/mantis-free-react-admin-template"
+                      href="https://github.com/codedthemes/airdash-free-react-admin-template"
                       target="_blank"
                     >
                       <ListItemButton component="span">
@@ -191,7 +191,7 @@ const Header = () => {
                         <ListItemText primary="Free Version" primaryTypographyProps={{ variant: 'h6', color: 'text.primary' }} />
                       </ListItemButton>
                     </Link>
-                    <Link style={{ textDecoration: 'none' }} href="https://codedthemes.gitbook.io/mantis/" target="_blank">
+                    <Link style={{ textDecoration: 'none' }} href="https://codedthemes.gitbook.io/airdash/" target="_blank">
                       <ListItemButton component="span">
                         <ListItemIcon>
                           <LineOutlined />
@@ -209,7 +209,7 @@ const Header = () => {
                     </Link>
                     <Link
                       style={{ textDecoration: 'none' }}
-                      href="https://mui.com/store/items/mantis-react-admin-dashboard-template/"
+                      href="https://mui.com/store/items/nairobi-air-dashboard-template/"
                       target="_blank"
                     >
                       <ListItemButton component="span">
