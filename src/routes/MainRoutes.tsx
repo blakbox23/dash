@@ -8,12 +8,15 @@ import SimpleLayout from 'layout/Simple';
 
 // types
 import { SimpleLayoutType } from 'types/config';
+import { Outlet } from 'react-router';
+import SensorsDetail from 'pages/sensorsDetail';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/500')));
 const MaintenanceUnderConstruction = Loadable(lazy(() => import('pages/maintenance/under-construction')));
 const MaintenanceComingSoon = Loadable(lazy(() => import('pages/maintenance/coming-soon')));
 const Analytics = Loadable(lazy(() => import('pages/analytics')));
+const Sensors = Loadable(lazy(() => import('pages/sensors')));
 
 const AppContactUS = Loadable(lazy(() => import('pages/contact-us')));
 // render - sample page
@@ -31,6 +34,26 @@ const MainRoutes = {
         {
           path: 'overview',
           element: <Overview />
+        }
+      ]
+    },
+    {
+      path: '/',
+      element: <DashboardLayout />,
+      children: [
+        {
+          path: 'sensors',
+          element: <Outlet />,
+          children: [
+            {
+              index: true,
+              element: <Sensors />,
+            },
+            {
+              path: ":id",
+              element: <SensorsDetail />,
+            },
+          ],
         }
       ]
     },

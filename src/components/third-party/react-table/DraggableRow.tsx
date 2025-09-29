@@ -12,7 +12,7 @@ import IconButton from 'components/@extended/IconButton';
 
 // assets
 import { DragOutlined } from '@ant-design/icons';
-import { TableDataProps } from 'sections/table';
+import { TableDataProps } from 'sections/data-tables/CurrentReadingsTabletable';
 
 // types
 

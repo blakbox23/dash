@@ -49,7 +49,7 @@ const RowEditable = <T extends RowData>({ getValue: initialValue, row, column: {
         return <Chip color="success" label="Relationship" size="small" variant="light" />;
       case 'Single':
       default:
-        return <Chip color="info" label="Single" size="small" variant="light" />;
+        return <Chip color="success" label="Online" size="small" variant="light" />;
     }
   };
 

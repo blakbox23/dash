@@ -15,14 +15,14 @@ const newPerson = (index: number) => {
   let status: string;
   switch (statusCode) {
     case 2:
-      status = 'Complicated';
+      status = 'Offline';
       break;
     case 1:
-      status = 'Relationship';
+      status = 'Maintainance';
       break;
     case 0:
     default:
-      status = 'Single';
+      status = 'Online';
       break;
   }
 

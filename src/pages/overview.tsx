@@ -21,7 +21,7 @@ import MapComponent from 'sections/map/maps-component';
 import { getStations, Station } from 'api/maps-api';
 import Legend from 'components/Legend';
 import SensorsTable from 'sections/dashboard/analytics/SensorsTable';
-import UmbrellaTable from 'sections/table';
+import UmbrellaTable from 'sections/data-tables/CurrentReadingsTabletable';
 
 type PollutantType = 'aqi' | 'pm25' | 'pm10';
 

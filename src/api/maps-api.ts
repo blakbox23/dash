@@ -25,7 +25,19 @@ export interface Station {
     lat: number;
     lng: number;
     sensorType?: string;
+    
   }
+
+  export interface Sensor {
+    id: number;
+    sensor_id: string;
+    location: string;
+    description: string;
+    lat: number;
+    lng: number;
+    sensorType: string;
+  }
+  
 
   export interface HistoricalData {
     pm25: number;
@@ -41,6 +53,11 @@ export interface Station {
   
 export const getStations = async () => {
     const response = await api.get("/stations");
+    return response.data;
+  };
+
+  export const getOneStation = async (id: string) => {
+    const response = await api.get(`/sensors/${id}`);
     return response.data;
   };
 

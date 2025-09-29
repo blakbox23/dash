@@ -17,6 +17,7 @@ import {
 
 import { getHistoricalData, HistoricalData, Station } from "api/maps-api";
 import { CheckOutlined, DownOutlined } from "@ant-design/icons";
+import { useParams } from "react-router-dom";
 
 
 type PollutantType = "aqi" | "pm25" | "pm10";
@@ -61,6 +62,8 @@ export default function TrendsChart({
   pollutantLabel,
   pollutantUnit,
 }: TrendsChartProps) {
+  const { id: sensorId } = useParams<{ id: string }>();
+  
   const [duration, setDuration] = useState(12);
   const [trendsStation, setTrendsStation] = useState<Station | null>(
     stations[0] || null
@@ -73,7 +76,7 @@ export default function TrendsChart({
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const stationId = trendsStation?.id ?? "1";
+        const stationId = sensorId ?? trendsStation?.id ?? "1";
         const historyData = await getHistoricalData(stationId, duration);
         setHistoricalData(Array.isArray(historyData) ? historyData : []);
       } catch (err) {
@@ -81,8 +84,10 @@ export default function TrendsChart({
         setHistoricalData([]);
       }
     };
+  
     fetchData();
-  }, [trendsStation, duration, selectedPollutant]);
+  }, [sensorId, trendsStation, duration, selectedPollutant]);
+  
 
   const currentPollutantOption =
     pollutantOptions.find((p) => p.value === selectedPollutant) ||
@@ -155,11 +160,11 @@ export default function TrendsChart({
 
   return (
     <Card sx={{ width: "100%" }}>
-      <CardHeader
+      {!sensorId && <CardHeader
         title={
           <Typography variant="h6">Air Quality Trends in Nairobi</Typography>
         }
-      />
+      />}
       <CardContent>
         <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
           {/* Duration */}
@@ -198,8 +203,8 @@ export default function TrendsChart({
             </Select>
           </FormControl>
 
-                  {/* Station */}
-                  <FormControl sx={{ minWidth: 180 }}>
+          {/* Station */}
+          {!sensorId && <FormControl sx={{ minWidth: 180 }}>
             <Select
               value={trendsStation?.id ?? ""}
               onChange={(e) => {
@@ -215,7 +220,7 @@ export default function TrendsChart({
                 </MenuItem>
               ))}
             </Select>
-          </FormControl>
+          </FormControl>}
         </Box>
 
         {/* Chart */}

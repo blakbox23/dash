@@ -3,11 +3,11 @@ import { Container, Grid } from '@mui/material';
 import { getStations, Station } from 'api/maps-api';
 import { useEffect, useState } from 'react';
 import UmbrellaTable from 'sections/data-tables/CurrentReadingsTabletable';
+import SensorsTable from 'sections/data-tables/SensorsTable';
 import TrendsChart from 'sections/trends/trends-chart';
 
-// ==============================|| CONTACT US - MAIN ||============================== //
 
-function Analytics() {
+function Sensors() {
   const [stations, setStations] = useState<Station[]>([]);
 
   useEffect(() => {
@@ -26,10 +26,10 @@ function Analytics() {
   return (
     <Grid justifyContent="center" alignItems="center" sx={{ mb: 12 }}>
       <Grid item xs={12} sm={10} lg={9}>
-            <TrendsChart stations={stations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
+            <SensorsTable />
       </Grid>
     </Grid>
   );
 }
 
-export default Analytics;
+export default Sensors;

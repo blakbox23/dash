@@ -11,11 +11,11 @@ import {
 } from '@mui/material';
 import { Station } from 'api/maps-api';
 
-interface SensorTablesProps {
+interface SensorTables1Props {
   stations: Station[];
 }
 
-const SensorTables: React.FC<SensorTablesProps> = ({ stations }) => {
+const SensorTables1: React.FC<SensorTables1Props> = ({ stations }) => {
   return (
     <TableContainer component={Paper}>
       <Table>
@@ -52,4 +52,4 @@ const SensorTables: React.FC<SensorTablesProps> = ({ stations }) => {
   );
 };
 
-export default SensorTables;
+export default SensorTables1;

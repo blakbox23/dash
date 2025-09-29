@@ -83,8 +83,9 @@ import {
   UngroupOutlined
 } from '@ant-design/icons';
 import Avatar from 'components/@extended/Avatar';
-import makeData from './data/react-table';
+import makeData from '../data/react-table';
 import { getStations } from 'api/maps-api';
+import { Link } from 'react-router-dom';
 
 export type TableDataProps = {
   id: number;
@@ -151,7 +152,6 @@ const EditAction = ({ row, table }: { row: Row<TableDataProps>; table: TableProp
     // @ts-ignore
     meta?.revertData(row.index, e?.currentTarget.name === 'cancel');
   };
-
   return (
     <Stack direction="row" spacing={1} alignItems="center">
       {meta?.selectedRow[row.id] && (
@@ -471,7 +471,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
 
 // ==============================|| REACT TABLE - UMBRELLA ||============================== //
 
-const UmbrellaTable = () => {
+const SensorsTable = () => {
   const theme = useTheme();
 
   const [data, setData] = useState<TableDataProps[]>(() => []);
@@ -492,20 +492,20 @@ const UmbrellaTable = () => {
 
   const columns = useMemo<ColumnDef<TableDataProps>[]>(
     () => [
-      // {
-      //   id: 'expander',
-      //   enableGrouping: false,
-      //   header: () => null,
-      //   cell: ({ row }) => {
-      //     return row.getCanExpand() ? (
-      //       <IconButton color={row.getIsExpanded() ? 'primary' : 'secondary'} onClick={row.getToggleExpandedHandler()} size="small">
-      //         {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
-      //       </IconButton>
-      //     ) : (
-      //       <StopOutlined style={{ color: theme.palette.text.secondary }} />
-      //     );
-      //   }
-      // },
+    //   {
+    //     id: 'expander',
+    //     enableGrouping: false,
+    //     header: () => null,
+    //     cell: ({ row }) => {
+    //       return row.getCanExpand() ? (
+    //         <IconButton color={row.getIsExpanded() ? 'primary' : 'secondary'} onClick={row.getToggleExpandedHandler()} size="small">
+    //           {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
+    //         </IconButton>
+    //       ) : (
+    //         <StopOutlined style={{ color: theme.palette.text.secondary }} />
+    //       );
+    //     }
+    //   },
       // {
       //   id: 'select',
       //   enableGrouping: false,
@@ -568,16 +568,16 @@ const UmbrellaTable = () => {
         dataType: 'text',
         enableGrouping: false
       },
-      {
-        id: 'aqi',
-        header: 'AQI',
-        footer: 'AQI',
-        accessorKey: 'aqi',
-        dataType: 'text',
-        meta: {
-          className: 'cell-right'
-        }
-      },
+    //   {
+    //     id: 'aqi',
+    //     header: 'AQI',
+    //     footer: 'AQI',
+    //     accessorKey: 'aqi',
+    //     dataType: 'text',
+    //     meta: {
+    //       className: 'cell-right'
+    //     }
+    //   },
       // {
       //   id: 'role',
       //   header: 'Role',
@@ -588,26 +588,26 @@ const UmbrellaTable = () => {
       //   filterFn: fuzzyFilter,
       //   sortingFn: fuzzySort
       // },
-      {
-        id: 'pm25',
-        header: 'PM 2.5',
-        footer: 'PM 2.5',
-        accessorKey: 'pm25',
-        dataType: 'text',
-        meta: {
-          className: 'cell-right'
-        }        
-      },
-      {
-        id: 'pm10',
-        header: 'PM 10',
-        footer: 'PM 10',
-        accessorKey: 'pm10',
-        dataType: 'text',
-        meta: {
-          className: 'cell-right'
-        }
-      },
+    //   {
+    //     id: 'pm25',
+    //     header: 'PM 2.5',
+    //     footer: 'PM 2.5',
+    //     accessorKey: 'pm25',
+    //     dataType: 'text',
+    //     meta: {
+    //       className: 'cell-right'
+    //     }        
+    //   },
+    //   {
+    //     id: 'pm10',
+    //     header: 'PM 10',
+    //     footer: 'PM 10',
+    //     accessorKey: 'pm10',
+    //     dataType: 'text',
+    //     meta: {
+    //       className: 'cell-right'
+    //     }
+    //   },
   
       // {
       //   id: 'contact',
@@ -636,13 +636,13 @@ const UmbrellaTable = () => {
       //     className: 'cell-right'
       //   }
       // },
-      // {
-      //   id: 'status',
-      //   header: 'Status',
-      //   footer: 'Status',
-      //   accessorKey: 'status',
-      //   dataType: 'select'
-      // },
+      {
+        id: 'status',
+        header: 'Status',
+        footer: 'Status',
+        accessorKey: 'status',
+        dataType: 'select'
+      },
       // {
       //   id: 'progress',
       //   header: 'Profile Progress',
@@ -651,15 +651,26 @@ const UmbrellaTable = () => {
       //   dataType: 'progress',
       //   enableGrouping: false
       // },
-      // {
-      //   id: 'edit',
-      //   header: 'Actions',
-      //   cell: EditAction,
-      //   enableGrouping: false,
-      //   meta: {
-      //     className: 'cell-center'
-      //   }
-      // }
+      {
+        header: "Actions",
+        meta: { className: "cell-center" },
+        disableSortBy: true,
+        cell: ({ row }) => (
+          <Link
+            to={`/sensors/${row.original.id}`}
+            style={{
+              textDecoration: "none",
+              padding: "6px 12px",
+              borderRadius: "4px",
+              color: "#4caf50",
+              border: "1px solid #4caf50",
+              cursor: "pointer",
+            }}
+          >
+            View
+          </Link>
+        ),
+      },
     ],
     // eslint-disable-next-line
     []
@@ -672,4 +683,4 @@ const UmbrellaTable = () => {
   );
 };
 
-export default UmbrellaTable;
+export default SensorsTable;

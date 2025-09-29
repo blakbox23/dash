@@ -6,7 +6,7 @@ import { Box, TableCell } from '@mui/material';
 // third-party
 import { useDrag, useDrop } from 'react-dnd';
 import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table';
-import { TableDataProps } from 'sections/table';
+import { TableDataProps } from 'sections/data-tables/CurrentReadingsTabletable';
 
 // types
 // import { TableDataProps } from 'types/table';
