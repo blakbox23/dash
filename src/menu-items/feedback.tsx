@@ -22,7 +22,7 @@ const feedback: NavItemType = {
   type: 'group',
   url: '/feedback',
   icon: icons.ChromeOutlined,
-  breadcrumbs: false
+  breadcrumbs: true
 };
 
 export default feedback;
