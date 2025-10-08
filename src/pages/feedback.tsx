@@ -3,7 +3,6 @@ import { Container, Grid } from '@mui/material';
 import { getStations, Station } from 'api/maps-api';
 import { useEffect, useState } from 'react';
 import FeedbackTable from 'sections/data-tables/feedbackTable';
-import SensorsTable from 'sections/data-tables/SensorsTable';
 
 
 function Sensors() {

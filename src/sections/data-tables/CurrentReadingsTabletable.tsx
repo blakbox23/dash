@@ -15,7 +15,8 @@ import {
   Stack,
   Divider,
   Tooltip,
-  useMediaQuery
+  useMediaQuery,
+  Chip
 } from '@mui/material';
 
 // third-party
@@ -87,6 +88,7 @@ import makeData from '../data/react-table';
 import { getStations } from 'api/maps-api';
 
 export type TableDataProps = {
+  aqi: unknown;
   id: number;
   sensorId: string;
   firstName: string;
@@ -469,9 +471,9 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
   );
 }
 
-// ==============================|| REACT TABLE - UMBRELLA ||============================== //
+// ==============================|| CURRENT READINGS TABLE ||============================== //
 
-const UmbrellaTable = () => {
+const CurrentReadingTable = () => {
   const theme = useTheme();
 
   const [data, setData] = useState<TableDataProps[]>(() => []);
@@ -490,45 +492,17 @@ const UmbrellaTable = () => {
       fetchStations();
     }, []);
 
+    function getPollutantLevel(value: number) {
+      if (value <= 50) return 'Good';
+      if (value <= 100) return 'Moderate';
+      if (value <= 150) return 'Unhealthy for Sensitive Groups';
+      if (value <= 200) return 'Unhealthy';
+      if (value <= 300) return 'Very Unhealthy';
+      return 'Hazardous';
+    }
+
   const columns = useMemo<ColumnDef<TableDataProps>[]>(
     () => [
-      // {
-      //   id: 'expander',
-      //   enableGrouping: false,
-      //   header: () => null,
-      //   cell: ({ row }) => {
-      //     return row.getCanExpand() ? (
-      //       <IconButton color={row.getIsExpanded() ? 'primary' : 'secondary'} onClick={row.getToggleExpandedHandler()} size="small">
-      //         {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
-      //       </IconButton>
-      //     ) : (
-      //       <StopOutlined style={{ color: theme.palette.text.secondary }} />
-      //     );
-      //   }
-      // },
-      // {
-      //   id: 'select',
-      //   enableGrouping: false,
-      //   header: ({ table }) => (
-      //     <IndeterminateCheckbox
-      //       {...{
-      //         checked: table.getIsAllRowsSelected(),
-      //         indeterminate: table.getIsSomeRowsSelected(),
-      //         onChange: table.getToggleAllRowsSelectedHandler()
-      //       }}
-      //     />
-      //   ),
-      //   cell: ({ row }) => (
-      //     <IndeterminateCheckbox
-      //       {...{
-      //         checked: row.getIsSelected(),
-      //         disabled: !row.getCanSelect(),
-      //         indeterminate: row.getIsSomeSelected(),
-      //         onChange: row.getToggleSelectedHandler()
-      //       }}
-      //     />
-      //   )
-      // },
       {
         id: 'id',
         title: 'Id',
@@ -541,33 +515,27 @@ const UmbrellaTable = () => {
           className: 'cell-center'
         }
       },
-      // {
-      //   id: 'avatar',
-      //   header: 'Avatar',
-      //   accessorKey: 'avatar',
-      //   enableColumnFilter: false,
-      //   enableGrouping: false,
-      //   cell: (cell) => <Avatar alt="Avatar 1" size="sm" src={getImageUrl(`avatar-${cell.getValue()}.png`, ImagePath.USERS)} />,
-      //   meta: {
-      //     className: 'cell-center'
-      //   }
-      // },
       {
         id: 'name',
         header: 'Name',
         footer: 'Name',
         accessorKey: 'name',
         dataType: 'text',
-        enableGrouping: false
+        enableGrouping: false,
+        enableColumnFilter: false,
       },
-      {
-        id: 'sensorId',
-        header: 'Sensor ID',
-        footer: 'Sensor ID',
-        accessorKey: 'sensorId',
-        dataType: 'text',
-        enableGrouping: false
-      },
+      // {
+      //   id: 'sensorId',
+      //   header: 'Sensor ID',
+      //   footer: 'Sensor ID',
+      //   accessorKey: 'sensorId',
+      //   dataType: 'text',
+      //   enableColumnFilter: false,
+      //   enableGrouping: false,
+      //   meta: {
+      //     className: 'cell-center'
+      //   }
+      // },
       {
         id: 'aqi',
         header: 'AQI',
@@ -575,7 +543,7 @@ const UmbrellaTable = () => {
         accessorKey: 'aqi',
         dataType: 'text',
         meta: {
-          className: 'cell-right'
+          className: 'cell-center'
         }
       },
       // {
@@ -595,7 +563,7 @@ const UmbrellaTable = () => {
         accessorKey: 'pm25',
         dataType: 'text',
         meta: {
-          className: 'cell-right'
+          className: 'cell-center'
         }        
       },
       {
@@ -605,52 +573,86 @@ const UmbrellaTable = () => {
         accessorKey: 'pm10',
         dataType: 'text',
         meta: {
-          className: 'cell-right'
+          className: 'cell-center'
         }
       },
-  
-      // {
-      //   id: 'contact',
-      //   header: 'Contact',
-      //   footer: 'Contact',
-      //   accessorKey: 'contact',
-      //   dataType: 'text',
-      //   enableGrouping: false
-      // },
-      // {
-      //   id: 'country',
-      //   header: 'Country',
-      //   footer: 'Country',
-      //   accessorKey: 'country',
-      //   dataType: 'text',
-      //   enableGrouping: false
-      // },
-      // {
-      //   id: 'visits',
-      //   header: 'Visits',
-      //   footer: 'Visits',
-      //   accessorKey: 'visits',
-      //   dataType: 'text',
-      //   enableGrouping: false,
-      //   meta: {
-      //     className: 'cell-right'
-      //   }
-      // },
-      // {
-      //   id: 'status',
-      //   header: 'Status',
-      //   footer: 'Status',
-      //   accessorKey: 'status',
-      //   dataType: 'select'
-      // },
-      // {
-      //   id: 'progress',
-      //   header: 'Profile Progress',
-      //   footer: 'Profile Progress',
-      //   accessorKey: 'progress',
-      //   dataType: 'progress',
-      //   enableGrouping: false
-      // },
+      {
+        id: 'pollutionLevel',
+        header: 'Pollution Level',
+        accessorFn: (row) => row.aqi,
+        enableColumnFilter: false,
+        cell: ({ getValue }) => {
+          const value = getValue() as number;
+          const level = getPollutantLevel(value);
+      
+          return (
+            <Chip
+              label={level}
+              color={
+                level === 'Good'
+                  ? 'success'
+                  : level === 'Moderate'
+                  ? 'info'
+                  : level === 'Unhealthy for Sensitive Groups'
+                  ? 'warning'
+                  : level === 'Unhealthy'
+                  ? 'error'
+                  : 'default'
+              }
+              size="small"
+              sx={{ borderRadius: '16px' }}
+            />
+          );
+        }
+      },
+      {
+        id: 'status',
+        header: 'Status',
+        accessorKey: 'status',
+        enableColumnFilter: false,
+        cell: ({ getValue }) => {
+          const status = getValue() as string;
+          let color: 'default' | 'success' | 'error' | 'warning' | 'info' = 'default';
+          if (status === 'ONLINE') color = 'success';
+          if (status === 'OFFLINE') color = 'error';
+      
+          return (
+            <Chip 
+              label={status.toLocaleLowerCase()} 
+              color={color} 
+              size="small" 
+              variant="outlined" 
+              sx={{ borderRadius: '16px' }} 
+            />
+          );
+        }
+      },
+
+      {
+        id: 'time',
+        header: 'Time',
+        footer: 'Time',
+        enableColumnFilter: false,
+        accessorKey: 'time',
+        dataType: 'text',
+        meta: {
+          className: 'cell-right'
+        },
+        cell: ({ getValue }) => {
+          const raw = getValue() as string;
+          const date = new Date(raw);
+      
+          // Format date + time, e.g. "Oct 08, 2025, 05:00 AM"
+          return date.toLocaleString([], {
+            year: 'numeric',
+            month: 'short',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: true
+          });
+        }
+      }
       // {
       //   id: 'edit',
       //   header: 'Actions',
@@ -672,4 +674,4 @@ const UmbrellaTable = () => {
   );
 };
 
-export default UmbrellaTable;
+export default CurrentReadingTable;

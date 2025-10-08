@@ -64,7 +64,26 @@ export interface Station {
         }))
       : stations;
   };
-  
+
+ // Dummy data from getAqiDistribution
+export const getAqiDistribution = async (stationId: string, start: string, end: string) => {
+  // In real use, you'd fetch from API with params: stationId, start, end
+  // Example: GET /api/v1/readings/aqi_distribution?station=stationId&start=...&end=...
+
+  return {
+    stationId,
+    start,
+    end,
+    distribution: [
+      { category: 'Good', value: 35 },
+      { category: 'Moderate', value: 25 },
+      { category: 'Unhealthy for Sensitive Groups', value: 15 },
+      { category: 'Unhealthy', value: 10 },
+      { category: 'Very Unhealthy', value: 10 },
+      { category: 'Hazardous', value: 5 }
+    ]
+  };
+};
 
   export const getOneStation = async (id: string) => {
     const response = await api.get(`/sensors/${id}`);
