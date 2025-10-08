@@ -53,7 +53,7 @@ const pollutantOptions: PollutantOption[] = [
   { value: "pm10", label: "PM 10", unit: "μg/m³" },
 ];
 
-export default function TrendsChart({
+export default function ComparisonChart({
   stations,
   pollutant,
   pollutantLabel,
@@ -215,6 +215,25 @@ export default function TrendsChart({
 
           {/* Station */}
           {!sensorId && (
+            <FormControl sx={{ minWidth: 180 }}>
+              <Select
+                value={trendsStation?.id ?? ""}
+                onChange={(e) => {
+                  const selected =
+                    stations.find((s) => s.id === e.target.value) || null;
+                  setTrendsStation(selected);
+                }}
+                displayEmpty
+              >
+                {stations.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
+           {!sensorId && (
             <FormControl sx={{ minWidth: 180 }}>
               <Select
                 value={trendsStation?.id ?? ""}

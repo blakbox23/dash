@@ -492,43 +492,6 @@ const SensorsTable = () => {
 
   const columns = useMemo<ColumnDef<TableDataProps>[]>(
     () => [
-    //   {
-    //     id: 'expander',
-    //     enableGrouping: false,
-    //     header: () => null,
-    //     cell: ({ row }) => {
-    //       return row.getCanExpand() ? (
-    //         <IconButton color={row.getIsExpanded() ? 'primary' : 'secondary'} onClick={row.getToggleExpandedHandler()} size="small">
-    //           {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
-    //         </IconButton>
-    //       ) : (
-    //         <StopOutlined style={{ color: theme.palette.text.secondary }} />
-    //       );
-    //     }
-    //   },
-      // {
-      //   id: 'select',
-      //   enableGrouping: false,
-      //   header: ({ table }) => (
-      //     <IndeterminateCheckbox
-      //       {...{
-      //         checked: table.getIsAllRowsSelected(),
-      //         indeterminate: table.getIsSomeRowsSelected(),
-      //         onChange: table.getToggleAllRowsSelectedHandler()
-      //       }}
-      //     />
-      //   ),
-      //   cell: ({ row }) => (
-      //     <IndeterminateCheckbox
-      //       {...{
-      //         checked: row.getIsSelected(),
-      //         disabled: !row.getCanSelect(),
-      //         indeterminate: row.getIsSomeSelected(),
-      //         onChange: row.getToggleSelectedHandler()
-      //       }}
-      //     />
-      //   )
-      // },
       {
         id: 'id',
         title: 'Id',
@@ -541,17 +504,6 @@ const SensorsTable = () => {
           className: 'cell-center'
         }
       },
-      // {
-      //   id: 'avatar',
-      //   header: 'Avatar',
-      //   accessorKey: 'avatar',
-      //   enableColumnFilter: false,
-      //   enableGrouping: false,
-      //   cell: (cell) => <Avatar alt="Avatar 1" size="sm" src={getImageUrl(`avatar-${cell.getValue()}.png`, ImagePath.USERS)} />,
-      //   meta: {
-      //     className: 'cell-center'
-      //   }
-      // },
       {
         id: 'name',
         header: 'Name',
@@ -568,74 +520,6 @@ const SensorsTable = () => {
         dataType: 'text',
         enableGrouping: false
       },
-    //   {
-    //     id: 'aqi',
-    //     header: 'AQI',
-    //     footer: 'AQI',
-    //     accessorKey: 'aqi',
-    //     dataType: 'text',
-    //     meta: {
-    //       className: 'cell-right'
-    //     }
-    //   },
-      // {
-      //   id: 'role',
-      //   header: 'Role',
-      //   footer: 'Role',
-      //   accessorKey: 'role',
-      //   dataType: 'text',
-      //   enableGrouping: false,
-      //   filterFn: fuzzyFilter,
-      //   sortingFn: fuzzySort
-      // },
-    //   {
-    //     id: 'pm25',
-    //     header: 'PM 2.5',
-    //     footer: 'PM 2.5',
-    //     accessorKey: 'pm25',
-    //     dataType: 'text',
-    //     meta: {
-    //       className: 'cell-right'
-    //     }        
-    //   },
-    //   {
-    //     id: 'pm10',
-    //     header: 'PM 10',
-    //     footer: 'PM 10',
-    //     accessorKey: 'pm10',
-    //     dataType: 'text',
-    //     meta: {
-    //       className: 'cell-right'
-    //     }
-    //   },
-  
-      // {
-      //   id: 'contact',
-      //   header: 'Contact',
-      //   footer: 'Contact',
-      //   accessorKey: 'contact',
-      //   dataType: 'text',
-      //   enableGrouping: false
-      // },
-      // {
-      //   id: 'country',
-      //   header: 'Country',
-      //   footer: 'Country',
-      //   accessorKey: 'country',
-      //   dataType: 'text',
-      //   enableGrouping: false
-      // },
-      // {
-      //   id: 'visits',
-      //   header: 'Visits',
-      //   footer: 'Visits',
-      //   accessorKey: 'visits',
-      //   dataType: 'text',
-      //   enableGrouping: false,
-      //   meta: {
-      //     className: 'cell-right'
-      //   }
-      // },
       {
         id: 'status',
         header: 'Status',
@@ -643,14 +527,6 @@ const SensorsTable = () => {
         accessorKey: 'status',
         dataType: 'select'
       },
-      // {
-      //   id: 'progress',
-      //   header: 'Profile Progress',
-      //   footer: 'Profile Progress',
-      //   accessorKey: 'progress',
-      //   dataType: 'progress',
-      //   enableGrouping: false
-      // },
       {
         header: "Actions",
         meta: { className: "cell-center" },

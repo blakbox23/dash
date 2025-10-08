@@ -2,9 +2,7 @@
 import { Container, Grid } from '@mui/material';
 import { getStations, Station } from 'api/maps-api';
 import { useEffect, useState } from 'react';
-import UmbrellaTable from 'sections/data-tables/CurrentReadingsTabletable';
 import SensorsTable from 'sections/data-tables/SensorsTable';
-import TrendsChart from 'sections/trends/trends-chart';
 
 
 function Sensors() {

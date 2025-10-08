@@ -22,7 +22,7 @@ const analytics: NavItemType = {
   type: 'group',
   url: '/analytics',
   icon: icons.ChromeOutlined,
-  breadcrumbs: false
+  breadcrumbs: true
 };
 
 export default analytics;
