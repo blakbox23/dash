@@ -1,3 +1,4 @@
+"use client";
 
 import { useEffect, useRef } from "react";
 import L, { divIcon } from "leaflet";
@@ -28,6 +29,20 @@ export default function MapComponent({
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<L.Map | null>(null);
   const markerGroupRef = useRef<L.LayerGroup | null>(null);
+  const timeRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const updateTime = () => {
+      if (timeRef.current) {
+        timeRef.current.textContent = new Date().toLocaleString("en-KE", {
+          timeZone: "Africa/Nairobi",
+        });
+      }
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Helper to create custom icon
   const createCustomIcon = (
@@ -66,16 +81,16 @@ export default function MapComponent({
 
   useEffect(() => {
     if (mapRef.current && !leafletMapRef.current) {
-      // Initialize the map
+      // Initialize map
       leafletMapRef.current = L.map(mapRef.current).setView(
         [-1.2921, 36.8719],
         12
       );
 
-      // Add tile layer
+      // Add OpenStreetMap tiles
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(leafletMapRef.current);
 
       markerGroupRef.current = L.layerGroup().addTo(leafletMapRef.current);
@@ -95,10 +110,14 @@ export default function MapComponent({
 
         const value = getPollutantValue(station, selectedPollutant);
         const unit = selectedPollutant === "aqi" ? "" : "μg/m³";
+        const timeStamp = station.time
+          ? new Date(station.time).toLocaleString()
+          : "No timestamp available";
 
         marker.bindPopup(`
           <div class="p-2">
             <div class="font-semibold text-[#101828]">${station.name}</div>
+            <div class="text-xs text-[#667085] mb-1">${timeStamp}</div>
             <div class="text-sm text-[#667085]">
               ${selectedPollutant.toUpperCase()}: ${value}${unit} - ${getPollutantLevel(value, selectedPollutant)}
             </div>
@@ -110,10 +129,7 @@ export default function MapComponent({
           </div>
         `);
 
-        marker.on("click", () => {
-          onStationSelect(station);
-        });
-
+        marker.on("click", () => onStationSelect(station));
         marker.addTo(markerGroupRef.current!);
       });
 
@@ -127,7 +143,6 @@ export default function MapComponent({
     }
 
     return () => {
-      // Clean up map on unmount
       if (leafletMapRef.current) {
         leafletMapRef.current.remove();
         leafletMapRef.current = null;
@@ -143,5 +158,13 @@ export default function MapComponent({
     onStationSelect,
   ]);
 
-  return <div ref={mapRef} style={{ height: "86vh", width: "100%" }} />;
+  // Live timestamp 
+  return (
+    <div className="w-full">
+      <div className="flex items-center text-sm text-gray-700 mb-2">
+        <span ref={timeRef} className="ml-2 font-medium" />
+      </div>
+      <div ref={mapRef} style={{ height: "86vh", width: "100%" }} />
+    </div>
+  );
 }
