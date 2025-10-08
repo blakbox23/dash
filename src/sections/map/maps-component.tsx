@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+
+import { useEffect, useRef } from "react";
 import L, { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Station } from "api/maps-api";
@@ -28,13 +29,16 @@ export default function MapComponent({
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<L.Map | null>(null);
   const markerGroupRef = useRef<L.LayerGroup | null>(null);
-  const [currentTime, setCurrentTime] = useState<string>("");
+  const timeRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const updateTime = () =>
-      setCurrentTime(
-        new Date().toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })
-      );
+    const updateTime = () => {
+      if (timeRef.current) {
+        timeRef.current.textContent = new Date().toLocaleString("en-KE", {
+          timeZone: "Africa/Nairobi",
+        });
+      }
+    };
     updateTime();
     const interval = setInterval(updateTime, 60_000);
     return () => clearInterval(interval);
@@ -157,14 +161,9 @@ export default function MapComponent({
   // Live timestamp 
   return (
     <div className="w-full">
-      {currentTime && (
-        <div className="flex items-center text-sm text-gray-700 mb-2">
-          {/* <span className="ml-2 px-2 py-1 text-green-700 bg-green-100 rounded-full text-xs font-semibold">
-            Live Data
-          </span> */}
-          <span className="ml-2 font-medium">{currentTime}</span>
-        </div>
-      )}
+      <div className="flex items-center text-sm text-gray-700 mb-2">
+        <span ref={timeRef} className="ml-2 font-medium" />
+      </div>
       <div ref={mapRef} style={{ height: "86vh", width: "100%" }} />
     </div>
   );
