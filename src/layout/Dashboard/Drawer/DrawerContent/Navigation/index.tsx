@@ -102,7 +102,8 @@ const Navigation = () => {
         ...(!isHorizontal && {
           '& > ul:first-of-type': { mt: 0 }
         }),
-        display: isHorizontal ? { xs: 'block', lg: 'flex' } : 'block'
+        display: isHorizontal ? { xs: 'block', lg: 'flex' } : 'block',
+        marginTop: '2rem'
       }}
     >
       {navGroups}

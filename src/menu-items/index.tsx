@@ -6,13 +6,13 @@ import alerts from './alerts';
 
 // types
 import { NavItemType } from 'types/menu';
-import pages from './pages';
+import dashboard from './pages';
 import sensors from './sensors';
 
 // ==============================|| MENU ITEMS ||============================== //
 
 const menuItems: { items: NavItemType[] } = {
-  items: [overview, sensors, analytics, alerts, feedback]
+  items: [dashboard]
 };
 
 export default menuItems;

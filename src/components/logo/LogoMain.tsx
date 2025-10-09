@@ -21,13 +21,15 @@ const LogoMain = ({ reverse, ...others }: { reverse?: boolean }) => {
      * <img src={theme.palette.mode === ThemeMode.DARK ? logoDark : logo} alt="airdash" width="100" />
      *
      */
-    <>
+    <div style={{margin: 'auto'}}>
         <img
         src="/assets/identity/nccg_logo.png"
         alt="Nairobi County Logo"
-        style={{ width: 70, display: "block", marginTop: '1rem' }}
+        style={{ width: 70, display: "block",  }}
       />
-    </>
+
+      {/* <h2 style={{display: 'block'}}>Air Quality Dashboard</h2> */}
+    </div>
   );
 };
 
