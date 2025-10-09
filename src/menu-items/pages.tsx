@@ -22,7 +22,7 @@ const icons = { DashboardOutlinedIcon, SensorsOutlinedIcon, AnalyticsOutlinedIco
 
 const dashboard: NavItemType = {
   id: 'group-pages',
-  title: <FormattedMessage id="Dashboard" />,
+  title: <FormattedMessage id="Air Quality Dashboard" />,
   type: 'group',
   children: [
 

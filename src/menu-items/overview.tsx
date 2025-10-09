@@ -22,7 +22,7 @@ const overview: NavItemType = {
   type: 'group',
   url: '/overview',
   icon: icons.ChromeOutlined,
-  breadcrumbs: false
+  breadcrumbs: true,
 };
 
 export default overview;
