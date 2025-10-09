@@ -12,7 +12,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { getAqiDistribution } from "api/maps-api";
+import { DistributionItem, getAqiDistribution } from "api/maps-api";
+import { DownloadOutlined } from "@ant-design/icons";
 
 // Minimal Station type for this example
 type Station = { id: string; name: string };
@@ -65,6 +66,9 @@ export default function AqiDistributionPieChart({
   const [options, setOptions] = useState<ApexCharts.ApexOptions>(defaultOptions);
   const [series, setSeries] = useState<number[]>([]);
 
+  const [distribution, setDistribution] = useState<DistributionItem[]>([]);
+
+
   useEffect(() => {
     const fetchData = async () => {
       if (!station || !start || !end) return;
@@ -72,6 +76,8 @@ export default function AqiDistributionPieChart({
         const res = await getAqiDistribution(station.id, start, end);
         const labels = res.distribution.map((d) => d.category);
         const values = res.distribution.map((d) => d.value);
+
+        setDistribution(res.distribution)
 
         const colors = labels.map(
           (lab) => AQI_COLORS[lab] ?? (theme.palette.primary.main as string)
@@ -96,42 +102,78 @@ export default function AqiDistributionPieChart({
 
   return (
     <Card sx={{ width: "100%" }}>
-      <CardHeader title={<Typography variant="h6">AQI Distribution</Typography>} />
-      <CardContent>
-        <Box display="flex" gap={2} flexWrap="wrap" mb={3}>
-          <TextField
-            label="Start"
-            type="datetime-local"
-            value={start}
-            onChange={(e) => setStart(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-          />
-          <TextField
-            label="End"
-            type="datetime-local"
-            value={end}
-            onChange={(e) => setEnd(e.target.value)}
-            InputLabelProps={{ shrink: true }}
-          />
-          <FormControl sx={{ minWidth: 180 }}>
-            <Select
-              value={station?.id ?? ""}
-              onChange={(e) => {
-                const selected = stations.find((s) => s.id === e.target.value) ?? null;
-                setStation(selected);
-              }}
-            >
-              {stations.map((s) => (
-                <MenuItem key={s.id} value={s.id}>
-                  {s.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
+  <CardHeader
+    title={<Typography variant="h6">AQI Distribution</Typography>}
+    action={
+      <DownloadOutlined
+      style={{ cursor: "pointer", fontSize: 20 }}
+      onClick={() => {
+        if (!distribution || distribution.length === 0) return;
+    
+        const total = distribution.reduce((sum, item) => sum + item.value, 0);
+    
+        const headers = ["Category", "Percentage"];
+        const rows = distribution.map((item) => {
+          const percent = total > 0 ? ((item.value / total) * 100).toFixed(1) : "0";
+          return `${item.category},${percent}%`;
+        });
+    
+        const csvContent = [headers.join(","), ...rows].join("\n");
+    
+        const blob = new Blob([csvContent], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.setAttribute(
+          "download",
+          `aqi_distribution_${station?.name ?? station?.id ?? "station"}_${start}_to_${end}.csv`
+        );
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }}
+    />
+    
+    }
+  />
+  <CardContent>
+    <Box display="flex" gap={2} flexWrap="wrap" mb={3}>
+      <TextField
+        label="Start"
+        type="datetime-local"
+        value={start}
+        onChange={(e) => setStart(e.target.value)}
+        InputLabelProps={{ shrink: true }}
+      />
+      <TextField
+        label="End"
+        type="datetime-local"
+        value={end}
+        onChange={(e) => setEnd(e.target.value)}
+        InputLabelProps={{ shrink: true }}
+      />
+      <FormControl sx={{ minWidth: 180 }}>
+        <Select
+          value={station?.id ?? ""}
+          onChange={(e) => {
+            const selected = stations.find((s) => s.id === e.target.value) ?? null;
+            setStation(selected);
+          }}
+        >
+          {stations.map((s) => (
+            <MenuItem key={s.id} value={s.id}>
+              {s.name}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
 
-        <ReactApexChart options={options} series={series} type="donut" height={320} />
-      </CardContent>
-    </Card>
+    <ReactApexChart options={options} series={series} type="donut" height={320} />
+  </CardContent>
+</Card>
+
   );
 }

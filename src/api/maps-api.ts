@@ -56,7 +56,7 @@ type Reading = {
   pm10: number;
 };
 
-type DistributionItem = {
+export type DistributionItem = {
   category: string;
   value: number;
 };
