@@ -153,7 +153,6 @@ export const getStations = async () => {
     : stations;
 };
 
-
 export const getAqiDistribution = async (
   stationId: string,
   start: string,
@@ -163,16 +162,15 @@ export const getAqiDistribution = async (
   await new Promise((r) => setTimeout(r, 150));
 
   // helper to generate a random number in a range
-  const rand = (min: number, max: number) =>
-    Math.floor(Math.random() * (max - min + 1)) + min;
+  const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
   // generate randomized readings
   const rawReadings: Reading[] = Array.from({ length: 7 }, (_, i) => ({
     id: (i + 1).toString(),
     sensorId: stationId,
-    aqi: rand(10, 400),   // AQI between 10 and 400
-    pm25: rand(5, 250),   // PM2.5 between 5 and 250
-    pm10: rand(10, 300),  // PM10 between 10 and 300
+    aqi: rand(10, 400), // AQI between 10 and 400
+    pm25: rand(5, 250), // PM2.5 between 5 and 250
+    pm10: rand(10, 300) // PM10 between 10 and 300
   }));
 
   // tally counts per category
@@ -182,7 +180,7 @@ export const getAqiDistribution = async (
     'Unhealthy for Sensitive Groups': 0,
     Unhealthy: 0,
     'Very Unhealthy': 0,
-    Hazardous: 0,
+    Hazardous: 0
   };
 
   rawReadings.forEach((r) => {
@@ -191,16 +189,46 @@ export const getAqiDistribution = async (
   });
 
   // convert to distribution format
-  const distribution: DistributionItem[] = Object.entries(counts).map(
-    ([category, count]) => ({
-      category,
-      value: count,
-    })
-  );
+  const distribution: DistributionItem[] = Object.entries(counts).map(([category, count]) => ({
+    category,
+    value: count
+  }));
 
-  console.log("getAqiDistribution called");
+  console.log('getAqiDistribution called');
 
   return { stationId, start, end, distribution };
+};
+
+export const getAnalyticsTimeSeries = (
+  stationId: string,
+  start: string,
+  end: string,
+  selectedPollutant: string
+) => {
+  console.log(stationId, start, end, selectedPollutant);
+
+  const startDate = new Date(start);
+  const endDate = new Date(end);
+  const data: { pm25: number; aqi: number; pm10: number; timestamp: string }[] =
+    [];
+
+  // Generate hourly data points between start and end
+  const hours = Math.floor(
+    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
+  );
+
+  for (let i = 0; i <= hours; i++) {
+    const ts = new Date(startDate.getTime() + i * 60 * 60 * 1000);
+
+    data.push({
+      aqi: Math.floor(Math.random() * 300), // random AQI between 0–300
+      pm25: parseFloat((Math.random() * 150).toFixed(1)), // random 0–150
+      pm10: parseFloat((Math.random() * 200).toFixed(1)), // random 0–200
+      timestamp: ts.toISOString(),
+    });
+  }
+
+  return data;
 };
 
 

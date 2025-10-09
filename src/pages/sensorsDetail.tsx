@@ -9,7 +9,7 @@ import { useParams } from 'react-router-dom';
 import { getOneStation, Sensor } from 'api/maps-api';
 import ReportCard from 'components/cards/statistics/ReportCard';
 import UserCountCard from 'components/cards/statistics/UserCountCard';
-import TrendsChart from 'sections/trends/trends-chart';
+import TrendsChart from 'sections/trends/sensor-trends-chart';
 
 function SensorsDetail() {
   const theme = useTheme();
