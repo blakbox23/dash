@@ -1,6 +1,6 @@
 // material-ui
 import { Card, Container, Grid, Typography } from '@mui/material';
-import { getStations, Station } from 'api/maps-api';
+import { dummyStations, getStations, Station } from 'api/maps-api';
 import MainCard from 'components/MainCard';
 import { useEffect, useState } from 'react';
 import AlertsSummary from 'sections/trends/alerts-chart';
@@ -35,7 +35,7 @@ function Analytics() {
             Time series chart
           </Typography>
         </Grid>
-        <TrendsChart stations={stations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
+        <TrendsChart stations={dummyStations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
       </Grid>
 
       {/* Row 2 */}
@@ -46,7 +46,7 @@ function Analytics() {
             <Typography variant="h4" sx={{ mb: 1 }}>
               AQI distribution
             </Typography>
-            <AqiDistributionPieChart stations={stations} />
+            <AqiDistributionPieChart stations={dummyStations} />
           </Card>
         </Grid>
 
@@ -56,7 +56,7 @@ function Analytics() {
             <Typography variant="h4" sx={{ mb: 1 }}>
               Alerts summary
             </Typography>
-            <AlertsSummary stations={stations} />
+            <AlertsSummary stations={dummyStations} />
           </Card>
         </Grid>
       </Grid>
@@ -68,7 +68,7 @@ function Analytics() {
             Comparison chart
           </Typography>
         </Grid>
-        <ComparisonChart stations={stations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
+        <ComparisonChart stations={dummyStations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
       </Grid>
     </Grid>
   );
