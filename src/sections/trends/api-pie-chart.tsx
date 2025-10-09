@@ -12,32 +12,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { getAqiDistribution } from "api/maps-api";
 
 // Minimal Station type for this example
 type Station = { id: string; name: string };
 
 // Dummy API (replace with real API call)
-const getAqiDistribution = async (
-  stationId: string,
-  start: string,
-  end: string
-) => {
-  // simulate network delay
-  await new Promise((r) => setTimeout(r, 150));
-  return {
-    stationId,
-    start,
-    end,
-    distribution: [
-      { category: "Good", value: 35 },
-      { category: "Moderate", value: 25 },
-      { category: "Unhealthy for Sensitive Groups", value: 15 },
-      { category: "Unhealthy", value: 10 },
-      { category: "Very Unhealthy", value: 10 },
-      { category: "Hazardous", value: 5 },
-    ],
-  };
-};
+
 
 // color map for categories (fallback will use theme.primary)
 const AQI_COLORS: Record<string, string> = {
@@ -81,12 +62,11 @@ export default function AqiDistributionPieChart({
   const [end, setEnd] = useState(new Date().toISOString().slice(0, 16));
   const [station, setStation] = useState<Station | null>(stations[0] ?? null);
 
-  // <-- Declare options state (fixes your `setOptions has not been declared` error)
   const [options, setOptions] = useState<ApexCharts.ApexOptions>(defaultOptions);
   const [series, setSeries] = useState<number[]>([]);
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchData = async () => {
       if (!station || !start || !end) return;
       try {
         const res = await getAqiDistribution(station.id, start, end);
@@ -111,7 +91,7 @@ export default function AqiDistributionPieChart({
       }
     };
 
-    fetch();
+    fetchData();
   }, [station, start, end, theme.palette.primary.main]);
 
   return (

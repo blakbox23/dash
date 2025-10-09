@@ -18,18 +18,34 @@ import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
 
 // dummy fetch function (replace with API call)
 const getAlertsSummary = async (stationId: string, start: string, end: string) => {
-  // Simulated backend response
-  return {
-    total: 8,
-    breakdown: [
-        { level: "Unhealthy for Sensitive Groups", count: 4 },
-        { level: "Unhealthy", count: 2 },
-        { level: "Very Unhealthy", count: 1 },
-        { level: "Hazardous", count: 1 }
-      ]
-      
-  };
+  // Simulate network delay
+  await new Promise((r) => setTimeout(r, 150));
+
+  const levels = [
+    "Unhealthy for Sensitive Groups",
+    "Unhealthy",
+    "Very Unhealthy",
+    "Hazardous"
+  ];
+
+  // total alerts for this query
+  const total = Math.floor(Math.random() * 15) + 5; // between 5 and 20
+
+  // distribute alerts randomly across levels
+  let remaining = total;
+  const breakdown = levels.map((level, idx) => {
+    if (idx === levels.length - 1) {
+      // assign the remaining to last category
+      return { level, count: remaining };
+    }
+    const count = Math.floor(Math.random() * (remaining + 1));
+    remaining -= count;
+    return { level, count };
+  });
+
+  return { total, breakdown };
 };
+
 
 interface Station {
   id: string;
