@@ -3,65 +3,70 @@ import { FormattedMessage } from 'react-intl';
 
 // assets
 import { DollarOutlined, LoginOutlined, PhoneOutlined, RocketOutlined } from '@ant-design/icons';
+import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
+import SensorsOutlinedIcon from '@mui/icons-material/SensorsOutlined';
+// alternative: import MemoryIcon from '@mui/icons-material/Memory';
+import AnalyticsOutlinedIcon from '@mui/icons-material/AnalyticsOutlined';
+import WarningAmberOutlinedIcon from '@mui/icons-material/WarningAmberOutlined';
+// alternative: import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import FeedbackOutlinedIcon from '@mui/icons-material/FeedbackOutlined';
+
 
 // type
 import { NavItemType } from 'types/menu';
 
 // icons
-const icons = { DollarOutlined, LoginOutlined, PhoneOutlined, RocketOutlined };
+const icons = { DashboardOutlinedIcon, SensorsOutlinedIcon, AnalyticsOutlinedIcon, WarningAmberOutlinedIcon, FeedbackOutlinedIcon };
 
 // ==============================|| MENU ITEMS - PAGES ||============================== //
 
-const pages: NavItemType = {
+const dashboard: NavItemType = {
   id: 'group-pages',
-  title: <FormattedMessage id="pages" />,
+  title: <FormattedMessage id="Dashboard" />,
   type: 'group',
   children: [
+
     {
-      id: 'maintenance',
-      title: <FormattedMessage id="maintenance" />,
-      type: 'collapse',
-      icon: icons.RocketOutlined,
-      children: [
-        {
-          id: 'error-404',
-          title: <FormattedMessage id="error-404" />,
-          type: 'item',
-          url: '/maintenance/404',
-          target: true
-        },
-        {
-          id: 'error-500',
-          title: <FormattedMessage id="error-500" />,
-          type: 'item',
-          url: '/maintenance/500',
-          target: true
-        },
-        {
-          id: 'coming-soon',
-          title: <FormattedMessage id="coming-soon" />,
-          type: 'item',
-          url: '/maintenance/coming-soon',
-          target: true
-        },
-        {
-          id: 'under-construction',
-          title: <FormattedMessage id="under-construction" />,
-          type: 'item',
-          url: '/maintenance/under-construction',
-          target: true
-        }
-      ]
+      id: 'overview',
+      title: <FormattedMessage id="overview" />,
+      type: 'item',
+      url: '/overview',
+      icon: icons.DashboardOutlinedIcon,
+      breadcrumbs: false
     },
     {
-      id: 'contact-us',
-      title: <FormattedMessage id="contact-us" />,
+      id: 'sensors',
+      title: <FormattedMessage id="Sensors" />,
       type: 'item',
-      url: '/contact-us',
-      icon: icons.PhoneOutlined,
-      target: true
+      url: '/sensors',
+      icon: icons.SensorsOutlinedIcon,
+      breadcrumbs: true
+    },
+    {
+      id: 'analytics',
+      title: <FormattedMessage id="Analytics" />,
+      type: 'item',
+      url: '/analytics',
+      icon: icons.AnalyticsOutlinedIcon,
+      breadcrumbs: true
+    },
+    {
+      id: 'alerts',
+      title: <FormattedMessage id="Alerts" />,
+      type: 'item',
+      url: '/alerts',
+      icon: icons.WarningAmberOutlinedIcon,
+      breadcrumbs: false
+    },
+    {
+      id: 'feedback',
+      title: <FormattedMessage id="Feedback" />,
+      type: 'item',
+      url: '/feedback',
+      icon: icons.FeedbackOutlinedIcon,
+      breadcrumbs: true
     }
   ]
 };
 
-export default pages;
+export default dashboard;
