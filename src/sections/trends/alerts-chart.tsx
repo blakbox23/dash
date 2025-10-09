@@ -85,6 +85,34 @@ export default function AlertsSummary({ stations }: AlertsSummaryProps) {
     <Card sx={{ width: "100%", height: "100%" }}>
       <CardHeader
         title={<Typography variant="h6">Alerts Summary</Typography>}
+        action={
+          <DownloadOutlined
+            style={{ cursor: "pointer", fontSize: 20 }}
+            onClick={() => {
+              // create a simple CSV string from summary
+              const headers = ["Level", "Count"];
+              const rows = summary.breakdown.map(
+                (item) => `${item.level},${item.count}`
+              );
+              const csvContent =
+                [headers.join(","), ...rows, `Total,${summary.total}`].join("\n");
+    
+              // create a blob and trigger download
+              const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement("a");
+              link.href = url;
+              link.setAttribute(
+                "download",
+                `alerts_summary_${station?.name ?? sensorId}_${start}_to_${end}.csv`
+              );
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }}
+          />
+        }
+      
       />
       <CardContent>
         {/* Filters */}
