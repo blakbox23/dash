@@ -50,7 +50,7 @@ const WelcomeBanner = () => {
                   }
                 }}
               >
-                View full statistic
+                Get full report
               </Button>
             </Box>
           </Stack>
