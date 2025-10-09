@@ -12,33 +12,20 @@ import IconButton from 'components/@extended/IconButton';
 
 // assets
 import { DragOutlined } from '@ant-design/icons';
-import { TableDataProps } from 'sections/data-tables/CurrentReadingsTabletable';
+import { SensorTableDataProps } from 'sections/data-tables/SensorsTable';
 
 // types
 
 // ==============================|| DRAGGABLE ROW ||============================== //
 
 const DraggableRow: FC<{
-  row: Row<TableDataProps>;
+  row: Row<SensorTableDataProps>;
   // reorderRow: (draggedRowIndex: number, targetRowIndex: number) => void;
   children: ReactElement;
 }> = ({ row, children }) => {
-  // const [{ isOverCurrent }, dropRef] = useDrop({
-  //   accept: 'row',
-  //   drop: (draggedRow: Row<TableDataProps>) => reorderRow(draggedRow.index, row.index),
-  //   collect: (monitor) => ({ isOver: monitor.isOver(), isOverCurrent: monitor.isOver({ shallow: true }) })
-  // });
 
-  // const [{ isDragging }, dragRef, previewRef] = useDrag({
-  //   collect: (monitor) => ({ isDragging: monitor.isDragging() }),
-  //   item: () => row,
-  //   type: 'row'
-  // });
   return (
-    <TableRow
-      // ref={previewRef} //previewRef could go here
-      // sx={{ bgcolor:'inherit' }}
-    >
+    <TableRow>
       <TableCell>
         <IconButton
           size="small"
@@ -46,7 +33,6 @@ const DraggableRow: FC<{
           color="secondary"
           disabled={row.getIsGrouped()}
         >
-          {/* <DragOutlined /> */}
           {row.index + 1}
         </IconButton>
       </TableCell>

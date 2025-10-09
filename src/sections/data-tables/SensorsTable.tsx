@@ -87,27 +87,12 @@ import makeData from '../data/react-table';
 import { getStations } from 'api/maps-api';
 import { Link } from 'react-router-dom';
 
-export type TableDataProps = {
+export type SensorTableDataProps = {
   id: number;
   sensorId: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  fatherName: string;
-  email: string;
-  age: number;
-  gender: string;
-  role: string;
-  visits: number;
-  progress: number;
+
   status: string;
-  orderStatus: string;
-  contact: string;
-  country: string;
-  address: string;
-  about: string;
-  avatar: number;
-  skills: string[];
+  aqi?: string;
   time: string[];
 };
 
@@ -116,7 +101,7 @@ type LabelKeyObject = {
   key: string;
 };
 
-export const fuzzyFilter: FilterFn<TableDataProps> = (row, columnId, value, addMeta) => {
+export const fuzzyFilter: FilterFn<SensorTableDataProps> = (row, columnId, value, addMeta) => {
   // rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -127,7 +112,7 @@ export const fuzzyFilter: FilterFn<TableDataProps> = (row, columnId, value, addM
   return itemRank.passed;
 };
 
-export const fuzzySort: SortingFn<TableDataProps> = (rowA, rowB, columnId) => {
+export const fuzzySort: SortingFn<SensorTableDataProps> = (rowA, rowB, columnId) => {
   let dir = 0;
 
   // only sort by rank if the column has ranking information
@@ -141,10 +126,10 @@ export const fuzzySort: SortingFn<TableDataProps> = (rowA, rowB, columnId) => {
 
 // ==============================|| REACT TABLE - EDIT ACTION ||============================== //
 
-const EditAction = ({ row, table }: { row: Row<TableDataProps>; table: TableProps<TableDataProps> }) => {
+const EditAction = ({ row, table }: { row: Row<SensorTableDataProps>; table: TableProps<SensorTableDataProps> }) => {
   const meta = table?.options?.meta;
   const setSelectedRow = (e: MouseEvent<HTMLButtonElement> | undefined) => {
-    meta?.setSelectedRow((old: TableDataProps[]) => ({
+    meta?.setSelectedRow((old: SensorTableDataProps[]) => ({
       ...old,
       [row.id]: !old[row.id as any]
     }));
@@ -171,8 +156,8 @@ const EditAction = ({ row, table }: { row: Row<TableDataProps>; table: TableProp
 };
 
 interface ReactTableProps {
-  defaultColumns: ColumnDef<TableDataProps>[];
-  data: TableDataProps[];
+  defaultColumns: ColumnDef<SensorTableDataProps>[];
+  data: SensorTableDataProps[];
   setData: any;
 }
 
@@ -198,7 +183,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
   );
 
   // const reorderRow = (draggedRowIndex: number, targetRowIndex: number) => {
-  //   data.splice(targetRowIndex, 0, data.splice(draggedRowIndex, 1)[0] as TableDataProps);
+  //   data.splice(targetRowIndex, 0, data.splice(draggedRowIndex, 1)[0] as SensorTableDataProps);
   //   setData([...data]);
   // };
 
@@ -247,13 +232,13 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
       setSelectedRow,
       revertData: (rowIndex: number, revert: unknown) => {
         if (revert) {
-          setData((old: TableDataProps[]) => old.map((row, index) => (index === rowIndex ? originalData[rowIndex] : row)));
+          setData((old: SensorTableDataProps[]) => old.map((row, index) => (index === rowIndex ? originalData[rowIndex] : row)));
         } else {
           setOriginalData((old) => old.map((row, index) => (index === rowIndex ? data[rowIndex] : row)));
         }
       },
       updateData: (rowIndex, columnId, value) => {
-        setData((old: TableDataProps[]) =>
+        setData((old: SensorTableDataProps[]) =>
           old.map((row, index) => {
             if (index === rowIndex) {
               return {
@@ -474,7 +459,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
 const SensorsTable = () => {
   const theme = useTheme();
 
-  const [data, setData] = useState<TableDataProps[]>(() => []);
+  const [data, setData] = useState<SensorTableDataProps[]>(() => []);
 
     useEffect(() => {
       const fetchStations = async () => {
@@ -490,7 +475,7 @@ const SensorsTable = () => {
       fetchStations();
     }, []);
 
-  const columns = useMemo<ColumnDef<TableDataProps>[]>(
+  const columns = useMemo<ColumnDef<SensorTableDataProps>[]>(
     () => [
       {
         id: 'id',

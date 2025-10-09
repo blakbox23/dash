@@ -83,32 +83,14 @@ import {
   StopOutlined,
   UngroupOutlined
 } from '@ant-design/icons';
-import Avatar from 'components/@extended/Avatar';
-import makeData from '../data/react-table';
+
 import { getStations } from 'api/maps-api';
 
 export type TableDataProps = {
   aqi: unknown;
   id: number;
   sensorId: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  fatherName: string;
-  email: string;
-  age: number;
-  gender: string;
-  role: string;
-  visits: number;
-  progress: number;
   status: string;
-  orderStatus: string;
-  contact: string;
-  country: string;
-  address: string;
-  about: string;
-  avatar: number;
-  skills: string[];
   time: string[];
 };
 
@@ -337,7 +319,9 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                     }
 
                     return (
-                      <DraggableColumnHeader key={header.id} header={header} table={table}>
+                      // <DraggableColumnHeader key={header.id} header={header} table={table}>
+                         <TableCell  colSpan={header.colSpan} {...header.column.columnDef.meta}>
+
                         <>
                           {header.isPlaceholder ? null : (
                             <Stack direction="row" spacing={1} alignItems="center">
@@ -356,7 +340,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                             </Stack>
                           )}
                         </>
-                      </DraggableColumnHeader>
+                        </TableCell>
                     );
                   })}
                 </TableRow>
@@ -378,7 +362,18 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
               {table.getRowModel().rows.length > 0 ? (
                 table.getRowModel().rows.map((row) => (
                   <Fragment key={row.id}>
-                    <DraggableRow row={row}>
+                    {/* <DraggableRow row={row}> */}
+                    <TableRow>
+      <TableCell>
+        <IconButton
+          size="small"
+          sx={{ p: 0, width: 24, height: 24, fontSize: '1rem', mr: 0.75 }}
+          color="secondary"
+          disabled={row.getIsGrouped()}
+        >
+          {row.index + 1}
+        </IconButton>
+      </TableCell>
                     <>
                       {row.getVisibleCells().map((cell) => {
                         let bgcolor = 'background.paper';
@@ -423,7 +418,8 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                         );
                       })}
                     </>
-                    </DraggableRow>
+                    {/* </DraggableRow> */}
+                    </TableRow>
                     {row.getIsExpanded() && !row.getIsGrouped() && (
                       <TableRow sx={{ bgcolor: backColor, '&:hover': { bgcolor: `${backColor} !important` } }}>
                         <TableCell colSpan={row.getVisibleCells().length + 2}>
