@@ -2,10 +2,10 @@
 import { Container, Grid } from '@mui/material';
 import { getStations, Station } from 'api/maps-api';
 import { useEffect, useState } from 'react';
-import FeedbackTable from 'sections/data-tables/feedbackTable';
+// import FeedbackTable from 'sections/data-tables/feedbackTable';
 
 
-function Sensors() {
+function Feedback() {
   const [stations, setStations] = useState<Station[]>([]);
 
   useEffect(() => {
@@ -24,10 +24,10 @@ function Sensors() {
   return (
     <Grid justifyContent="center" alignItems="center" sx={{ mb: 12 }}>
       <Grid item xs={12} sm={10} lg={9}>
-            <FeedbackTable />
+            {/* <FeedbackTable /> */}
       </Grid>
     </Grid>
   );
 }
 
-export default Sensors;
+export default Feedback;

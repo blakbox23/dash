@@ -6,10 +6,10 @@ import { Box, TableCell } from '@mui/material';
 // third-party
 import { useDrag, useDrop } from 'react-dnd';
 import { Column, ColumnOrderState, Header, Table } from '@tanstack/react-table';
-import { TableDataProps } from 'sections/data-tables/CurrentReadingsTabletable';
+import { SensorTableDataProps } from 'sections/data-tables/SensorsTable';
 
 // types
-// import { TableDataProps } from 'types/table';
+// import { SensorTableDataProps } from 'types/table';
 
 const reorderColumn = (draggedColumnId: string, targetColumnId: string, columnOrder: string[]): ColumnOrderState => {
   columnOrder.splice(columnOrder.indexOf(targetColumnId), 0, columnOrder.splice(columnOrder.indexOf(draggedColumnId), 1)[0] as string);
@@ -18,7 +18,7 @@ const reorderColumn = (draggedColumnId: string, targetColumnId: string, columnOr
 
 // ==============================|| DRAGGABLE COLUMN ||============================== //
 
-const DraggableColumnHeader: FC<{ header: Header<TableDataProps, unknown>; table: Table<TableDataProps>; children: ReactElement }> = ({
+const DraggableColumnHeader: FC<{ header: Header<SensorTableDataProps, unknown>; table: Table<SensorTableDataProps>; children: ReactElement }> = ({
   header,
   table,
   children
@@ -27,25 +27,6 @@ const DraggableColumnHeader: FC<{ header: Header<TableDataProps, unknown>; table
   // const { columnOrder } = getState();
   const { column } = header;
 
-  // const [{ isOverCurrent }, dropRef] = useDrop({
-  //   accept: 'column',
-  //   drop: (draggedColumn: Column<TableDataProps>) => {
-  //     const newColumnOrder = reorderColumn(draggedColumn.id, column.id, columnOrder);
-  //     setColumnOrder(newColumnOrder);
-  //   },
-  //   collect: (monitor) => ({
-  //     isOver: monitor.isOver(),
-  //     isOverCurrent: monitor.isOver({ shallow: true })
-  //   })
-  // });
-
-  // const [{ isDragging }, dragRef, previewRef] = useDrag({
-  //   collect: (monitor) => ({
-  //     isDragging: monitor.isDragging()
-  //   }),
-  //   item: () => column,
-  //   type: 'column'
-  // });
 
   return (
     <TableCell  colSpan={header.colSpan} {...header.column.columnDef.meta}>
