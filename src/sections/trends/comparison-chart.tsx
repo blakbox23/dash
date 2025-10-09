@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 
-import { getHistoricalData, HistoricalData, Station } from "api/maps-api";
+import { getAnalyticsTimeSeries,getHistoricalData, HistoricalData, Station } from "api/maps-api";
 import { CheckOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 
@@ -60,7 +60,13 @@ export default function ComparisonChart({
   pollutantUnit,
 }: TrendsChartProps) {
 
-  const [sensorId, setSensorId] = useState<string | undefined>(undefined);
+    // two sensor IDs for comparison
+  const [sensorId1, setSensorId1] = useState<string | undefined>(
+    stations[0]?.sensorId
+  );
+  const [sensorId2, setSensorId2] = useState<string | undefined>(
+    stations[1]?.sensorId
+  );
 
   const [start, setStart] = useState(
     new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
@@ -77,27 +83,59 @@ export default function ComparisonChart({
 
   const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
 
+  // Data for both sensors
+  const [data1, setData1] = useState<HistoricalData[]>([]);
+  const [data2, setData2] = useState<HistoricalData[]>([]);
+
+
   useEffect(() => {
     const fetchData = async () => {
       if (!start || !end) return;
       try {
-        const stationId = sensorId ?? trendsStation?.id ?? "1";
-        // Update API call signature to accept start & end
-        console.log(
-          stationId,
+        const res1 = await getAnalyticsTimeSeries(
+          sensorId1 ?? "",
           start,
           end,
           selectedPollutant
         );
+        const res2 = await getAnalyticsTimeSeries(
+          sensorId2 ?? "",
+          start,
+          end,
+          selectedPollutant
+        );
+        setData1(
+          Array.isArray(res1)
+            ? res1.map((item) => ({
+                ...item,
+                date: item.timestamp,
+                avg_aqi: item.aqi,
+                avg_pm25: item.pm25,
+                avg_pm10: item.pm10,
+              }))
+            : []
+        );
+        setData2(
+          Array.isArray(res2)
+            ? res2.map((item) => ({
+                ...item,
+                date: item.timestamp,
+                avg_aqi: item.aqi,
+                avg_pm25: item.pm25,
+                avg_pm10: item.pm10,
+              }))
+            : []
+        );
         // setHistoricalData(Array.isArray(historyData) ? historyData : []);
       } catch (err) {
         console.error(err);
-        setHistoricalData([]);
+        setData1([]);
+        setData2([]);
       }
     };
 
     fetchData();
-  }, [sensorId, trendsStation, start, end, selectedPollutant]);
+  }, [sensorId1, sensorId2, trendsStation, start, end, selectedPollutant]);
 
   const currentPollutantOption =
     pollutantOptions.find((p) => p.value === selectedPollutant) ||
@@ -114,22 +152,33 @@ export default function ComparisonChart({
     })
   );
 
-  const pollutantSeries = historicalData.map((item) => {
-    if (selectedPollutant === "aqi") return item.aqi;
-    if (selectedPollutant === "pm25") return item.pm25;
-    return item.pm10;
-  });
+  const pollutantSeries = (data: HistoricalData[]) =>
+  data.map((item) => ({
+    x: new Date(item.timestamp),
+    y:
+      selectedPollutant === "aqi"
+        ? item.aqi
+        : selectedPollutant === "pm25"
+        ? item.pm25
+        : item.pm10,
+  }));
+
 
   const series = [
     {
-      name: `${currentPollutantOption.label}${
-        currentPollutantOption.unit ? ` (${currentPollutantOption.unit})` : ""
-      }`,
-      data: pollutantSeries,
+      name: `${stations.find((s) => s.sensorId === sensorId1)?.name ?? "Sensor 1"}`,
+      data: pollutantSeries(data1),
+    },
+    {
+      name: `${stations.find((s) => s.sensorId === sensorId2)?.name ?? "Sensor 2"}`,
+      data: pollutantSeries(data2),
     },
     {
       name: `Threshold (${thresholdValue})`,
-      data: Array(pollutantSeries.length).fill(thresholdValue),
+    data: data1.map((d) => ({
+      x: new Date(d.timestamp),
+      y: thresholdValue,
+       })),
     },
   ];
 
@@ -214,45 +263,36 @@ export default function ComparisonChart({
             </Select>
           </FormControl>
 
-          {/* Station */}
-            <FormControl sx={{ minWidth: 180 }}>
-              <Select
-                value={trendsStation?.id ?? ""}
-                onChange={(e) => {
-                  const selected =
-                    stations.find((s) => s.id === e.target.value) || null;
-                  setTrendsStation(selected);
-                  setSensorId(selected?.sensorId)
-                }}
-                displayEmpty
-              >
-                {stations.map((s) => (
-                  <MenuItem key={s.id} value={s.id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          
+          {/* Sensor 1 */}
+          <FormControl sx={{ minWidth: 180 }}>
+            <Select
+              value={sensorId1 ?? ""}
+              onChange={(e) => setSensorId1(e.target.value)}
+              displayEmpty
+            >
+              {stations.map((s) => (
+                <MenuItem key={s.sensorId} value={s.sensorId}>
+                  {s.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
 
-                {/* Station */}
-            <FormControl sx={{ minWidth: 180 }}>
-              <Select
-                value={trendsStation?.id ?? ""}
-                onChange={(e) => {
-                  const selected =
-                    stations.find((s) => s.id === e.target.value) || null;
-                  setTrendsStation(selected);
-                  setSensorId(selected?.sensorId)
-                }}
-                displayEmpty
-              >
-                {stations.map((s) => (
-                  <MenuItem key={s.id} value={s.id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+          {/* Sensor 2 */}
+          <FormControl sx={{ minWidth: 180 }}>
+            <Select
+              value={sensorId2 ?? ""}
+              onChange={(e) => setSensorId2(e.target.value)}
+              displayEmpty
+            >
+              {stations.map((s) => (
+                <MenuItem key={s.sensorId} value={s.sensorId}>
+                  {s.name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </Box>
 
         {/* Chart */}
