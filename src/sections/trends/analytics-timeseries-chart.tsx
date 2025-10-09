@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 
-import { getHistoricalData, HistoricalData, Station } from "api/maps-api";
+import { getAnalyticsTimeSeries, getHistoricalData, HistoricalData, Station } from "api/maps-api";
 import { CheckOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 
@@ -53,11 +53,9 @@ const pollutantOptions: PollutantOption[] = [
   { value: "pm10", label: "PM 10", unit: "μg/m³" },
 ];
 
-export default function ComparisonChart({
+export default function AnalyticsTimeSeries({
   stations,
-  pollutant,
-  pollutantLabel,
-  pollutantUnit,
+  pollutant
 }: TrendsChartProps) {
 
   const [sensorId, setSensorId] = useState<string | undefined>(undefined);
@@ -75,7 +73,7 @@ export default function ComparisonChart({
   const [selectedPollutant, setSelectedPollutant] =
     useState<PollutantType>(pollutant);
 
-  const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
+  const [historicalData, setHistoricalData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,13 +81,13 @@ export default function ComparisonChart({
       try {
         const stationId = sensorId ?? trendsStation?.id ?? "1";
         // Update API call signature to accept start & end
-        console.log(
-          stationId,
+    
+        const historyData = getAnalyticsTimeSeries( stationId,
           start,
           end,
-          selectedPollutant
-        );
-        // setHistoricalData(Array.isArray(historyData) ? historyData : []);
+          selectedPollutant)
+
+        setHistoricalData(Array.isArray(historyData) ? historyData : []);
       } catch (err) {
         console.error(err);
         setHistoricalData([]);
@@ -144,7 +142,7 @@ export default function ComparisonChart({
       width: [3, 2],
       dashArray: [0, 5],
     },
-    colors: [POLLUTANT_COLOR_MAP[selectedPollutant], "red"],
+    colors: ["blue"],
     markers: { size: 0 },
     xaxis: {
       categories: labels,
@@ -215,26 +213,6 @@ export default function ComparisonChart({
           </FormControl>
 
           {/* Station */}
-            <FormControl sx={{ minWidth: 180 }}>
-              <Select
-                value={trendsStation?.id ?? ""}
-                onChange={(e) => {
-                  const selected =
-                    stations.find((s) => s.id === e.target.value) || null;
-                  setTrendsStation(selected);
-                  setSensorId(selected?.sensorId)
-                }}
-                displayEmpty
-              >
-                {stations.map((s) => (
-                  <MenuItem key={s.id} value={s.id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-
-                {/* Station */}
             <FormControl sx={{ minWidth: 180 }}>
               <Select
                 value={trendsStation?.id ?? ""}

@@ -1,12 +1,12 @@
 // material-ui
 import { Card, Container, Grid, Typography } from '@mui/material';
 import { dummyStations, getStations, Station } from 'api/maps-api';
-import MainCard from 'components/MainCard';
 import { useEffect, useState } from 'react';
 import AlertsSummary from 'sections/trends/alerts-chart';
+import AnalyticsTimeSeries from 'sections/trends/analytics-timeseries-chart';
+import TrendsChart from 'sections/trends/analytics-timeseries-chart';
 import AqiDistributionPieChart from 'sections/trends/api-pie-chart';
 import ComparisonChart from 'sections/trends/comparison-chart';
-import TrendsChart from 'sections/trends/trends-chart';
 
 // ==============================|| CONTACT US - MAIN ||============================== //
 
@@ -35,7 +35,7 @@ function Analytics() {
             Time series chart
           </Typography>
         </Grid>
-        <TrendsChart stations={dummyStations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
+        <AnalyticsTimeSeries stations={dummyStations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
       </Grid>
 
       {/* Row 2 */}

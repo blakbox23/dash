@@ -14,7 +14,7 @@ export default defineConfig({
     proxy: {
       // Proxy API calls during local dev
       '/api': {
-        target: 'http://40.81.230.185', // 👈 backend server
+        target: 'http://161.97.134.211', // 👈 backend server
         changeOrigin: true,
         secure: false
       }
