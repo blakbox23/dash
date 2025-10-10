@@ -10,7 +10,6 @@ import AqiDistributionPieChart from 'sections/trends/api-pie-chart';
 import ComparisonChart from 'sections/trends/comparison-chart';
 import { ThemeMode } from 'types/config';
 
-// ==============================|| CONTACT US - MAIN ||============================== //
 
 function Analytics() {
   const [stations, setStations] = useState<Station[]>([]);
