@@ -115,12 +115,8 @@ const NavUser = () => {
         }}
       >
         <MenuItem onClick={handleLogout}>Logout</MenuItem>
-        <MenuItem component={Link} to="#" onClick={handleClose}>
-          Profile
-        </MenuItem>
-        <MenuItem component={Link} to="#" onClick={handleClose}>
-          My account
-        </MenuItem>
+
+
       </Menu>
     </Box>
   );

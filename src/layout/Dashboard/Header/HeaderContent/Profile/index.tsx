@@ -155,7 +155,7 @@ const Profile = () => {
                           <Stack>
                             <Typography variant="h6">{user?.name}</Typography>
                             <Typography variant="body2" color="textSecondary">
-                              UI/UX Designer
+                              user.role
                             </Typography>
                           </Stack>
                         </Stack>
@@ -184,7 +184,7 @@ const Profile = () => {
                         label="Profile"
                         {...a11yProps(0)}
                       />
-                      <Tab
+                      {/* <Tab
                         sx={{
                           display: 'flex',
                           flexDirection: 'row',
@@ -195,7 +195,7 @@ const Profile = () => {
                         icon={<SettingOutlined style={{ marginBottom: 0, marginRight: '10px' }} />}
                         label="Setting"
                         {...a11yProps(1)}
-                      />
+                      /> */}
                     </Tabs>
                   </Box>
                   <TabPanel value={value} index={0} dir={theme.direction}>
