@@ -2,7 +2,7 @@
 import { FormattedMessage } from 'react-intl';
 
 // assets
-import { DollarOutlined, LoginOutlined, PhoneOutlined, RocketOutlined } from '@ant-design/icons';
+import { DollarOutlined, LoginOutlined, PhoneOutlined, RocketOutlined, UserOutlined } from '@ant-design/icons';
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import SensorsOutlinedIcon from '@mui/icons-material/SensorsOutlined';
 // alternative: import MemoryIcon from '@mui/icons-material/Memory';
@@ -16,7 +16,7 @@ import FeedbackOutlinedIcon from '@mui/icons-material/FeedbackOutlined';
 import { NavItemType } from 'types/menu';
 
 // icons
-const icons = { DashboardOutlinedIcon, SensorsOutlinedIcon, AnalyticsOutlinedIcon, WarningAmberOutlinedIcon, FeedbackOutlinedIcon };
+const icons = { DashboardOutlinedIcon, SensorsOutlinedIcon, AnalyticsOutlinedIcon, WarningAmberOutlinedIcon, FeedbackOutlinedIcon, UserOutlined };
 
 // ==============================|| MENU ITEMS - PAGES ||============================== //
 
@@ -64,6 +64,14 @@ const dashboard: NavItemType = {
       type: 'item',
       url: '/feedback',
       icon: icons.FeedbackOutlinedIcon,
+      breadcrumbs: true
+    },
+    {
+      id: 'users',
+      title: <FormattedMessage id="Users" />,
+      type: 'item',
+      url: '/users',
+      icon: icons.UserOutlined,
       breadcrumbs: true
     }
   ]

@@ -11,8 +11,10 @@ import authReducer from 'contexts/auth-reducer/auth';
 // project import
 import Loader from 'components/Loader';
 import axios from 'utils/axios';
+// import axiosServices from "utils/axios";
 import { KeyedObject } from 'types/root';
 import { AuthProps, JWTContextType } from 'types/auth';
+import axiosServices from 'utils/axios';
 
 const chance = new Chance();
 
@@ -40,6 +42,8 @@ const setSession = (serviceToken?: string | null) => {
     axios.defaults.headers.common.Authorization = `Bearer ${serviceToken}`;
   } else {
     localStorage.removeItem('serviceToken');
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("role")
     delete axios.defaults.headers.common.Authorization;
   }
 };
@@ -57,7 +61,14 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
         const serviceToken = window.localStorage.getItem('serviceToken');
         if (serviceToken && verifyToken(serviceToken)) {
           setSession(serviceToken);
-          const response = await axios.get('/api/account/me');
+          
+          
+          // const response = await axios.get('/api/account/me');
+          const response = await axiosServices.post("http://localhost:4000/auth", {
+            token: serviceToken,
+          });
+
+
           const { user } = response.data;
           dispatch({
             type: LOGIN,
@@ -83,9 +94,15 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await axios.post('/api/account/login', { email, password });
-    const { serviceToken, user } = response.data;
-    setSession(serviceToken);
+    setSession();
+    const response = await axios.post('http://localhost:4000/auth/', { email, password });
+    const { token, user } = response.data;
+    // window.localStorage.setItem('accessToken', JSON.stringify(response?.token.accessToken));
+
+    localStorage.setItem("refreshToken", token.refreshToken);
+    localStorage.setItem('role', user.role );
+
+    setSession(token.accessToken);
     dispatch({
       type: LOGIN,
       payload: {
@@ -95,15 +112,16 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
     });
   };
 
-  const register = async (email: string, password: string, firstName: string, lastName: string) => {
+  const register = async (email: string, password: string, displayName: string) => {
     // todo: this flow need to be recode as it not verified
     const id = chance.bb_pin();
-    const response = await axios.post('/api/account/register', {
+    const response = await axios.post('http://localhost:4000/auth/signup', {
       id,
       email,
       password,
-      firstName,
-      lastName
+      // firstName,
+      // lastName
+      displayName
     });
     let users = response.data;
 
@@ -115,12 +133,13 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
           id,
           email,
           password,
-          name: `${firstName} ${lastName}`
+          // name: `${firstName} ${lastName}`
+          displayName
         }
       ];
     }
 
-    window.localStorage.setItem('users', JSON.stringify(users));
+    // window.localStorage.setItem('users', JSON.stringify({...users}));
   };
 
   const logout = () => {

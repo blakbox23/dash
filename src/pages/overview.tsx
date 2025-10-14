@@ -43,10 +43,23 @@ const DashboardAnalytics = () => {
         setLoading(false);
       }
     };
-
     // Initial fetch
     fetchStations();
   }, []);
+
+  //useEffect ya kuitisha AQS
+  useEffect(() => {
+    const stationsCron = async () => {
+      try {
+        await getStations();
+      } catch (err: any) {
+        console.log(err.message || 'Failed to load stations');
+      } 
+    };
+    // Initial fetch
+    stationsCron();
+  }, []);
+
   function getPollutantValue(station: Station, pollutant: PollutantType): number {
     switch (pollutant) {
       case 'aqi':

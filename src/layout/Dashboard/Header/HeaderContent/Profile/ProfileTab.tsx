@@ -142,7 +142,7 @@ const ProfileTab = ({ handleLogout }: Props) => {
                     ))
                   }
                   renderInput={(params) => (
-                    <TextField {...params} label="Report Stations" placeholder="Add stationF..." margin="normal" />
+                    <TextField {...params} label="Report Stations" placeholder="Add station..." margin="normal" />
                   )}
                   fullWidth
                 />

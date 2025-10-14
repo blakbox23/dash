@@ -3,10 +3,10 @@ import { Container, Grid } from '@mui/material';
 import { getStations, Station } from 'api/maps-api';
 import { useEffect, useState } from 'react';
 import FeedbackTable from 'sections/data-tables/feedbackTable';
-// import FeedbackTable from 'sections/data-tables/feedbackTable';
+import UsersTable from 'sections/data-tables/usersTable';
 
 
-function Feedback() {
+function Users() {
   const [stations, setStations] = useState<Station[]>([]);
 
   useEffect(() => {
@@ -25,11 +25,10 @@ function Feedback() {
   return (
     <Grid justifyContent="center" alignItems="center" sx={{ mb: 12 }}>
       <Grid item xs={12} sm={10} lg={9}>
-        fedbakk
-            <FeedbackTable />
+            <UsersTable />
       </Grid>
     </Grid>
   );
 }
 
-export default Feedback;
+export default Users;

@@ -1,41 +1,45 @@
 import axios from 'axios';
-import { useEffect, useMemo } from 'react';
-import useSWR, { mutate } from 'swr';
-import { fetcher } from 'utils/axios';
+// import { useEffect, useMemo } from 'react';
+// import useSWR, { mutate } from 'swr';
+// import { fetcher } from 'utils/axios';
+
+const token = localStorage.getItem("serviceToken");
 
 const api = axios.create({
-  baseURL: '/api/v1/',
+  baseURL: '/api/v1',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` })
   }
 });
 
 export const endpoints = {
-  key: '/api/v1/',
+  key: '/api',
   stations: '/stations'
 };
 
-export interface Station {
-  id: string;
-  sensorId: string;
-  name: string;
-  aqi: number;
-  pm25: number;
-  pm10: number;
-  lat: number;
-  lng: number;
-  sensorType?: string;
-}
+  export interface Station {
+    id: string;
+    sensorId: string;
+    name: string;
+    aqi: number;
+    pm25: number;
+    pm10: number;
+    lat: number;
+    lng: number;
+    timeStamp?: string;
+    sensorType: string;
+  }
 
-export interface Sensor {
-  id: number;
-  sensor_id: string;
-  location: string;
-  description: string;
-  lat: number;
-  lng: number;
-  sensorType: string;
-}
+  export interface Sensor {
+    id: number;
+    sensor_id: string;
+    location: string;
+    description: string;
+    lat: number;
+    lng: number;
+    sensorType: string;
+  }
 
 export interface HistoricalData {
   pm25: number;
@@ -242,6 +246,24 @@ export const getHistoricalData = async (sensorId = '1', period = 24) => {
   return response.data;
 };
 
+
+export const stationsCron = async () => {
+  const response = await api.get(`/stations/cron/`);
+  return response.data;
+};
+
+export const getFeedback = async () => {
+  const response = await api.get(`/feedback`);
+  return response.data.data;
+};
+
+
+export const getUsers = async () => {
+  const response = await api.get(`/users`);
+  console.log(response.data.data)
+  return response.data.data;
+};
+
 // export function useGetStations(page: number = 0, size: number = 10) {
 //   const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);
 
@@ -268,3 +290,12 @@ export const getHistoricalData = async (sensorId = '1', period = 24) => {
 //   );
 //   return memoizedValue;
 // }
+
+
+
+//user haina status
+//nimefanya endpoints zote zianze na /api
+
+//progress ya reports, > cron job ku tuma report kwa email
+                   //  >  endpoint ya time?
+//                     > format report ya kushow from the frontend
