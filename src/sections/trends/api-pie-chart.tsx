@@ -12,11 +12,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DistributionItem, getAqiDistribution } from "api/maps-api";
+import { DistributionItem, getAqiDistribution, Station } from "api/maps-api";
 import { DownloadOutlined } from "@ant-design/icons";
 
 // Minimal Station type for this example
-type Station = { id: string; name: string };
 
 // Dummy API (replace with real API call)
 
@@ -57,6 +56,8 @@ export default function AqiDistributionPieChart({
 }) {
   const theme = useTheme();
 
+  console.log(`stations at pie chart ${stations[0]}`)
+
   const [start, setStart] = useState(
     new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
   );
@@ -72,8 +73,9 @@ export default function AqiDistributionPieChart({
   useEffect(() => {
     const fetchData = async () => {
       if (!station || !start || !end) return;
+      console.log(`station at api pie chart ${station}`)
       try {
-        const res = await getAqiDistribution(station.id, start, end);
+        const res = await getAqiDistribution(station.sensorId, start, end);
         const labels = res.distribution.map((d) => d.category);
         const values = res.distribution.map((d) => d.value);
 

@@ -14,7 +14,7 @@ const api = axios.create({
 });
 
 export const endpoints = {
-  key: '/api',
+  key: '/api/v1',
   stations: '/stations'
 };
 
@@ -145,7 +145,7 @@ const classifyAqi = (aqi: number): string => {
 
 export const getStations = async () => {
   const response = await api.get('/stations');
-  const stations = response.data;
+  const stations = response.data.data;
 
   // Ensure it's an array before mapping
   return Array.isArray(stations)
