@@ -24,17 +24,17 @@ const HeaderContent = () => {
   const downLG = useMediaQuery((theme: Theme) => theme.breakpoints.down('lg'));
 
   return (
-    <>
+    <div style={{marginLeft: 'auto', display: 'flex'}}>
       {menuOrientation === MenuOrientation.HORIZONTAL && !downLG && <DrawerHeader open={true} />}
-      {!downLG && <Search />}
+      {/* {!downLG && <Search />} */}
       {downLG && <Box sx={{ width: '100%', ml: 1 }} />}
 
       {/* <Notification /> */}
       {/* <Message /> */}
-      {!downLG && <FullScreen />}
+      {/* {!downLG && <FullScreen />} */}
       {!downLG && <Profile />}
       {downLG && <MobileSection />}
-    </>
+    </div>
   );
 };
 

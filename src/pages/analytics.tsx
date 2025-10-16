@@ -22,7 +22,8 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
-import { dummyStations, getStations, Station } from 'api/maps-api';
+import { dummyStations, getStations, Station, updateUserReportStations } from 'api/maps-api';
+import useAuth from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
 import AlertsSummary from 'sections/trends/alerts-chart';
 import AnalyticsTimeSeries from 'sections/trends/analytics-timeseries-chart';
@@ -31,22 +32,25 @@ import ComparisonChart from 'sections/trends/comparison-chart';
 import { ThemeMode } from 'types/config';
 
 function Analytics() {
-  const [stations, setStations] = useState<Station[]>(dummyStations);
+
+  const { user } = useAuth();
+
+  const [stations, setStations] = useState<Station[]>([]);
   const theme = useTheme();
 
-  // useEffect(() => {
-  //   const fetchStations = async () => {
-  //     try {
-  //       const stationsData = await getStations();
-  //       setStations(stationsData);
-  //     } catch (err: any) {
-  //       console.log(err.message || 'Failed to load stations');
-  //     }
-  //   };
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const stationsData = await getStations();
+        setStations(stationsData);
+      } catch (err: any) {
+        console.log(err.message || 'Failed to load stations');
+      }
+    };
 
-  //   // Initial fetch
-  //   fetchStations();
-  // }, []);
+    // Initial fetch
+    fetchStations();
+  }, []);
 
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
 
@@ -59,9 +63,18 @@ function Analytics() {
     setSelectedStations((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     console.log('user', 'reportsStations');
-    // TODO: hook into your backend subscription logic
+
+    try {
+      const response = await updateUserReportStations(user?.id, selectedStations);
+      console.log(response.data)
+      // alert("Stations updated successfully!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update stations");
+    }
+    
     handleClose();
   };
 
@@ -102,8 +115,8 @@ function Analytics() {
               multiple
               options={stations}
               getOptionLabel={(option) => option.name}
-              value={stations.filter((s) => selectedStations.includes(s.id))}
-              onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.id))}
+              value={stations.filter((s) => selectedStations.includes(s.sensorId))}
+              onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.sensorId))}
               renderTags={(value, getTagProps) =>
                 value.map((option, index) => (
                   <Chip
@@ -141,7 +154,7 @@ function Analytics() {
               Time series chart
             </Typography>
           </Grid>
-          <AnalyticsTimeSeries stations={dummyStations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
+          <AnalyticsTimeSeries stations={stations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
         </Grid>
 
         {/* Row 2 */}
@@ -152,7 +165,7 @@ function Analytics() {
               <Typography variant="h4" sx={{ mb: 1 }}>
                 AQI distribution
               </Typography>
-              <AqiDistributionPieChart stations={dummyStations} />
+              <AqiDistributionPieChart stations={stations} />
             </Card>
           </Grid>
 
@@ -162,7 +175,7 @@ function Analytics() {
               <Typography variant="h4" sx={{ mb: 1 }}>
                 Alerts summary
               </Typography>
-              <AlertsSummary stations={dummyStations} />
+              <AlertsSummary stations={stations} />
             </Card>
           </Grid>
         </Grid>

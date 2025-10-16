@@ -1,4 +1,5 @@
 import axios from 'axios';
+import useAuth from 'hooks/useAuth';
 // import { useEffect, useMemo } from 'react';
 // import useSWR, { mutate } from 'swr';
 // import { fetcher } from 'utils/axios';
@@ -44,7 +45,7 @@ export const endpoints = {
 export interface HistoricalData {
   pm25: number;
   aqi: number;
-  timestamp: string | number | Date;
+  timeStamp: string | number | Date;
   pm10: number;
   date: string;
   avg_aqi: number;
@@ -134,6 +135,29 @@ export const dummyStations: Station[] = [
   }
 ];
 
+
+export const updateUserReportStations = async (id: string, reportStations: string[]) => {
+
+  console.log(`user at api ${id}`)
+  if (!id) {
+    console.error("User not found in context");
+    throw new Error("User not found");
+  }
+
+  try {
+    const response = await api.patch(`/users/${id}`, {
+      reportStations,
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.error("Failed to update user report stations:", error);
+    throw error.response?.data || error;
+  }
+
+};
+
+
 const classifyAqi = (aqi: number): string => {
   if (aqi <= 50) return 'Good';
   if (aqi <= 100) return 'Moderate';
@@ -142,7 +166,6 @@ const classifyAqi = (aqi: number): string => {
   if (aqi <= 300) return 'Very Unhealthy';
   return 'Hazardous';
 };
-
 export const getStations = async () => {
   const response = await api.get('/stations');
   const stations = response.data.data;
@@ -156,99 +179,79 @@ export const getStations = async () => {
       }))
     : stations;
 };
-
 export const getAqiDistribution = async (
-  stationId: string,
-  start: string,
-  end: string
-): Promise<{ stationId: string; start: string; end: string; distribution: DistributionItem[] }> => {
-  // simulate API returning raw readings
-  await new Promise((r) => setTimeout(r, 150));
+  sensorId: string,
+  from: string,
+  to: string
+): Promise<{
+  sensorId: string;
+  from: string;
+  to: string;
+  distribution: DistributionItem[];
+}> => {
+  try {
+    // 1️⃣ Fetch readings from backto
+    const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to=${to}`);
+    const rawReadings: Reading[] = response.data.data;
 
-  // helper to generate a random number in a range
-  const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-  // generate randomized readings
-  const rawReadings: Reading[] = Array.from({ length: 7 }, (_, i) => ({
-    id: (i + 1).toString(),
-    sensorId: stationId,
-    aqi: rand(10, 400), // AQI between 10 and 400
-    pm25: rand(5, 250), // PM2.5 between 5 and 250
-    pm10: rand(10, 300) // PM10 between 10 and 300
-  }));
+    if (!Array.isArray(rawReadings) || rawReadings.length === 0) {
+      return { sensorId, from, to, distribution: [] };
+    }
 
-  // tally counts per category
-  const counts: Record<string, number> = {
-    Good: 0,
-    Moderate: 0,
-    'Unhealthy for Sensitive Groups': 0,
-    Unhealthy: 0,
-    'Very Unhealthy': 0,
-    Hazardous: 0
-  };
+    // 2️⃣ Initialize counts per category
+    const counts: Record<string, number> = {
+      Good: 0,
+      Moderate: 0,
+      "Unhealthy for Sensitive Groups": 0,
+      Unhealthy: 0,
+      "Very Unhealthy": 0,
+      Hazardous: 0,
+    };
 
-  rawReadings.forEach((r) => {
-    const category = classifyAqi(r.aqi);
-    counts[category] += 1;
-  });
+    // 3️⃣ Count occurrences by AQI category
+    rawReadings.forEach((r) => {
+      const category = classifyAqi(r.aqi);
+      counts[category] += 1;
+    });
 
-  // convert to distribution format
-  const distribution: DistributionItem[] = Object.entries(counts).map(([category, count]) => ({
-    category,
-    value: count
-  }));
+    // 4️⃣ Convert counts to percentages
+    const total = rawReadings.length;
+    const distribution: DistributionItem[] = Object.entries(counts).map(([category, count]) => ({
+      category,
+      value: parseFloat(((count / total) * 100).toFixed(2)),
+    }));
 
-  console.log('getAqiDistribution called');
-
-  return { stationId, start, end, distribution };
+    // 5️⃣ Return extended result
+    return { sensorId, from, to, distribution };
+  } catch (error) {
+    console.error("Error fetching AQI distribution:", error);
+    throw error;
+  }
 };
-
-export const getAnalyticsTimeSeries = (
-  stationId: string,
+export const getAnalyticsTimeSeries = async (
+  sensorId: string,
   start: string,
   end: string,
-  selectedPollutant: string
 ) => {
-  console.log(stationId, start, end, selectedPollutant);
+  console.log(sensorId);
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const data: { pm25: number; aqi: number; pm10: number; timestamp: string }[] =
-    [];
-
-  // Generate hourly data points between start and end
-  const hours = Math.floor(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
-  );
-
-  for (let i = 0; i <= hours; i++) {
-    const ts = new Date(startDate.getTime() + i * 60 * 60 * 1000);
-
-    data.push({
-      aqi: Math.floor(Math.random() * 300), // random AQI between 0–300
-      pm25: parseFloat((Math.random() * 150).toFixed(1)), // random 0–150
-      pm10: parseFloat((Math.random() * 200).toFixed(1)), // random 0–200
-      timestamp: ts.toISOString(),
-    });
-  }
-
-  return data;
+  const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}`);
+  console.log('historicalDAta for timeseries')
+  console.log(response.data.data)
+  return response.data.data;
 };
-
-
 export const getOneStation = async (id: string) => {
-  const response = await api.get(`/sensors/${id}`);
+  const response = await api.get(`/stations/${id}`);
   return response.data;
 };
-
-export const getHistoricalData = async (sensorId = '1', period = 24) => {
-  const response = await api.get(`/sensors/${sensorId}/readings/?range=${period}`);
+export const getHistoricalData = async (sensorId: number, from: string, to: string) => {
+  const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to={to}`);
   return response.data;
 };
-
-
-export const stationsCron = async () => {
-  const response = await api.get(`/stations/cron/`);
+export const getStationsCron = async () => {
+  const response = await api.get(`/sync/stations`);
+  console.log('get stations cron api function called')
   return response.data;
 };
 
@@ -257,12 +260,27 @@ export const getFeedback = async () => {
   return response.data.data;
 };
 
+export const getAlerts = async () => {
+  const response = await api.get(`/alerts`);
+  return response.data;
+};
 
 export const getUsers = async () => {
   const response = await api.get(`/users`);
-  console.log(response.data.data)
   return response.data.data;
 };
+
+export const updateUserStatus = async (userId: number, status: string) => {
+  console.log(userId, status)
+  try {
+    const response = await api.patch(`/users/${userId}`, { status });
+    return response.data.data; // assuming your API returns { data: { ...updatedUser } }
+  } catch (error: any) {
+    console.error('Failed to update user status:', error);
+    throw error;
+  }
+};
+
 
 // export function useGetStations(page: number = 0, size: number = 10) {
 //   const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);

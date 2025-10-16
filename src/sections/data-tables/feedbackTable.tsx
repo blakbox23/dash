@@ -16,7 +16,8 @@ import {
   Divider,
   Tooltip,
   useMediaQuery,
-  Chip
+  Chip,
+  Typography
 } from '@mui/material';
 
 // third-party
@@ -85,8 +86,11 @@ import {
 } from '@ant-design/icons';
 
 import { getFeedback, getStations } from 'api/maps-api';
+import { StarOutline } from '@mui/icons-material';
 
 export type FeedbackTableDataProps = {
+  rating: number;
+  message: string;
   id: string;
   email: string;
   name: string;
@@ -421,12 +425,44 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                     {/* </DraggableRow> */}
                     </TableRow>
                     {row.getIsExpanded() && !row.getIsGrouped() && (
-                      <TableRow sx={{ bgcolor: backColor, '&:hover': { bgcolor: `${backColor} !important` } }}>
-                        <TableCell colSpan={row.getVisibleCells().length + 2}>
-                          <div> {row.original.id} </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
+  <TableRow
+    sx={{
+      bgcolor: backColor,
+      '&:hover': { bgcolor: `${backColor} !important` },
+    }}
+  >
+    <TableCell colSpan={row.getVisibleCells().length + 2}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          p: 1.5,
+          borderRadius: 2,
+          backgroundColor: "#fafafa",
+          border: "1px solid #e0e0e0",
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          <strong>Email:</strong> {row.original.email}
+        </Typography>
+
+        <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
+          <strong>Feedback:</strong> {row.original.message || "No feedback provided."}
+        </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
+          <Typography variant="body2" sx={{ mr: 0.5 }}>
+            <strong>Rating:</strong>
+          </Typography>
+          {[...Array(row.original.rating || 0)].map((_, i) => (
+            <StarOutline key={i} sx={{ color: "#fbc02d", fontSize: 20 }} />
+          ))}
+        </Box>
+      </Box>
+    </TableCell>
+  </TableRow>
+)}
                   </Fragment>
                 ))
               ) : (
@@ -513,18 +549,6 @@ const FeedbackTable = () => {
         enableGrouping: false,
         enableColumnFilter: false,
       },
-      // {
-      //   id: 'sensorId',
-      //   header: 'Sensor ID',
-      //   footer: 'Sensor ID',
-      //   accessorKey: 'sensorId',
-      //   dataType: 'text',
-      //   enableColumnFilter: false,
-      //   enableGrouping: false,
-      //   meta: {
-      //     className: 'cell-center'
-      //   }
-      // },
       {
         id: 'email',
         header: 'Email',
@@ -535,16 +559,7 @@ const FeedbackTable = () => {
           className: 'cell-center'
         }
       },
-      // {
-      //   id: 'role',
-      //   header: 'Role',
-      //   footer: 'Role',
-      //   accessorKey: 'role',
-      //   dataType: 'text',
-      //   enableGrouping: false,
-      //   filterFn: fuzzyFilter,
-      //   sortingFn: fuzzySort
-      // },
+
       {
         id: 'rating',
         header: 'Rating',
@@ -563,66 +578,55 @@ const FeedbackTable = () => {
         dataType: 'text',
         meta: {
           className: 'cell-center'
+        },
+        cell: ({ getValue }) => {
+          const value = getValue() as string;
+          return (
+            <div
+              style={{
+                maxWidth: '200px', // 👈 control column width
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+              title={value} // 👈 shows full text on hover
+            >
+              {value}
+            </div>
+          );
         }
       },
+      
+    
       // {
-      //   id: 'pollutionLevel',
-      //   header: 'Pollution Level',
-      //   accessorFn: (row) => row.aqi,
+      //   id: 'status',
+      //   header: 'Status',
+      //   accessorKey: 'status',
       //   enableColumnFilter: false,
       //   cell: ({ getValue }) => {
-      //     const value = getValue() as number;
-      //     const level = getPollutantLevel(value);
+      //     const status = getValue() as string;
+      //     let color: 'default' | 'success' | 'error' | 'warning' | 'info' = 'default';
+      //     if (status === 'ONLINE') color = 'success';
+      //     if (status === 'OFFLINE') color = 'error';
       
       //     return (
-      //       <Chip
-      //         label={level}
-      //         color={
-      //           level === 'Good'
-      //             ? 'success'
-      //             : level === 'Moderate'
-      //             ? 'info'
-      //             : level === 'Unhealthy for Sensitive Groups'
-      //             ? 'warning'
-      //             : level === 'Unhealthy'
-      //             ? 'error'
-      //             : 'default'
-      //         }
-      //         size="small"
-      //         sx={{ borderRadius: '16px' }}
+      //       <Chip 
+      //         label={status.toLocaleLowerCase()} 
+      //         color={color} 
+      //         size="small" 
+      //         variant="outlined" 
+      //         sx={{ borderRadius: '16px' }} 
       //       />
       //     );
       //   }
       // },
-      {
-        id: 'status',
-        header: 'Status',
-        accessorKey: 'status',
-        enableColumnFilter: false,
-        cell: ({ getValue }) => {
-          const status = getValue() as string;
-          let color: 'default' | 'success' | 'error' | 'warning' | 'info' = 'default';
-          if (status === 'ONLINE') color = 'success';
-          if (status === 'OFFLINE') color = 'error';
-      
-          return (
-            <Chip 
-              label={status.toLocaleLowerCase()} 
-              color={color} 
-              size="small" 
-              variant="outlined" 
-              sx={{ borderRadius: '16px' }} 
-            />
-          );
-        }
-      },
 
       {
         id: 'submitted_at',
         header: 'submitted_at',
         footer: 'submitted_at',
         enableColumnFilter: false,
-        accessorKey: 'submitted_at',
+        accessorKey: 'createdAt',
         dataType: 'text',
         meta: {
           className: 'cell-right'
@@ -641,7 +645,21 @@ const FeedbackTable = () => {
             hour12: true
           });
         }
-      }
+      },
+      {
+        id: 'expander',
+        enableGrouping: false,
+        header: () => null,
+        cell: ({ row }) => {
+          return row.getCanExpand() ? (
+            <IconButton color={row.getIsExpanded() ? 'primary' : 'secondary'} onClick={row.getToggleExpandedHandler()} size="small">
+              {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
+            </IconButton>
+          ) : (
+            <StopOutlined style={{ color: theme.palette.text.secondary }} />
+          );
+        }
+      },
       // {
       //   id: 'edit',
       //   header: 'Actions',

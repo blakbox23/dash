@@ -32,6 +32,7 @@ const dashboard: NavItemType = {
       type: 'item',
       url: '/overview',
       icon: icons.DashboardOutlinedIcon,
+      
       breadcrumbs: false
     },
     {
@@ -40,6 +41,7 @@ const dashboard: NavItemType = {
       type: 'item',
       url: '/sensors',
       icon: icons.SensorsOutlinedIcon,
+      
       breadcrumbs: true
     },
     {
@@ -48,6 +50,8 @@ const dashboard: NavItemType = {
       type: 'item',
       url: '/analytics',
       icon: icons.AnalyticsOutlinedIcon,
+      
+
       breadcrumbs: true
     },
     {
@@ -56,7 +60,7 @@ const dashboard: NavItemType = {
       type: 'item',
       url: '/alerts',
       icon: icons.WarningAmberOutlinedIcon,
-      breadcrumbs: false
+      breadcrumbs: false,
     },
     {
       id: 'feedback',
@@ -64,7 +68,8 @@ const dashboard: NavItemType = {
       type: 'item',
       url: '/feedback',
       icon: icons.FeedbackOutlinedIcon,
-      breadcrumbs: true
+      breadcrumbs: true,
+      allowedRoles: ['admin']
     },
     {
       id: 'users',
@@ -72,7 +77,8 @@ const dashboard: NavItemType = {
       type: 'item',
       url: '/users',
       icon: icons.UserOutlined,
-      breadcrumbs: true
+      breadcrumbs: true,
+      allowedRoles: ['admin']
     }
   ]
 };

@@ -117,25 +117,7 @@ export default function AlertsSummary({ stations }: AlertsSummaryProps) {
       <CardContent>
         {/* Filters */}
         <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-          {/* Station Selector */}
-          {!sensorId && (
-            <FormControl sx={{ minWidth: 180 }}>
-              <Select
-                value={station?.id ?? ""}
-                onChange={(e) => {
-                  const selected =
-                    stations.find((s) => s.id === e.target.value) || null;
-                  setStation(selected);
-                }}
-              >
-                {stations.map((s) => (
-                  <MenuItem key={s.id} value={s.id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
+      
 
           {/* Start Date */}
           <TextField
@@ -154,6 +136,25 @@ export default function AlertsSummary({ stations }: AlertsSummaryProps) {
             onChange={(e) => setEnd(e.target.value)}
             InputLabelProps={{ shrink: true }}
           />
+              {/* Station Selector */}
+              {!sensorId && (
+            <FormControl sx={{ minWidth: 180 }}>
+              <Select
+                value={station?.id ?? ""}
+                onChange={(e) => {
+                  const selected =
+                    stations.find((s) => s.id === e.target.value) || null;
+                  setStation(selected);
+                }}
+              >
+                {stations.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Box>
 
         {/* Summary */}

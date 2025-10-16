@@ -84,7 +84,7 @@ import {
   UngroupOutlined
 } from '@ant-design/icons';
 
-import { getStations, getUsers } from 'api/maps-api';
+import { getStations, getUsers, updateUserStatus } from 'api/maps-api';
 
 export type UsersTableDataProps = {
   id: number;
@@ -127,28 +127,67 @@ export const fuzzySort: SortingFn<UsersTableDataProps> = (rowA, rowB, columnId) 
 
 const EditAction = ({ row, table }: { row: Row<UsersTableDataProps>; table: TableProps<UsersTableDataProps> }) => {
   const meta = table?.options?.meta;
-  const setSelectedRow = (e: MouseEvent<HTMLButtonElement> | undefined) => {
-    meta?.setSelectedRow((old: UsersTableDataProps[]) => ({
-      ...old,
-      [row.id]: !old[row.id as any]
-    }));
+  const [saving, setSaving] = useState(false);
 
-    // @ts-ignore
-    meta?.revertData(row.index, e?.currentTarget.name === 'cancel');
+  const handleEditClick = async (e: MouseEvent<HTMLButtonElement>) => {
+    const isEditing = meta?.selectedRow?.[row.id];
+  
+    if (meta?.setSelectedRow) {
+      meta.setSelectedRow((old: any) => ({
+        ...old,
+        [row.id]: !isEditing
+      }));
+    }
+  
+    if (isEditing) {
+      const updatedRow = row.original;
+      setSaving(true);
+  
+      try {
+        const updated = await updateUserStatus(updatedRow.id, updatedRow.status);
+        if (meta?.updateData) meta.updateData(row.index, 'status', updated.status);
+        console.log('✅ Status updated successfully:', updated);
+      } catch (error) {
+        console.error('❌ Failed to update user status:', error);
+      } finally {
+        setSaving(false);
+      }
+    }
   };
+  
+
+  const handleCancelClick = () => {
+    if (meta?.revertData) meta.revertData(row.index, true);
+  
+    if (meta?.setSelectedRow) {
+      meta.setSelectedRow((old: any) => ({
+        ...old,
+        [row.id]: false
+      }));
+    }
+  };
+  
+
+  const isEditing = meta?.selectedRow?.[row.id];
 
   return (
     <Stack direction="row" spacing={1} alignItems="center">
-      {meta?.selectedRow[row.id] && (
+      {isEditing && (
         <Tooltip title="Cancel">
-          <IconButton color="error" name="cancel" onClick={setSelectedRow}>
+          <IconButton color="error" onClick={handleCancelClick} disabled={saving}>
             <CloseOutlined />
           </IconButton>
         </Tooltip>
       )}
-      <Tooltip title={meta?.selectedRow[row.id] ? 'Save' : 'Edit'}>
-        <IconButton color={meta?.selectedRow[row.id] ? 'success' : 'primary'} onClick={setSelectedRow}>
-          {meta?.selectedRow[row.id] ? <SendOutlined /> : <EditTwoTone />}
+      <Tooltip title={isEditing ? (saving ? 'Saving...' : 'Save') : 'Edit'}>
+        <IconButton color={isEditing ? 'success' : 'primary'} onClick={handleEditClick} disabled={saving}>
+          {saving ? (
+            <StopOutlined spin />
+          ) : isEditing ? (
+            <SendOutlined />
+          ) : (
+            <EditTwoTone />
+          )}
         </IconButton>
       </Tooltip>
     </Stack>
@@ -321,8 +360,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
 
                     return (
                       // <DraggableColumnHeader key={header.id} header={header} table={table}>
-                         <TableCell  colSpan={header.colSpan} {...header.column.columnDef.meta}>
-
+                      <TableCell colSpan={header.colSpan} {...header.column.columnDef.meta}>
                         <>
                           {header.isPlaceholder ? null : (
                             <Stack direction="row" spacing={1} alignItems="center">
@@ -341,7 +379,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                             </Stack>
                           )}
                         </>
-                        </TableCell>
+                      </TableCell>
                     );
                   })}
                 </TableRow>
@@ -365,61 +403,61 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                   <Fragment key={row.id}>
                     {/* <DraggableRow row={row}> */}
                     <TableRow>
-      <TableCell>
-        <IconButton
-          size="small"
-          sx={{ p: 0, width: 24, height: 24, fontSize: '1rem', mr: 0.75 }}
-          color="secondary"
-          disabled={row.getIsGrouped()}
-        >
-          {row.index + 1}
-        </IconButton>
-      </TableCell>
-                    <>
-                      {row.getVisibleCells().map((cell) => {
-                        let bgcolor = 'background.paper';
-                        if (cell.getIsGrouped()) bgcolor = 'primary.lighter';
-                        if (cell.getIsAggregated()) bgcolor = 'warning.lighter';
-                        if (cell.getIsPlaceholder()) bgcolor = 'error.lighter';
+                      <TableCell>
+                        <IconButton
+                          size="small"
+                          sx={{ p: 0, width: 24, height: 24, fontSize: '1rem', mr: 0.75 }}
+                          color="secondary"
+                          disabled={row.getIsGrouped()}
+                        >
+                          {row.index + 1}
+                        </IconButton>
+                      </TableCell>
+                      <>
+                        {row.getVisibleCells().map((cell) => {
+                          let bgcolor = 'background.paper';
+                          if (cell.getIsGrouped()) bgcolor = 'primary.lighter';
+                          if (cell.getIsAggregated()) bgcolor = 'warning.lighter';
+                          if (cell.getIsPlaceholder()) bgcolor = 'error.lighter';
 
-                        if (cell.column.columnDef.meta !== undefined && cell.column.getCanSort()) {
-                          Object.assign(cell.column.columnDef.meta, {
-                            style: { backgroundColor: bgcolor }
-                          });
-                        }
+                          if (cell.column.columnDef.meta !== undefined && cell.column.getCanSort()) {
+                            Object.assign(cell.column.columnDef.meta, {
+                              style: { backgroundColor: bgcolor }
+                            });
+                          }
 
-                        return (
-                          <TableCell
-                            key={cell.id}
-                            {...cell.column.columnDef.meta}
-                            sx={{ bgcolor }}
-                            {...(cell.getIsGrouped() &&
-                              cell.column.columnDef.meta === undefined && {
-                                style: { backgroundColor: bgcolor }
-                              })}
-                          >
-                            {cell.getIsGrouped() ? (
-                              <Stack direction="row" alignItems="center" spacing={0.5}>
-                                <IconButton
-                                  color="secondary"
-                                  onClick={row.getToggleExpandedHandler()}
-                                  size="small"
-                                  sx={{ p: 0, width: 24, height: 24 }}
-                                >
-                                  {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
-                                </IconButton>
-                                <Box>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Box> <Box>({row.subRows.length})</Box>
-                              </Stack>
-                            ) : cell.getIsAggregated() ? (
-                              flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())
-                            ) : cell.getIsPlaceholder() ? null : (
-                              flexRender(cell.column.columnDef.cell, cell.getContext())
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </>
-                    {/* </DraggableRow> */}
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              {...cell.column.columnDef.meta}
+                              sx={{ bgcolor }}
+                              {...(cell.getIsGrouped() &&
+                                cell.column.columnDef.meta === undefined && {
+                                  style: { backgroundColor: bgcolor }
+                                })}
+                            >
+                              {cell.getIsGrouped() ? (
+                                <Stack direction="row" alignItems="center" spacing={0.5}>
+                                  <IconButton
+                                    color="secondary"
+                                    onClick={row.getToggleExpandedHandler()}
+                                    size="small"
+                                    sx={{ p: 0, width: 24, height: 24 }}
+                                  >
+                                    {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
+                                  </IconButton>
+                                  <Box>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Box> <Box>({row.subRows.length})</Box>
+                                </Stack>
+                              ) : cell.getIsAggregated() ? (
+                                flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())
+                              ) : cell.getIsPlaceholder() ? null : (
+                                flexRender(cell.column.columnDef.cell, cell.getContext())
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </>
+                      {/* </DraggableRow> */}
                     </TableRow>
                     {row.getIsExpanded() && !row.getIsGrouped() && (
                       <TableRow sx={{ bgcolor: backColor, '&:hover': { bgcolor: `${backColor} !important` } }}>
@@ -475,20 +513,19 @@ const UsersTable = () => {
 
   const [data, setData] = useState<UsersTableDataProps[]>(() => []);
 
-    useEffect(() => {
-      const fetchUsers = async () => {
-        try {
-          const usersData = await getUsers();
-          setData(usersData);
-        } catch (err: any) {
-          console.log(err.message || 'Failed to load users');
-        }
-      };
-  
-      // Initial fetch
-      fetchUsers();
-    }, []);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersData = await getUsers();
+        setData(usersData);
+      } catch (err: any) {
+        console.log(err.message || 'Failed to load users');
+      }
+    };
 
+    // Initial fetch
+    fetchUsers();
+  }, []);
 
   const columns = useMemo<ColumnDef<UsersTableDataProps>[]>(
     () => [
@@ -511,7 +548,7 @@ const UsersTable = () => {
         accessorKey: 'displayName',
         dataType: 'text',
         enableGrouping: false,
-        enableColumnFilter: false,
+        enableColumnFilter: false
       },
       {
         id: 'email',
@@ -533,33 +570,61 @@ const UsersTable = () => {
         accessorKey: 'role',
         dataType: 'text',
         enableGrouping: false,
-        enableColumnFilter: false,
+        enableColumnFilter: false
         // filterFn: fuzzyFilter,
         // sortingFn: fuzzySort
       },
 
-      // {
-      //   id: 'status',
-      //   header: 'Status',
-      //   accessorKey: 'status',
-      //   enableColumnFilter: false,
-      //   cell: ({ getValue }) => {
-      //     const status = getValue() as string;
-      //     let color: 'default' | 'success' | 'error' | 'warning' | 'info' = 'default';
-      //     if (status === 'ONLINE') color = 'success';
-      //     if (status === 'OFFLINE') color = 'error';
+      {
+        id: 'status',
+        header: 'Status',
+        accessorKey: 'status',
+        enableColumnFilter: false,
+        cell: ({ getValue, row, table }) => {
+          const meta = table.options.meta;
+          const isEditing = meta?.selectedRow?.[row.id];
+          const status = getValue() as string;
       
-      //     return (
-      //       <Chip 
-      //         label={status.toLocaleLowerCase()} 
-      //         color={color} 
-      //         size="small" 
-      //         variant="outlined" 
-      //         sx={{ borderRadius: '16px' }} 
-      //       />
-      //     );
-      //   }
-      // },
+          const color =
+            status === 'active'
+              ? 'success'
+              : status === 'inactive'
+              ? 'error'
+              : 'warning';
+      
+          if (isEditing) {
+            return (
+              <select
+                value={status}
+                onChange={(e) =>
+                  meta?.updateData(row.index, 'status', e.target.value)
+                }
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc',
+                  outline: 'none',
+                }}
+              >
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            );
+          }
+      
+          return (
+            <Chip
+              label={status}
+              color={color}
+              size="small"
+              variant="outlined"
+              sx={{ borderRadius: '16px', textTransform: 'capitalize' }}
+            />
+          );
+        },
+      },
+      
 
       {
         id: 'joined',
@@ -574,7 +639,7 @@ const UsersTable = () => {
         cell: ({ getValue }) => {
           const raw = getValue() as string;
           const date = new Date(raw);
-      
+
           // Format date + time, e.g. "Oct 08, 2025, 05:00 AM"
           return date.toLocaleString([], {
             year: 'numeric',
@@ -585,16 +650,16 @@ const UsersTable = () => {
             hour12: true
           });
         }
+      },
+      {
+        id: 'edit',
+        header: 'Actions',
+        cell: EditAction,
+        enableGrouping: false,
+        meta: {
+          className: 'cell-center'
+        }
       }
-      // {
-      //   id: 'edit',
-      //   header: 'Actions',
-      //   cell: EditAction,
-      //   enableGrouping: false,
-      //   meta: {
-      //     className: 'cell-center'
-      //   }
-      // }
     ],
     // eslint-disable-next-line
     []

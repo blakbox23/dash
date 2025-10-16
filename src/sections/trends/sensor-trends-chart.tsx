@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 
-import { getHistoricalData, HistoricalData, Station } from "api/maps-api";
+import { getAnalyticsTimeSeries, getHistoricalData, HistoricalData, Station } from "api/maps-api";
 import { CheckOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 
@@ -78,16 +78,11 @@ export default function TrendsChart({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!start || !end) return;
+      if (!start || !end || !sensorId) return;
       try {
-        const stationId = sensorId ?? trendsStation?.id ?? "1";
         // Update API call signature to accept start & end
-        console.log(
-          stationId,
-          start,
-          end,
-          selectedPollutant
-        );
+        const historyData = await getAnalyticsTimeSeries(sensorId, start, end);
+        setHistoricalData(Array.isArray(historyData) ? historyData : []);
         // setHistoricalData(Array.isArray(historyData) ? historyData : []);
       } catch (err) {
         console.error(err);
@@ -96,7 +91,7 @@ export default function TrendsChart({
     };
 
     fetchData();
-  }, [sensorId, trendsStation, start, end, selectedPollutant]);
+  }, [sensorId, start, end, selectedPollutant]);
 
   const currentPollutantOption =
     pollutantOptions.find((p) => p.value === selectedPollutant) ||
@@ -105,7 +100,7 @@ export default function TrendsChart({
   const thresholdValue = THRESHOLD_MAP[selectedPollutant] ?? 0;
 
   const labels = historicalData.map((item) =>
-    new Date(item.timestamp).toLocaleString("en-US", {
+    new Date(item.timeStamp).toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -115,8 +110,9 @@ export default function TrendsChart({
 
   const pollutantSeries = historicalData.map((item) => {
     if (selectedPollutant === "aqi") return item.aqi;
-    if (selectedPollutant === "pm25") return item.pm25;
-    return item.pm10;
+    if (selectedPollutant === "pm25") return item.pm25.toFixed(2);
+    
+    return item.pm10.toFixed(2);
   });
 
   const series = [
@@ -143,7 +139,7 @@ export default function TrendsChart({
       width: [3, 2],
       dashArray: [0, 5],
     },
-    colors: [POLLUTANT_COLOR_MAP[selectedPollutant], "red"],
+    colors: ["blue", "red"],
     markers: { size: 0 },
     xaxis: {
       categories: labels,

@@ -629,7 +629,7 @@ const CurrentReadingTable = () => {
         header: 'Time',
         footer: 'Time',
         enableColumnFilter: false,
-        accessorKey: 'time',
+        accessorKey: 'timeStamp',
         dataType: 'text',
         meta: {
           className: 'cell-right'

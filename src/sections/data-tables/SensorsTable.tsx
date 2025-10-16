@@ -84,7 +84,7 @@ import {
 } from '@ant-design/icons';
 import Avatar from 'components/@extended/Avatar';
 import makeData from '../data/react-table';
-import { getStations } from 'api/maps-api';
+import { getStations, Station } from 'api/maps-api';
 import { Link } from 'react-router-dom';
 
 export type SensorTableDataProps = {
@@ -93,7 +93,7 @@ export type SensorTableDataProps = {
 
   status: string;
   aqi?: string;
-  time: string[];
+  timeStamp: string[];
 };
 
 type LabelKeyObject = {
@@ -518,7 +518,7 @@ const SensorsTable = () => {
         disableSortBy: true,
         cell: ({ row }) => (
           <Link
-            to={`/sensors/${row.original.id}`}
+            to={`/sensors/${row.original.sensorId}`}
             style={{
               textDecoration: "none",
               padding: "6px 12px",

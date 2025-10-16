@@ -56,7 +56,6 @@ export default function AqiDistributionPieChart({
 }) {
   const theme = useTheme();
 
-  console.log(`stations at pie chart ${stations[0]}`)
 
   const [start, setStart] = useState(
     new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
