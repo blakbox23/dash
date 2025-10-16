@@ -15,7 +15,7 @@ import {
   TextField,
 } from "@mui/material";
 
-import { getAnalyticsTimeSeries,getHistoricalData, HistoricalData, Station } from "api/maps-api";
+import { getAnalyticsTimeSeries, getHistoricalData, getStations, HistoricalData, Station } from "api/maps-api";
 import { CheckOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 
@@ -27,7 +27,7 @@ interface PollutantOption {
   unit: string;
 }
 
-interface TrendsChartProps {
+interface ComparisonChartProps {
   stations: Station[];
   pollutant: PollutantType;
   pollutantLabel: string;
@@ -58,15 +58,12 @@ export default function ComparisonChart({
   pollutant,
   pollutantLabel,
   pollutantUnit,
-}: TrendsChartProps) {
+}: ComparisonChartProps) {
+  const [stationList, setStationList] = useState<Station[]>([]);
 
-    // two sensor IDs for comparison
-  const [sensorId1, setSensorId1] = useState<string | undefined>(
-    stations[0]?.sensorId
-  );
-  const [sensorId2, setSensorId2] = useState<string | undefined>(
-    stations[1]?.sensorId
-  );
+  // two sensor IDs for comparison
+  const [sensorId1, setSensorId1] = useState<string>();
+  const [sensorId2, setSensorId2] = useState<string>();
 
   const [start, setStart] = useState(
     new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString().slice(0, 16)
@@ -75,67 +72,74 @@ export default function ComparisonChart({
     new Date().toISOString().slice(0, 16)
   );
 
-  const [trendsStation, setTrendsStation] = useState<Station | null>(
-    stations[0] || null
-  );
   const [selectedPollutant, setSelectedPollutant] =
     useState<PollutantType>(pollutant);
-
-  const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
 
   // Data for both sensors
   const [data1, setData1] = useState<HistoricalData[]>([]);
   const [data2, setData2] = useState<HistoricalData[]>([]);
 
+  useEffect(() => {
+    const fetchStations = async () => {
+      try {
+        const stations = await getStations();
+        setStationList(stations);
+        if (stations.length >= 2) {
+          setSensorId1(stations[0].sensorId);
+          setSensorId2(stations[1].sensorId);
+        }
+      } catch (err) {
+        console.error("Failed to load stations:", err);
+      }
+    };
+    fetchStations();
+  }, []);
+
+  // Format date for API - ensure proper format
+  const formatDateForAPI = (dateTimeLocal: string) => {
+    // Convert to ISO string and remove milliseconds
+    return new Date(dateTimeLocal).toISOString().replace(/\.\d{3}Z$/, 'Z');
+  };
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!start || !end) return;
+      if (!sensorId1 || !sensorId2) {
+        console.log("Missing sensor IDs:", { sensorId1, sensorId2 });
+        return;
+      }
+
       try {
-        const res1 = await getAnalyticsTimeSeries(
-          sensorId1 ?? "",
-          start,
-          end,
+        const formattedStart = formatDateForAPI(start);
+        const formattedEnd = formatDateForAPI(end);
+        
+        console.log("Fetching comparison data with params:", {
+          sensorId1,
+          sensorId2,
+          start: formattedStart,
+          end: formattedEnd,
           selectedPollutant
-        );
-        const res2 = await getAnalyticsTimeSeries(
-          sensorId2 ?? "",
-          start,
-          end,
-          selectedPollutant
-        );
-        setData1(
-          Array.isArray(res1)
-            ? res1.map((item) => ({
-                ...item,
-                date: item.timestamp,
-                avg_aqi: item.aqi,
-                avg_pm25: item.pm25,
-                avg_pm10: item.pm10,
-              }))
-            : []
-        );
-        setData2(
-          Array.isArray(res2)
-            ? res2.map((item) => ({
-                ...item,
-                date: item.timestamp,
-                avg_aqi: item.aqi,
-                avg_pm25: item.pm25,
-                avg_pm10: item.pm10,
-              }))
-            : []
-        );
-        // setHistoricalData(Array.isArray(historyData) ? historyData : []);
+        });
+
+        const [res1, res2] = await Promise.all([
+          getAnalyticsTimeSeries(sensorId1, formattedStart, formattedEnd, selectedPollutant),
+          getAnalyticsTimeSeries(sensorId2, formattedStart, formattedEnd, selectedPollutant),
+        ]);
+
+        console.log("Sensor 1 data:", res1);
+        console.log("Sensor 2 data:", res2);
+
+        // Use the data directly without transformation since your API already returns the correct format
+        setData1(Array.isArray(res1) ? res1 : []);
+        setData2(Array.isArray(res2) ? res2 : []);
       } catch (err) {
-        console.error(err);
+        console.error("Error fetching comparison data:", err);
         setData1([]);
         setData2([]);
-      }
+      } 
     };
 
     fetchData();
-  }, [sensorId1, sensorId2, trendsStation, start, end, selectedPollutant]);
+  }, [sensorId1, sensorId2, start, end, selectedPollutant]);
 
   const currentPollutantOption =
     pollutantOptions.find((p) => p.value === selectedPollutant) ||
@@ -143,42 +147,45 @@ export default function ComparisonChart({
 
   const thresholdValue = THRESHOLD_MAP[selectedPollutant] ?? 0;
 
-  const labels = historicalData.map((item) =>
-    new Date(item.timestamp).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    })
-  );
-
   const pollutantSeries = (data: HistoricalData[]) =>
-  data.map((item) => ({
-    x: new Date(item.timestamp),
-    y:
-      selectedPollutant === "aqi"
-        ? item.aqi
-        : selectedPollutant === "pm25"
-        ? item.pm25
-        : item.pm10,
-  }));
+    data.map((item) => ({
+      x: new Date(item.timestamp),
+      y:
+        selectedPollutant === "aqi"
+          ? item.aqi
+          : selectedPollutant === "pm25"
+          ? item.pm25
+          : item.pm10,
+    }));
 
+  const name1 = stationList.find((s) => s.sensorId === sensorId1)?.name ?? sensorId1 ?? "Sensor 1";
+  const name2 = stationList.find((s) => s.sensorId === sensorId2)?.name ?? sensorId2 ?? "Sensor 2";
+
+  // Create threshold data that spans the entire time range
+  const allTimestamps = Array.from(
+    new Set([
+      ...data1.map(item => new Date(item.timestamp).getTime()),
+      ...data2.map(item => new Date(item.timestamp).getTime())
+    ])
+  ).sort();
+
+  const thresholdData = allTimestamps.map(timestamp => ({
+    x: timestamp,
+    y: thresholdValue
+  }));
 
   const series = [
     {
-      name: `${stations.find((s) => s.sensorId === sensorId1)?.name ?? "Sensor 1"}`,
+      name: name1,
       data: pollutantSeries(data1),
     },
     {
-      name: `${stations.find((s) => s.sensorId === sensorId2)?.name ?? "Sensor 2"}`,
+      name: name2,
       data: pollutantSeries(data2),
     },
     {
       name: `Threshold (${thresholdValue})`,
-    data: data1.map((d) => ({
-      x: new Date(d.timestamp),
-      y: thresholdValue,
-       })),
+      data: thresholdData,
     },
   ];
 
@@ -190,14 +197,24 @@ export default function ComparisonChart({
     },
     stroke: {
       curve: "smooth",
-      width: [3, 2],
-      dashArray: [0, 5],
+      width: [3, 3, 2],
+      dashArray: [0, 0, 5],
     },
-    colors: [POLLUTANT_COLOR_MAP[selectedPollutant], "red"],
+    colors: [POLLUTANT_COLOR_MAP[selectedPollutant], "red", "#000000"],
     markers: { size: 0 },
     xaxis: {
-      categories: labels,
+      type: "datetime",
       title: { text: "Time" },
+      labels: {
+        formatter: function(value: string | number | Date) {
+          return new Date(value).toLocaleString("en-US", {
+            month: "short",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
+      }
     },
     yaxis: {
       title: {
@@ -206,10 +223,55 @@ export default function ComparisonChart({
         }`,
       },
       min: 0,
+      labels: {
+        formatter: function(val: number) {
+          return val % 1 === 0 ? val.toString() : val.toFixed(1);
+        }
+      }
     },
     tooltip: {
       shared: true,
       intersect: false,
+      custom: function({ series, seriesIndex, dataPointIndex, w }) {
+        // Get the timestamp for this data point
+        const timestamp = new Date(w.globals.seriesX[seriesIndex][dataPointIndex]);
+        const formattedDate = timestamp.toLocaleString("en-US", {
+          weekday: 'short',
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZoneName: 'long'
+        });
+
+        // Build the tooltip HTML
+        let tooltipHTML = `<div style="padding: 10px; background: #fff; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">`;
+        tooltipHTML += `<div style="font-weight: bold; margin-bottom: 8px; border-bottom: 1px solid #eee; padding-bottom: 4px;">${formattedDate}</div>`;
+        
+        // Add data for each series
+        const seriesNames = [name1, name2, `Threshold (${thresholdValue})`];
+        
+        series.forEach((s: number[], index: number) => {
+          const value = series[index][dataPointIndex];
+          if (value !== null && value !== undefined) {
+            const color = w.config.colors[index];
+            const isThreshold = index === 2;
+            const displayValue = isThreshold ? thresholdValue : (value % 1 === 0 ? value.toString() : value.toFixed(1));
+            
+            tooltipHTML += `
+              <div style="display: flex; align-items: center; margin: 4px 0;">
+                <span style="display: inline-block; width: 12px; height: 12px; border-radius: 50%; background: ${color}; margin-right: 8px; ${isThreshold ? 'border: 2px dashed ' + color + '; background: transparent;' : ''}"></span>
+                <span style="font-weight: 600;">${seriesNames[index]}:</span>
+                <span style="margin-left: auto; font-weight: bold;">${displayValue}</span>
+              </div>
+            `;
+          }
+        });
+        
+        tooltipHTML += `</div>`;
+        return tooltipHTML;
+      }
     },
     legend: {
       position: "top",
@@ -219,13 +281,6 @@ export default function ComparisonChart({
 
   return (
     <Card sx={{ width: "100%" }}>
-      {/* {!sensorId && (
-        <CardHeader
-          title={
-            <Typography variant="h6">Air Quality Trends in Nairobi</Typography>
-          }
-        />
-      )} */}
       <CardContent>
         <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
           {/* Start Date */}
@@ -263,7 +318,6 @@ export default function ComparisonChart({
             </Select>
           </FormControl>
 
-          
           {/* Sensor 1 */}
           <FormControl sx={{ minWidth: 180 }}>
             <Select
@@ -271,7 +325,7 @@ export default function ComparisonChart({
               onChange={(e) => setSensorId1(e.target.value)}
               displayEmpty
             >
-              {stations.map((s) => (
+              {stationList.map((s) => (
                 <MenuItem key={s.sensorId} value={s.sensorId}>
                   {s.name}
                 </MenuItem>
@@ -286,7 +340,7 @@ export default function ComparisonChart({
               onChange={(e) => setSensorId2(e.target.value)}
               displayEmpty
             >
-              {stations.map((s) => (
+              {stationList.map((s) => (
                 <MenuItem key={s.sensorId} value={s.sensorId}>
                   {s.name}
                 </MenuItem>
