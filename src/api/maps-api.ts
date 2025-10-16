@@ -25,6 +25,7 @@ export interface Station {
   lat: number;
   lng: number;
   sensorType?: string;
+  time?: string; 
 }
 
 export interface Sensor {
@@ -199,36 +200,32 @@ export const getAqiDistribution = async (
   return { stationId, start, end, distribution };
 };
 
-export const getAnalyticsTimeSeries = (
-  stationId: string,
+export const getAnalyticsTimeSeries = async (
+  sensorId: string,
   start: string,
   end: string,
-  selectedPollutant: string
-) => {
-  console.log(stationId, start, end, selectedPollutant);
+  selectedPollutant?: string
+): Promise<HistoricalData[]> => {
+  try {
+    const params: Record<string, string> = { start, end };
+    if (selectedPollutant) params.pollutant = selectedPollutant;
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const data: { pm25: number; aqi: number; pm10: number; timestamp: string }[] =
-    [];
+    // Corrected endpoint
+    const response = await api.get(`/readings/${sensorId}/`, { params });
 
-  // Generate hourly data points between start and end
-  const hours = Math.floor(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
-  );
+    const transformedData = response.data.map((item: any) => ({
+      timestamp: item.timestamp || item.date,
+      aqi: item.aqi ?? item.avg_aqi ?? 0,
+      pm25: item.pm25 ?? item.avg_pm25 ?? 0,
+      pm10: item.pm10 ?? item.avg_pm10 ?? 0,
+      date: item.date || new Date(item.timestamp).toISOString().split('T')[0],
+    }));
 
-  for (let i = 0; i <= hours; i++) {
-    const ts = new Date(startDate.getTime() + i * 60 * 60 * 1000);
-
-    data.push({
-      aqi: Math.floor(Math.random() * 300), // random AQI between 0–300
-      pm25: parseFloat((Math.random() * 150).toFixed(1)), // random 0–150
-      pm10: parseFloat((Math.random() * 200).toFixed(1)), // random 0–200
-      timestamp: ts.toISOString(),
-    });
+    return transformedData;
+  } catch (error) {
+    console.error("Error fetching analytics time series:", error);
+    return [];
   }
-
-  return data;
 };
 
 
@@ -237,10 +234,24 @@ export const getOneStation = async (id: string) => {
   return response.data;
 };
 
-export const getHistoricalData = async (sensorId = '1', period = 24) => {
-  const response = await api.get(`/sensors/${sensorId}/readings/?range=${period}`);
-  return response.data;
+export const getHistoricalData = async (sensorId: string, start: string, end: string) => {
+  try {
+    const response = await api.get(`/readings/${sensorId}/`, {
+      params: { start, end },
+    });
+    return response.data.map((item: any) => ({
+      timestamp: item.timestamp || item.date,
+      aqi: item.aqi ?? item.avg_aqi ?? 0,
+      pm25: item.pm25 ?? item.avg_pm25 ?? 0,
+      pm10: item.pm10 ?? item.avg_pm10 ?? 0,
+      date: item.date || new Date(item.timestamp).toISOString().split('T')[0],
+    }));
+  } catch (error) {
+    console.error("Error fetching historical data:", error);
+    return [];
+  }
 };
+
 
 // export function useGetStations(page: number = 0, size: number = 10) {
 //   const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);
