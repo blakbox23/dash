@@ -111,6 +111,7 @@
     "@types/react-window": "^1.8.5",
     "@types/uuid": "^9.0.2",
     "@types/webpack-env": "^1.18.1",
+    "@vercel/node": "^5.4.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^8.47.0",
     "eslint-config-prettier": "^9.0.0",
