@@ -78,7 +78,7 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
 
         // 2️⃣ Access token expired → attempt refresh
         if (refreshToken) {
-          const response = await axiosServices.post('http://localhost:4000/auth/refresh', {
+          const response = await axiosServices.post('http://161.97.134.211/xp/auth/refresh', {
             refreshToken
           });
 
@@ -117,7 +117,7 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
 
   const login = async (email: string, password: string) => {
     setSession();
-    const response = await axiosServices.post('http://localhost:4000/auth', { email, password });
+    const response = await axiosServices.post('http://161.97.134.211/xp/auth', { email, password });
 
     const { token, user } = response.data;
     const { accessToken, refreshToken } = token;
@@ -139,7 +139,7 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
 
   const register = async (email: string, password: string, displayName: string) => {
     const id = chance.bb_pin();
-    await axiosServices.post('http://localhost:4000/auth/signup', {
+    await axiosServices.post('http://161.97.134.211/xp/auth/signup', {
       id,
       email,
       password,
