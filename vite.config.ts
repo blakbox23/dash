@@ -14,7 +14,7 @@ export default defineConfig({
     proxy: {
       // Proxy API calls during local dev
       '/api': {
-        target: 'http://localhost:4000', // 👈 backend server
+        target: 'http://161.97.134.211/xp', // 👈 backend server
         changeOrigin: true,
         secure: false
       }
