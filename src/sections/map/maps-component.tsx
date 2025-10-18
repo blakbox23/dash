@@ -1,4 +1,3 @@
-
 import { useEffect, useRef } from "react";
 import L, { divIcon } from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -65,69 +64,82 @@ export default function MapComponent({
   };
 
   useEffect(() => {
+    // Initialize the map once
     if (mapRef.current && !leafletMapRef.current) {
-      // Initialize the map
       leafletMapRef.current = L.map(mapRef.current).setView(
-        [-1.2921, 36.8719],
+        [-1.2921, 36.8719], // Default: Nairobi
         12
       );
 
-      // Add tile layer
+      // Add base map
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution:
           '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       }).addTo(leafletMapRef.current);
 
+      // Add group layer for markers
       markerGroupRef.current = L.layerGroup().addTo(leafletMapRef.current);
     }
 
-    // Clear and add new markers
-    if (leafletMapRef.current && markerGroupRef.current) {
-      markerGroupRef.current.clearLayers();
+    if (!leafletMapRef.current || !markerGroupRef.current) return;
 
-      stations.forEach((station) => {
-        const marker = L.marker([station.lat, station.lng], {
-          icon: createCustomIcon(
-            station,
-            selectedStation?.id === station.id
-          ),
-        });
+    // Clear existing markers
+    markerGroupRef.current.clearLayers();
 
-        const value = getPollutantValue(station, selectedPollutant);
-        const unit = selectedPollutant === "aqi" ? "" : "μg/m³";
+    // Add new markers safely
+    stations.forEach((station) => {
+      const lat = parseFloat(String(station.lat));
+      const lng = parseFloat(String(station.lng));
 
-        marker.bindPopup(`
-          <div class="p-2">
-            <div class="font-semibold text-[#101828]">${station.name}</div>
-            <div class="text-sm text-[#667085]">
-              ${selectedPollutant.toUpperCase()}: ${value}${unit} - ${getPollutantLevel(value, selectedPollutant)}
-            </div>
-            <div class="mt-2 text-xs text-[#667085]">
-              <div>AQI: ${station.aqi}</div>
-              <div>PM2.5: ${station.pm25} μg/m³</div>
-              <div>PM10: ${station.pm10} μg/m³</div>
-            </div>
-          </div>
-        `);
+      if (isNaN(lat) || isNaN(lng)) {
+        console.warn(
+          `Skipping station ${station.name || station.id} due to invalid coordinates`,
+          lat,
+          lng
+        );
+        return;
+      }
 
-        marker.on("click", () => {
-          onStationSelect(station);
-        });
-
-        marker.addTo(markerGroupRef.current!);
+      const marker = L.marker([lat, lng], {
+        icon: createCustomIcon(station, selectedStation?.id === station.id),
       });
 
-      if (selectedStation) {
-        leafletMapRef.current.setView(
-          [selectedStation.lat, selectedStation.lng],
-          13,
-          { animate: true }
-        );
-      }
+      const value = getPollutantValue(station, selectedPollutant);
+      const unit = selectedPollutant === "aqi" ? "" : "μg/m³";
+
+      marker.bindPopup(`
+        <div class="p-2">
+          <div class="font-semibold text-[#101828]">${station.name}</div>
+          <div class="text-sm text-[#667085]">
+            ${selectedPollutant.toUpperCase()}: ${value}${unit} - ${getPollutantLevel(value, selectedPollutant)}
+          </div>
+          <div class="mt-2 text-xs text-[#667085]">
+            <div>AQI: ${station.aqi}</div>
+            <div>PM2.5: ${station.pm25} μg/m³</div>
+            <div>PM10: ${station.pm10} μg/m³</div>
+          </div>
+        </div>
+      `);
+
+      marker.on("click", () => onStationSelect(station));
+      marker.addTo(markerGroupRef.current!);
+    });
+
+    // Center map on selected station (safely)
+    if (
+      selectedStation &&
+      typeof selectedStation.lat === "number" &&
+      typeof selectedStation.lng === "number"
+    ) {
+      leafletMapRef.current.setView(
+        [selectedStation.lat, selectedStation.lng],
+        13,
+        { animate: true }
+      );
     }
 
+    // Cleanup function (only remove if component unmounts)
     return () => {
-      // Clean up map on unmount
       if (leafletMapRef.current) {
         leafletMapRef.current.remove();
         leafletMapRef.current = null;

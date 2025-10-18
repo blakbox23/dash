@@ -84,14 +84,15 @@ import {
   UngroupOutlined
 } from '@ant-design/icons';
 
-import { getStations } from 'api/maps-api';
+import { getStations, getUsers, updateUserStatus } from 'api/maps-api';
 
-export type TableDataProps = {
-  aqi: unknown;
+export type UsersTableDataProps = {
   id: number;
-  sensorId: string;
+  email: string;
   status: string;
-  time: string[];
+  role: string;
+  displayName: string;
+  joined: string;
 };
 
 type LabelKeyObject = {
@@ -99,7 +100,7 @@ type LabelKeyObject = {
   key: string;
 };
 
-export const fuzzyFilter: FilterFn<TableDataProps> = (row, columnId, value, addMeta) => {
+export const fuzzyFilter: FilterFn<UsersTableDataProps> = (row, columnId, value, addMeta) => {
   // rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -110,7 +111,7 @@ export const fuzzyFilter: FilterFn<TableDataProps> = (row, columnId, value, addM
   return itemRank.passed;
 };
 
-export const fuzzySort: SortingFn<TableDataProps> = (rowA, rowB, columnId) => {
+export const fuzzySort: SortingFn<UsersTableDataProps> = (rowA, rowB, columnId) => {
   let dir = 0;
 
   // only sort by rank if the column has ranking information
@@ -124,30 +125,69 @@ export const fuzzySort: SortingFn<TableDataProps> = (rowA, rowB, columnId) => {
 
 // ==============================|| REACT TABLE - EDIT ACTION ||============================== //
 
-const EditAction = ({ row, table }: { row: Row<TableDataProps>; table: TableProps<TableDataProps> }) => {
+const EditAction = ({ row, table }: { row: Row<UsersTableDataProps>; table: TableProps<UsersTableDataProps> }) => {
   const meta = table?.options?.meta;
-  const setSelectedRow = (e: MouseEvent<HTMLButtonElement> | undefined) => {
-    meta?.setSelectedRow((old: TableDataProps[]) => ({
-      ...old,
-      [row.id]: !old[row.id as any]
-    }));
+  const [saving, setSaving] = useState(false);
 
-    // @ts-ignore
-    meta?.revertData(row.index, e?.currentTarget.name === 'cancel');
+  const handleEditClick = async (e: MouseEvent<HTMLButtonElement>) => {
+    const isEditing = meta?.selectedRow?.[row.id];
+  
+    if (meta?.setSelectedRow) {
+      meta.setSelectedRow((old: any) => ({
+        ...old,
+        [row.id]: !isEditing
+      }));
+    }
+  
+    if (isEditing) {
+      const updatedRow = row.original;
+      setSaving(true);
+  
+      try {
+        const updated = await updateUserStatus(updatedRow.id, updatedRow.status);
+        if (meta?.updateData) meta.updateData(row.index, 'status', updated.status);
+        console.log('✅ Status updated successfully:', updated);
+      } catch (error) {
+        console.error('❌ Failed to update user status:', error);
+      } finally {
+        setSaving(false);
+      }
+    }
   };
+  
+
+  const handleCancelClick = () => {
+    if (meta?.revertData) meta.revertData(row.index, true);
+  
+    if (meta?.setSelectedRow) {
+      meta.setSelectedRow((old: any) => ({
+        ...old,
+        [row.id]: false
+      }));
+    }
+  };
+  
+
+  const isEditing = meta?.selectedRow?.[row.id];
 
   return (
     <Stack direction="row" spacing={1} alignItems="center">
-      {meta?.selectedRow[row.id] && (
+      {isEditing && (
         <Tooltip title="Cancel">
-          <IconButton color="error" name="cancel" onClick={setSelectedRow}>
+          <IconButton color="error" onClick={handleCancelClick} disabled={saving}>
             <CloseOutlined />
           </IconButton>
         </Tooltip>
       )}
-      <Tooltip title={meta?.selectedRow[row.id] ? 'Save' : 'Edit'}>
-        <IconButton color={meta?.selectedRow[row.id] ? 'success' : 'primary'} onClick={setSelectedRow}>
-          {meta?.selectedRow[row.id] ? <SendOutlined /> : <EditTwoTone />}
+      <Tooltip title={isEditing ? (saving ? 'Saving...' : 'Save') : 'Edit'}>
+        <IconButton color={isEditing ? 'success' : 'primary'} onClick={handleEditClick} disabled={saving}>
+          {saving ? (
+            <StopOutlined spin />
+          ) : isEditing ? (
+            <SendOutlined />
+          ) : (
+            <EditTwoTone />
+          )}
         </IconButton>
       </Tooltip>
     </Stack>
@@ -155,8 +195,8 @@ const EditAction = ({ row, table }: { row: Row<TableDataProps>; table: TableProp
 };
 
 interface ReactTableProps {
-  defaultColumns: ColumnDef<TableDataProps>[];
-  data: TableDataProps[];
+  defaultColumns: ColumnDef<UsersTableDataProps>[];
+  data: UsersTableDataProps[];
   setData: any;
 }
 
@@ -182,7 +222,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
   );
 
   // const reorderRow = (draggedRowIndex: number, targetRowIndex: number) => {
-  //   data.splice(targetRowIndex, 0, data.splice(draggedRowIndex, 1)[0] as TableDataProps);
+  //   data.splice(targetRowIndex, 0, data.splice(draggedRowIndex, 1)[0] as UsersTableDataProps);
   //   setData([...data]);
   // };
 
@@ -231,13 +271,13 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
       setSelectedRow,
       revertData: (rowIndex: number, revert: unknown) => {
         if (revert) {
-          setData((old: TableDataProps[]) => old.map((row, index) => (index === rowIndex ? originalData[rowIndex] : row)));
+          setData((old: UsersTableDataProps[]) => old.map((row, index) => (index === rowIndex ? originalData[rowIndex] : row)));
         } else {
           setOriginalData((old) => old.map((row, index) => (index === rowIndex ? data[rowIndex] : row)));
         }
       },
       updateData: (rowIndex, columnId, value) => {
-        setData((old: TableDataProps[]) =>
+        setData((old: UsersTableDataProps[]) =>
           old.map((row, index) => {
             if (index === rowIndex) {
               return {
@@ -290,7 +330,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
               getAllColumns: table.getAllColumns
             }}
           />
-          <CSVExport
+          {/* <CSVExport
             {...{
               data:
                 table.getSelectedRowModel().flatRows.map((row) => row.original).length === 0
@@ -299,7 +339,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
               headers,
               filename: 'umbrella.csv'
             }}
-          />
+          /> */}
         </Stack>
       </Stack>
 
@@ -320,8 +360,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
 
                     return (
                       // <DraggableColumnHeader key={header.id} header={header} table={table}>
-                         <TableCell  colSpan={header.colSpan} {...header.column.columnDef.meta}>
-
+                      <TableCell colSpan={header.colSpan} {...header.column.columnDef.meta}>
                         <>
                           {header.isPlaceholder ? null : (
                             <Stack direction="row" spacing={1} alignItems="center">
@@ -340,7 +379,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                             </Stack>
                           )}
                         </>
-                        </TableCell>
+                      </TableCell>
                     );
                   })}
                 </TableRow>
@@ -364,61 +403,61 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                   <Fragment key={row.id}>
                     {/* <DraggableRow row={row}> */}
                     <TableRow>
-      <TableCell>
-        <IconButton
-          size="small"
-          sx={{ p: 0, width: 24, height: 24, fontSize: '1rem', mr: 0.75 }}
-          color="secondary"
-          disabled={row.getIsGrouped()}
-        >
-          {row.index + 1}
-        </IconButton>
-      </TableCell>
-                    <>
-                      {row.getVisibleCells().map((cell) => {
-                        let bgcolor = 'background.paper';
-                        if (cell.getIsGrouped()) bgcolor = 'primary.lighter';
-                        if (cell.getIsAggregated()) bgcolor = 'warning.lighter';
-                        if (cell.getIsPlaceholder()) bgcolor = 'error.lighter';
+                      <TableCell>
+                        <IconButton
+                          size="small"
+                          sx={{ p: 0, width: 24, height: 24, fontSize: '1rem', mr: 0.75 }}
+                          color="secondary"
+                          disabled={row.getIsGrouped()}
+                        >
+                          {row.index + 1}
+                        </IconButton>
+                      </TableCell>
+                      <>
+                        {row.getVisibleCells().map((cell) => {
+                          let bgcolor = 'background.paper';
+                          if (cell.getIsGrouped()) bgcolor = 'primary.lighter';
+                          if (cell.getIsAggregated()) bgcolor = 'warning.lighter';
+                          if (cell.getIsPlaceholder()) bgcolor = 'error.lighter';
 
-                        if (cell.column.columnDef.meta !== undefined && cell.column.getCanSort()) {
-                          Object.assign(cell.column.columnDef.meta, {
-                            style: { backgroundColor: bgcolor }
-                          });
-                        }
+                          if (cell.column.columnDef.meta !== undefined && cell.column.getCanSort()) {
+                            Object.assign(cell.column.columnDef.meta, {
+                              style: { backgroundColor: bgcolor }
+                            });
+                          }
 
-                        return (
-                          <TableCell
-                            key={cell.id}
-                            {...cell.column.columnDef.meta}
-                            sx={{ bgcolor }}
-                            {...(cell.getIsGrouped() &&
-                              cell.column.columnDef.meta === undefined && {
-                                style: { backgroundColor: bgcolor }
-                              })}
-                          >
-                            {cell.getIsGrouped() ? (
-                              <Stack direction="row" alignItems="center" spacing={0.5}>
-                                <IconButton
-                                  color="secondary"
-                                  onClick={row.getToggleExpandedHandler()}
-                                  size="small"
-                                  sx={{ p: 0, width: 24, height: 24 }}
-                                >
-                                  {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
-                                </IconButton>
-                                <Box>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Box> <Box>({row.subRows.length})</Box>
-                              </Stack>
-                            ) : cell.getIsAggregated() ? (
-                              flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())
-                            ) : cell.getIsPlaceholder() ? null : (
-                              flexRender(cell.column.columnDef.cell, cell.getContext())
-                            )}
-                          </TableCell>
-                        );
-                      })}
-                    </>
-                    {/* </DraggableRow> */}
+                          return (
+                            <TableCell
+                              key={cell.id}
+                              {...cell.column.columnDef.meta}
+                              sx={{ bgcolor }}
+                              {...(cell.getIsGrouped() &&
+                                cell.column.columnDef.meta === undefined && {
+                                  style: { backgroundColor: bgcolor }
+                                })}
+                            >
+                              {cell.getIsGrouped() ? (
+                                <Stack direction="row" alignItems="center" spacing={0.5}>
+                                  <IconButton
+                                    color="secondary"
+                                    onClick={row.getToggleExpandedHandler()}
+                                    size="small"
+                                    sx={{ p: 0, width: 24, height: 24 }}
+                                  >
+                                    {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
+                                  </IconButton>
+                                  <Box>{flexRender(cell.column.columnDef.cell, cell.getContext())}</Box> <Box>({row.subRows.length})</Box>
+                                </Stack>
+                              ) : cell.getIsAggregated() ? (
+                                flexRender(cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell, cell.getContext())
+                              ) : cell.getIsPlaceholder() ? null : (
+                                flexRender(cell.column.columnDef.cell, cell.getContext())
+                              )}
+                            </TableCell>
+                          );
+                        })}
+                      </>
+                      {/* </DraggableRow> */}
                     </TableRow>
                     {row.getIsExpanded() && !row.getIsGrouped() && (
                       <TableRow sx={{ bgcolor: backColor, '&:hover': { bgcolor: `${backColor} !important` } }}>
@@ -469,35 +508,26 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
 
 // ==============================|| CURRENT READINGS TABLE ||============================== //
 
-const CurrentReadingTable = () => {
+const UsersTable = () => {
   const theme = useTheme();
 
-  const [data, setData] = useState<TableDataProps[]>(() => []);
+  const [data, setData] = useState<UsersTableDataProps[]>(() => []);
 
-    useEffect(() => {
-      const fetchStations = async () => {
-        try {
-          const stationsData = await getStations();
-          setData(stationsData);
-        } catch (err: any) {
-          console.log(err.message || 'Failed to load stations');
-        }
-      };
-  
-      // Initial fetch
-      fetchStations();
-    }, []);
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        const usersData = await getUsers();
+        setData(usersData);
+      } catch (err: any) {
+        console.log(err.message || 'Failed to load users');
+      }
+    };
 
-    function getPollutantLevel(value: number) {
-      if (value <= 50) return 'Good';
-      if (value <= 100) return 'Moderate';
-      if (value <= 150) return 'Unhealthy for Sensitive Groups';
-      if (value <= 200) return 'Unhealthy';
-      if (value <= 300) return 'Very Unhealthy';
-      return 'Hazardous';
-    }
+    // Initial fetch
+    fetchUsers();
+  }, []);
 
-  const columns = useMemo<ColumnDef<TableDataProps>[]>(
+  const columns = useMemo<ColumnDef<UsersTableDataProps>[]>(
     () => [
       {
         id: 'id',
@@ -515,121 +545,93 @@ const CurrentReadingTable = () => {
         id: 'name',
         header: 'Name',
         footer: 'Name',
-        accessorKey: 'name',
+        accessorKey: 'displayName',
         dataType: 'text',
         enableGrouping: false,
+        enableColumnFilter: false
+      },
+      {
+        id: 'email',
+        header: 'Email',
+        footer: 'Email',
+        accessorKey: 'email',
+        dataType: 'text',
         enableColumnFilter: false,
-      },
-      // {
-      //   id: 'sensorId',
-      //   header: 'Sensor ID',
-      //   footer: 'Sensor ID',
-      //   accessorKey: 'sensorId',
-      //   dataType: 'text',
-      //   enableColumnFilter: false,
-      //   enableGrouping: false,
-      //   meta: {
-      //     className: 'cell-center'
-      //   }
-      // },
-      {
-        id: 'aqi',
-        header: 'AQI',
-        footer: 'AQI',
-        accessorKey: 'aqi',
-        dataType: 'text',
+        enableGrouping: false,
         meta: {
-          className: 'cell-center'
+          className: 'cell-left'
         }
       },
-      // {
-      //   id: 'role',
-      //   header: 'Role',
-      //   footer: 'Role',
-      //   accessorKey: 'role',
-      //   dataType: 'text',
-      //   enableGrouping: false,
-      //   filterFn: fuzzyFilter,
-      //   sortingFn: fuzzySort
-      // },
+
       {
-        id: 'pm25',
-        header: 'PM 2.5',
-        footer: 'PM 2.5',
-        accessorKey: 'pm25',
+        id: 'role',
+        header: 'Role',
+        footer: 'Role',
+        accessorKey: 'role',
         dataType: 'text',
-        meta: {
-          className: 'cell-center'
-        }        
+        enableGrouping: false,
+        enableColumnFilter: false
+        // filterFn: fuzzyFilter,
+        // sortingFn: fuzzySort
       },
-      {
-        id: 'pm10',
-        header: 'PM 10',
-        footer: 'PM 10',
-        accessorKey: 'pm10',
-        dataType: 'text',
-        meta: {
-          className: 'cell-center'
-        }
-      },
-      {
-        id: 'pollutionLevel',
-        header: 'Pollution Level',
-        accessorFn: (row) => row.aqi,
-        enableColumnFilter: false,
-        cell: ({ getValue }) => {
-          const value = getValue() as number;
-          const level = getPollutantLevel(value);
-      
-          return (
-            <Chip
-              label={level}
-              color={
-                level === 'Good'
-                  ? 'success'
-                  : level === 'Moderate'
-                  ? 'info'
-                  : level === 'Unhealthy for Sensitive Groups'
-                  ? 'warning'
-                  : level === 'Unhealthy'
-                  ? 'error'
-                  : 'default'
-              }
-              size="small"
-              sx={{ borderRadius: '16px' }}
-            />
-          );
-        }
-      },
+
       {
         id: 'status',
         header: 'Status',
         accessorKey: 'status',
         enableColumnFilter: false,
-        cell: ({ getValue }) => {
+        cell: ({ getValue, row, table }) => {
+          const meta = table.options.meta;
+          const isEditing = meta?.selectedRow?.[row.id];
           const status = getValue() as string;
-          let color: 'default' | 'success' | 'error' | 'warning' | 'info' = 'default';
-          if (status === 'ONLINE') color = 'success';
-          if (status === 'OFFLINE') color = 'error';
+      
+          const color =
+            status === 'active'
+              ? 'success'
+              : status === 'inactive'
+              ? 'error'
+              : 'warning';
+      
+          if (isEditing) {
+            return (
+              <select
+                value={status}
+                onChange={(e) =>
+                  meta?.updateData(row.index, 'status', e.target.value)
+                }
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc',
+                  outline: 'none',
+                }}
+              >
+                <option value="pending">Pending</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            );
+          }
       
           return (
-            <Chip 
-              label={status.toLocaleLowerCase()} 
-              color={color} 
-              size="small" 
-              variant="outlined" 
-              sx={{ borderRadius: '16px' }} 
+            <Chip
+              label={status}
+              color={color}
+              size="small"
+              variant="outlined"
+              sx={{ borderRadius: '16px', textTransform: 'capitalize' }}
             />
           );
-        }
+        },
       },
+      
 
       {
-        id: 'time',
-        header: 'Time',
-        footer: 'Time',
+        id: 'joined',
+        header: 'Joined',
+        footer: 'Joined',
         enableColumnFilter: false,
-        accessorKey: 'timeStamp',
+        accessorKey: 'createdAt',
         dataType: 'text',
         meta: {
           className: 'cell-right'
@@ -637,7 +639,7 @@ const CurrentReadingTable = () => {
         cell: ({ getValue }) => {
           const raw = getValue() as string;
           const date = new Date(raw);
-      
+
           // Format date + time, e.g. "Oct 08, 2025, 05:00 AM"
           return date.toLocaleString([], {
             year: 'numeric',
@@ -648,16 +650,16 @@ const CurrentReadingTable = () => {
             hour12: true
           });
         }
+      },
+      {
+        id: 'edit',
+        header: 'Actions',
+        cell: EditAction,
+        enableGrouping: false,
+        meta: {
+          className: 'cell-center'
+        }
       }
-      // {
-      //   id: 'edit',
-      //   header: 'Actions',
-      //   cell: EditAction,
-      //   enableGrouping: false,
-      //   meta: {
-      //     className: 'cell-center'
-      //   }
-      // }
     ],
     // eslint-disable-next-line
     []
@@ -670,4 +672,4 @@ const CurrentReadingTable = () => {
   );
 };
 
-export default CurrentReadingTable;
+export default UsersTable;

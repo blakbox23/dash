@@ -1,46 +1,51 @@
 import axios from 'axios';
-import { useEffect, useMemo } from 'react';
-import useSWR, { mutate } from 'swr';
-import { fetcher } from 'utils/axios';
+import useAuth from 'hooks/useAuth';
+// import { useEffect, useMemo } from 'react';
+// import useSWR, { mutate } from 'swr';
+// import { fetcher } from 'utils/axios';
+
+const token = localStorage.getItem("serviceToken");
 
 const api = axios.create({
-  baseURL: '/api/v1/',
+  baseURL: '/api/v1',
   headers: {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    ...(token && { Authorization: `Bearer ${token}` })
   }
 });
 
 export const endpoints = {
-  key: '/api/v1/',
+  key: '/api/v1',
   stations: '/stations'
 };
 
-export interface Station {
-  id: string;
-  sensorId: string;
-  name: string;
-  aqi: number;
-  pm25: number;
-  pm10: number;
-  lat: number;
-  lng: number;
-  sensorType?: string;
-}
+  export interface Station {
+    id: string;
+    sensorId: string;
+    name: string;
+    aqi: number;
+    pm25: number;
+    pm10: number;
+    lat: number;
+    lng: number;
+    timeStamp?: string;
+    sensorType: string;
+  }
 
-export interface Sensor {
-  id: number;
-  sensor_id: string;
-  location: string;
-  description: string;
-  lat: number;
-  lng: number;
-  sensorType: string;
-}
+  export interface Sensor {
+    id: number;
+    sensor_id: string;
+    location: string;
+    description: string;
+    lat: number;
+    lng: number;
+    sensorType: string;
+  }
 
 export interface HistoricalData {
   pm25: number;
   aqi: number;
-  timestamp: string | number | Date;
+  timeStamp: string | number | Date;
   pm10: number;
   date: string;
   avg_aqi: number;
@@ -61,74 +66,97 @@ export type DistributionItem = {
   value: number;
 };
 
-export const dummyStations: Station[] = [
-  {
-    id: '1',
-    sensorId: 'airqo_g5380',
-    name: 'Nairobi CBD',
-    aqi: 85,
-    pm25: 23.4,
-    pm10: 42.1,
-    lat: -1.28333,
-    lng: 36.81667,
-    sensorType: 'BAM-1020'
-  },
-  {
-    id: '2',
-    sensorId: 'airqo_g5381',
-    name: 'Westlands',
-    aqi: 112,
-    pm25: 37.2,
-    pm10: 54.8,
-    lat: -1.26495,
-    lng: 36.80336,
-    sensorType: 'MOD-PM'
-  },
-  {
-    id: '3',
-    sensorId: 'airqo_g5382',
-    name: 'Industrial Area',
-    aqi: 156,
-    pm25: 65.1,
-    pm10: 88.6,
-    lat: -1.31255,
-    lng: 36.84518,
-    sensorType: 'BAM-1020'
-  },
-  {
-    id: '4',
-    sensorId: 'airqo_g5383',
-    name: 'Kibera',
-    aqi: 98,
-    pm25: 28.9,
-    pm10: 47.3,
-    lat: -1.31361,
-    lng: 36.78222,
-    sensorType: 'MOD-PM'
-  },
-  {
-    id: '5',
-    sensorId: 'airqo_g5384',
-    name: 'Gigiri',
-    aqi: 62,
-    pm25: 15.7,
-    pm10: 32.4,
-    lat: -1.22952,
-    lng: 36.81854,
-    sensorType: 'BAM-1020'
-  },
-  {
-    id: '6',
-    sensorId: 'airqo_g5385',
-    name: 'Eastleigh',
-    aqi: 134,
-    pm25: 48.6,
-    pm10: 72.9,
-    lat: -1.28326,
-    lng: 36.84616,
-    sensorType: 'MOD-PM'
+// export const dummyStations: Station[] = [
+//   {
+//     id: '1',
+//     sensorId: 'airqo_g5380',
+//     name: 'Nairobi CBD',
+//     aqi: 85,
+//     pm25: 23.4,
+//     pm10: 42.1,
+//     lat: -1.28333,
+//     lng: 36.81667,
+//     sensorType: 'BAM-1020'
+//   },
+//   {
+//     id: '2',
+//     sensorId: 'airqo_g5381',
+//     name: 'Westlands',
+//     aqi: 112,
+//     pm25: 37.2,
+//     pm10: 54.8,
+//     lat: -1.26495,
+//     lng: 36.80336,
+//     sensorType: 'MOD-PM'
+//   },
+//   {
+//     id: '3',
+//     sensorId: 'airqo_g5382',
+//     name: 'Industrial Area',
+//     aqi: 156,
+//     pm25: 65.1,
+//     pm10: 88.6,
+//     lat: -1.31255,
+//     lng: 36.84518,
+//     sensorType: 'BAM-1020'
+//   },
+//   {
+//     id: '4',
+//     sensorId: 'airqo_g5383',
+//     name: 'Kibera',
+//     aqi: 98,
+//     pm25: 28.9,
+//     pm10: 47.3,
+//     lat: -1.31361,
+//     lng: 36.78222,
+//     sensorType: 'MOD-PM'
+//   },
+//   {
+//     id: '5',
+//     sensorId: 'airqo_g5384',
+//     name: 'Gigiri',
+//     aqi: 62,
+//     pm25: 15.7,
+//     pm10: 32.4,
+//     lat: -1.22952,
+//     lng: 36.81854,
+//     sensorType: 'BAM-1020'
+//   },
+//   {
+//     id: '6',
+//     sensorId: 'airqo_g5385',
+//     name: 'Eastleigh',
+//     aqi: 134,
+//     pm25: 48.6,
+//     pm10: 72.9,
+//     lat: -1.28326,
+//     lng: 36.84616,
+//     sensorType: 'MOD-PM'
+//   }
+// ];
+
+
+export const updateUserReportStations = async (id?: string, reportStations?: string[]) => {
+
+  if(!id || !reportStations) return
+  if (!id) {
+    console.error("User not found in context");
+    throw new Error("User not found");
   }
-];
+
+  try {
+    const response = await api.patch(`/users/${id}`, {
+      reportStations,
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.error("Failed to update user report stations:", error);
+    throw error.response?.data || error;
+  }
+
+};
+
 
 const classifyAqi = (aqi: number): string => {
   if (aqi <= 50) return 'Good';
@@ -138,10 +166,9 @@ const classifyAqi = (aqi: number): string => {
   if (aqi <= 300) return 'Very Unhealthy';
   return 'Hazardous';
 };
-
 export const getStations = async () => {
   const response = await api.get('/stations');
-  const stations = response.data;
+  const stations = response.data.data;
 
   // Ensure it's an array before mapping
   return Array.isArray(stations)
@@ -152,95 +179,134 @@ export const getStations = async () => {
       }))
     : stations;
 };
-
 export const getAqiDistribution = async (
-  stationId: string,
-  start: string,
-  end: string
-): Promise<{ stationId: string; start: string; end: string; distribution: DistributionItem[] }> => {
-  // simulate API returning raw readings
-  await new Promise((r) => setTimeout(r, 150));
+  sensorId: string,
+  from: string,
+  to: string
+): Promise<{
+  sensorId: string;
+  from: string;
+  to: string;
+  distribution: DistributionItem[];
+}> => {
+  try {
+    // 1️⃣ Fetch readings from backto
+    const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to=${to}`);
+    const rawReadings: Reading[] = response.data.data;
 
-  // helper to generate a random number in a range
-  const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-  // generate randomized readings
-  const rawReadings: Reading[] = Array.from({ length: 7 }, (_, i) => ({
-    id: (i + 1).toString(),
-    sensorId: stationId,
-    aqi: rand(10, 400), // AQI between 10 and 400
-    pm25: rand(5, 250), // PM2.5 between 5 and 250
-    pm10: rand(10, 300) // PM10 between 10 and 300
-  }));
+    if (!Array.isArray(rawReadings) || rawReadings.length === 0) {
+      return { sensorId, from, to, distribution: [] };
+    }
 
-  // tally counts per category
-  const counts: Record<string, number> = {
-    Good: 0,
-    Moderate: 0,
-    'Unhealthy for Sensitive Groups': 0,
-    Unhealthy: 0,
-    'Very Unhealthy': 0,
-    Hazardous: 0
-  };
+    // 2️⃣ Initialize counts per category
+    const counts: Record<string, number> = {
+      Good: 0,
+      Moderate: 0,
+      "Unhealthy for Sensitive Groups": 0,
+      Unhealthy: 0,
+      "Very Unhealthy": 0,
+      Hazardous: 0,
+    };
 
-  rawReadings.forEach((r) => {
-    const category = classifyAqi(r.aqi);
-    counts[category] += 1;
-  });
+    // 3️⃣ Count occurrences by AQI category
+    rawReadings.forEach((r) => {
+      const category = classifyAqi(r.aqi);
+      counts[category] += 1;
+    });
 
-  // convert to distribution format
-  const distribution: DistributionItem[] = Object.entries(counts).map(([category, count]) => ({
-    category,
-    value: count
-  }));
+    // 4️⃣ Convert counts to percentages
+    const total = rawReadings.length;
+    const distribution: DistributionItem[] = Object.entries(counts).map(([category, count]) => ({
+      category,
+      value: parseFloat(((count / total) * 100).toFixed(2)),
+    }));
 
-  console.log('getAqiDistribution called');
-
-  return { stationId, start, end, distribution };
+    // 5️⃣ Return extended result
+    return { sensorId, from, to, distribution };
+  } catch (error) {
+    console.error("Error fetching AQI distribution:", error);
+    throw error;
+  }
 };
-
-export const getAnalyticsTimeSeries = (
-  stationId: string,
+export const getAnalyticsTimeSeries = async (
+  sensorId: string,
   start: string,
   end: string,
-  selectedPollutant: string
 ) => {
-  console.log(stationId, start, end, selectedPollutant);
 
-  const startDate = new Date(start);
-  const endDate = new Date(end);
-  const data: { pm25: number; aqi: number; pm10: number; timestamp: string }[] =
-    [];
-
-  // Generate hourly data points between start and end
-  const hours = Math.floor(
-    (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60)
-  );
-
-  for (let i = 0; i <= hours; i++) {
-    const ts = new Date(startDate.getTime() + i * 60 * 60 * 1000);
-
-    data.push({
-      aqi: Math.floor(Math.random() * 300), // random AQI between 0–300
-      pm25: parseFloat((Math.random() * 150).toFixed(1)), // random 0–150
-      pm10: parseFloat((Math.random() * 200).toFixed(1)), // random 0–200
-      timestamp: ts.toISOString(),
-    });
-  }
-
-  return data;
+  const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}`);
+  return response.data.data;
 };
-
-
 export const getOneStation = async (id: string) => {
-  const response = await api.get(`/sensors/${id}`);
+  const response = await api.get(`/stations/${id}`);
+  return response.data;
+};
+export const getHistoricalData = async (sensorId: number, from: string, to: string) => {
+  const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to={to}`);
+  return response.data;
+};
+export const getStationsCron = async () => {
+  const response = await api.get(`/sync/stations`);
   return response.data;
 };
 
-export const getHistoricalData = async (sensorId = '1', period = 24) => {
-  const response = await api.get(`/sensors/${sensorId}/readings/?range=${period}`);
-  return response.data;
+export const getFeedback = async () => {
+  const response = await api.get(`/feedback`);
+  return response.data.data;
 };
+
+export const getAlerts = async () => {
+  const response = await api.get(`/alerts/log `);
+
+  return response.data.data;
+};
+
+export const getAlertsSummary = async (stationId: string, start: string, end: string) => {
+  // Simulate network delay
+  await new Promise((r) => setTimeout(r, 150));
+
+  const levels = [
+    "Unhealthy for Sensitive Groups",
+    "Unhealthy",
+    "Very Unhealthy",
+    "Hazardous"
+  ];
+
+  // total alerts for this query
+  const total = Math.floor(Math.random() * 15) + 5; // between 5 and 20
+
+  // distribute alerts randomly across levels
+  let remaining = total;
+  const breakdown = levels.map((level, idx) => {
+    if (idx === levels.length - 1) {
+      // assign the remaining to last category
+      return { level, count: remaining };
+    }
+    const count = Math.floor(Math.random() * (remaining + 1));
+    remaining -= count;
+    return { level, count };
+  });
+
+  return { total, breakdown };
+};
+
+
+export const getUsers = async () => {
+  const response = await api.get(`/users`);
+  return response.data.data;
+};
+
+export const updateUserStatus = async (userId: number, status: string) => {
+  try {
+    const response = await api.patch(`/users/${userId}`, { status });
+    return response.data.data; // assuming your API returns { data: { ...updatedUser } }
+  } catch (error: any) {
+    console.error('Failed to update user status:', error);
+    throw error;
+  }
+};
+
 
 // export function useGetStations(page: number = 0, size: number = 10) {
 //   const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);
@@ -268,3 +334,12 @@ export const getHistoricalData = async (sensorId = '1', period = 24) => {
 //   );
 //   return memoizedValue;
 // }
+
+
+
+//user haina status
+//nimefanya endpoints zote zianze na /api
+
+//progress ya reports, > cron job ku tuma report kwa email
+                   //  >  endpoint ya time?
+//                     > format report ya kushow from the frontend

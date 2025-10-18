@@ -1,4 +1,3 @@
-"use client";
 
 import { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
@@ -96,13 +95,11 @@ export default function ComparisonChart({
           sensorId1 ?? "",
           start,
           end,
-          selectedPollutant
         );
         const res2 = await getAnalyticsTimeSeries(
           sensorId2 ?? "",
           start,
           end,
-          selectedPollutant
         );
         setData1(
           Array.isArray(res1)
@@ -144,7 +141,7 @@ export default function ComparisonChart({
   const thresholdValue = THRESHOLD_MAP[selectedPollutant] ?? 0;
 
   const labels = historicalData.map((item) =>
-    new Date(item.timestamp).toLocaleString("en-US", {
+    new Date(item.timeStamp).toLocaleString("en-US", {
       month: "short",
       day: "numeric",
       hour: "2-digit",
@@ -154,7 +151,7 @@ export default function ComparisonChart({
 
   const pollutantSeries = (data: HistoricalData[]) =>
   data.map((item) => ({
-    x: new Date(item.timestamp),
+    x: new Date(item.timeStamp),
     y:
       selectedPollutant === "aqi"
         ? item.aqi
@@ -176,7 +173,7 @@ export default function ComparisonChart({
     {
       name: `Threshold (${thresholdValue})`,
     data: data1.map((d) => ({
-      x: new Date(d.timestamp),
+      x: new Date(d.timeStamp),
       y: thresholdValue,
        })),
     },

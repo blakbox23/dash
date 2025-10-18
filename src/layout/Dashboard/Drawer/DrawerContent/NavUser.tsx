@@ -94,7 +94,7 @@ const NavUser = () => {
           <ListItemAvatar>
             <Avatar alt="Avatar" src={avatar1} sx={{ ...(drawerOpen && { width: 46, height: 46 }) }} />
           </ListItemAvatar>
-          <ListItemText primary={user?.name} secondary="UI/UX Designer" />
+          <ListItemText primary={user?.displayName} secondary={user?.role} />
         </ListItem>
       </List>
       <Menu

@@ -18,7 +18,7 @@ import { DownloadOutlined, BarChartOutlined, CalendarOutlined, FileTextOutlined 
 import ReportCard from 'components/cards/statistics/ReportCard';
 import MapComponent from 'sections/map/maps-component';
 
-import { getStations, Station } from 'api/maps-api';
+import { getStations, getStationsCron, Station } from 'api/maps-api';
 import Legend from 'components/Legend';
 import CurrentReadingTable from 'sections/data-tables/CurrentReadingsTabletable';
 
@@ -43,10 +43,23 @@ const DashboardAnalytics = () => {
         setLoading(false);
       }
     };
-
     // Initial fetch
     fetchStations();
   }, []);
+
+  // useEffect ya kuitisha AQS
+  useEffect(() => {
+    const fetchStationsCron = async () => {
+      try {
+        await getStationsCron();
+      } catch (err: any) {
+        console.log(err.message || 'Failed to load stations');
+      } 
+    };
+    // Initial fetch
+    fetchStationsCron();
+  }, []);
+
   function getPollutantValue(station: Station, pollutant: PollutantType): number {
     switch (pollutant) {
       case 'aqi':

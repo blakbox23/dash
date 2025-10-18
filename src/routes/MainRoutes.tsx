@@ -10,6 +10,9 @@ import SimpleLayout from 'layout/Simple';
 import { SimpleLayoutType } from 'types/config';
 import { Outlet } from 'react-router';
 import SensorsDetail from 'pages/sensorsDetail';
+// import FeedbackTable from 'sections/data-tables/feedbackTable';
+import Feedback from 'pages/feedback';
+import Users from 'pages/users';
 
 const MaintenanceError = Loadable(lazy(() => import('pages/maintenance/404')));
 const MaintenanceError500 = Loadable(lazy(() => import('pages/maintenance/500')));
@@ -85,7 +88,17 @@ const MainRoutes = {
       children: [
         {
           path: 'feedback',
-          element: <MaintenanceUnderConstruction />
+          element: <Feedback />
+        }
+      ]
+    },
+    {
+      path: '/',
+      element: <DashboardLayout />,
+      children: [
+        {
+          path: 'users',
+          element: <Users />
         }
       ]
     },

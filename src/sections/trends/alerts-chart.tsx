@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
+import { getAlerts } from "api/maps-api";
 
 // dummy fetch function (replace with API call)
 const getAlertsSummary = async (stationId: string, start: string, end: string) => {
@@ -73,6 +74,7 @@ export default function AlertsSummary({ stations }: AlertsSummaryProps) {
       try {
         const stationId = sensorId ?? station?.id ?? "1";
         const result = await getAlertsSummary(stationId, start, end);
+        const realAlerts = await getAlerts();
         setSummary(result);
       } catch (err) {
         console.error(err);
@@ -117,25 +119,7 @@ export default function AlertsSummary({ stations }: AlertsSummaryProps) {
       <CardContent>
         {/* Filters */}
         <Box display="flex" flexWrap="wrap" gap={2} mb={3}>
-          {/* Station Selector */}
-          {!sensorId && (
-            <FormControl sx={{ minWidth: 180 }}>
-              <Select
-                value={station?.id ?? ""}
-                onChange={(e) => {
-                  const selected =
-                    stations.find((s) => s.id === e.target.value) || null;
-                  setStation(selected);
-                }}
-              >
-                {stations.map((s) => (
-                  <MenuItem key={s.id} value={s.id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          )}
+      
 
           {/* Start Date */}
           <TextField
@@ -154,6 +138,25 @@ export default function AlertsSummary({ stations }: AlertsSummaryProps) {
             onChange={(e) => setEnd(e.target.value)}
             InputLabelProps={{ shrink: true }}
           />
+              {/* Station Selector */}
+              {!sensorId && (
+            <FormControl sx={{ minWidth: 180 }}>
+              <Select
+                value={station?.id ?? ""}
+                onChange={(e) => {
+                  const selected =
+                    stations.find((s) => s.id === e.target.value) || null;
+                  setStation(selected);
+                }}
+              >
+                {stations.map((s) => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          )}
         </Box>
 
         {/* Summary */}

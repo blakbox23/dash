@@ -16,7 +16,8 @@ import {
   Divider,
   Tooltip,
   useMediaQuery,
-  Chip
+  Chip,
+  Typography
 } from '@mui/material';
 
 // third-party
@@ -84,14 +85,17 @@ import {
   UngroupOutlined
 } from '@ant-design/icons';
 
-import { getStations } from 'api/maps-api';
+import { getFeedback, getStations } from 'api/maps-api';
+import { StarOutline } from '@mui/icons-material';
 
-export type TableDataProps = {
-  aqi: unknown;
-  id: number;
-  sensorId: string;
-  status: string;
-  time: string[];
+export type FeedbackTableDataProps = {
+  rating: number;
+  message: string;
+  id: string;
+  email: string;
+  name: string;
+  alertLevel: string;
+  sensorId: string[];
 };
 
 type LabelKeyObject = {
@@ -99,7 +103,7 @@ type LabelKeyObject = {
   key: string;
 };
 
-export const fuzzyFilter: FilterFn<TableDataProps> = (row, columnId, value, addMeta) => {
+export const fuzzyFilter: FilterFn<FeedbackTableDataProps> = (row, columnId, value, addMeta) => {
   // rank the item
   const itemRank = rankItem(row.getValue(columnId), value);
 
@@ -110,7 +114,7 @@ export const fuzzyFilter: FilterFn<TableDataProps> = (row, columnId, value, addM
   return itemRank.passed;
 };
 
-export const fuzzySort: SortingFn<TableDataProps> = (rowA, rowB, columnId) => {
+export const fuzzySort: SortingFn<FeedbackTableDataProps> = (rowA, rowB, columnId) => {
   let dir = 0;
 
   // only sort by rank if the column has ranking information
@@ -124,10 +128,10 @@ export const fuzzySort: SortingFn<TableDataProps> = (rowA, rowB, columnId) => {
 
 // ==============================|| REACT TABLE - EDIT ACTION ||============================== //
 
-const EditAction = ({ row, table }: { row: Row<TableDataProps>; table: TableProps<TableDataProps> }) => {
+const EditAction = ({ row, table }: { row: Row<FeedbackTableDataProps>; table: TableProps<FeedbackTableDataProps> }) => {
   const meta = table?.options?.meta;
   const setSelectedRow = (e: MouseEvent<HTMLButtonElement> | undefined) => {
-    meta?.setSelectedRow((old: TableDataProps[]) => ({
+    meta?.setSelectedRow((old: FeedbackTableDataProps[]) => ({
       ...old,
       [row.id]: !old[row.id as any]
     }));
@@ -155,8 +159,8 @@ const EditAction = ({ row, table }: { row: Row<TableDataProps>; table: TableProp
 };
 
 interface ReactTableProps {
-  defaultColumns: ColumnDef<TableDataProps>[];
-  data: TableDataProps[];
+  defaultColumns: ColumnDef<FeedbackTableDataProps>[];
+  data: FeedbackTableDataProps[];
   setData: any;
 }
 
@@ -182,7 +186,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
   );
 
   // const reorderRow = (draggedRowIndex: number, targetRowIndex: number) => {
-  //   data.splice(targetRowIndex, 0, data.splice(draggedRowIndex, 1)[0] as TableDataProps);
+  //   data.splice(targetRowIndex, 0, data.splice(dragged<RowIndex, 1)[0] as FeedbackTableDataProps);
   //   setData([...data]);
   // };
 
@@ -231,13 +235,13 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
       setSelectedRow,
       revertData: (rowIndex: number, revert: unknown) => {
         if (revert) {
-          setData((old: TableDataProps[]) => old.map((row, index) => (index === rowIndex ? originalData[rowIndex] : row)));
+          setData((old: FeedbackTableDataProps[]) => old.map((row, index) => (index === rowIndex ? originalData[rowIndex] : row)));
         } else {
           setOriginalData((old) => old.map((row, index) => (index === rowIndex ? data[rowIndex] : row)));
         }
       },
       updateData: (rowIndex, columnId, value) => {
-        setData((old: TableDataProps[]) =>
+        setData((old: FeedbackTableDataProps[]) =>
           old.map((row, index) => {
             if (index === rowIndex) {
               return {
@@ -290,7 +294,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
               getAllColumns: table.getAllColumns
             }}
           />
-          <CSVExport
+          {/* <CSVExport
             {...{
               data:
                 table.getSelectedRowModel().flatRows.map((row) => row.original).length === 0
@@ -299,7 +303,7 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
               headers,
               filename: 'umbrella.csv'
             }}
-          />
+          /> */}
         </Stack>
       </Stack>
 
@@ -421,12 +425,44 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
                     {/* </DraggableRow> */}
                     </TableRow>
                     {row.getIsExpanded() && !row.getIsGrouped() && (
-                      <TableRow sx={{ bgcolor: backColor, '&:hover': { bgcolor: `${backColor} !important` } }}>
-                        <TableCell colSpan={row.getVisibleCells().length + 2}>
-                          <div> {row.original.id} </div>
-                        </TableCell>
-                      </TableRow>
-                    )}
+  <TableRow
+    sx={{
+      bgcolor: backColor,
+      '&:hover': { bgcolor: `${backColor} !important` },
+    }}
+  >
+    <TableCell colSpan={row.getVisibleCells().length + 2}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 1,
+          p: 1.5,
+          borderRadius: 2,
+          backgroundColor: "#fafafa",
+          border: "1px solid #e0e0e0",
+        }}
+      >
+        <Typography variant="body2" color="text.secondary">
+          <strong>Email:</strong> {row.original.email}
+        </Typography>
+
+        <Typography variant="body2" sx={{ whiteSpace: "pre-line" }}>
+          <strong>Feedback:</strong> {row.original.message || "No feedback provided."}
+        </Typography>
+
+        <Box sx={{ display: "flex", alignItems: "center", mt: 0.5 }}>
+          <Typography variant="body2" sx={{ mr: 0.5 }}>
+            <strong>Rating:</strong>
+          </Typography>
+          {[...Array(row.original.rating || 0)].map((_, i) => (
+            <StarOutline key={i} sx={{ color: "#fbc02d", fontSize: 20 }} />
+          ))}
+        </Box>
+      </Box>
+    </TableCell>
+  </TableRow>
+)}
                   </Fragment>
                 ))
               ) : (
@@ -469,35 +505,28 @@ function ReactTable({ defaultColumns, data, setData }: ReactTableProps) {
 
 // ==============================|| CURRENT READINGS TABLE ||============================== //
 
-const CurrentReadingTable = () => {
+const FeedbackTable = () => {
   const theme = useTheme();
 
-  const [data, setData] = useState<TableDataProps[]>(() => []);
+  const [data, setData] = useState<FeedbackTableDataProps[]>(() => []);
 
     useEffect(() => {
-      const fetchStations = async () => {
+      const fetchFeedback = async () => {
         try {
-          const stationsData = await getStations();
-          setData(stationsData);
+          const feedbackData = await getFeedback();
+          setData(feedbackData);
         } catch (err: any) {
           console.log(err.message || 'Failed to load stations');
         }
       };
   
       // Initial fetch
-      fetchStations();
+      fetchFeedback();
     }, []);
 
-    function getPollutantLevel(value: number) {
-      if (value <= 50) return 'Good';
-      if (value <= 100) return 'Moderate';
-      if (value <= 150) return 'Unhealthy for Sensitive Groups';
-      if (value <= 200) return 'Unhealthy';
-      if (value <= 300) return 'Very Unhealthy';
-      return 'Hazardous';
-    }
 
-  const columns = useMemo<ColumnDef<TableDataProps>[]>(
+
+  const columns = useMemo<ColumnDef<FeedbackTableDataProps>[]>(
     () => [
       {
         id: 'id',
@@ -520,116 +549,84 @@ const CurrentReadingTable = () => {
         enableGrouping: false,
         enableColumnFilter: false,
       },
-      // {
-      //   id: 'sensorId',
-      //   header: 'Sensor ID',
-      //   footer: 'Sensor ID',
-      //   accessorKey: 'sensorId',
-      //   dataType: 'text',
-      //   enableColumnFilter: false,
-      //   enableGrouping: false,
-      //   meta: {
-      //     className: 'cell-center'
-      //   }
-      // },
       {
-        id: 'aqi',
-        header: 'AQI',
-        footer: 'AQI',
-        accessorKey: 'aqi',
+        id: 'email',
+        header: 'Email',
+        footer: 'Email',
+        accessorKey: 'email',
         dataType: 'text',
         meta: {
           className: 'cell-center'
         }
       },
-      // {
-      //   id: 'role',
-      //   header: 'Role',
-      //   footer: 'Role',
-      //   accessorKey: 'role',
-      //   dataType: 'text',
-      //   enableGrouping: false,
-      //   filterFn: fuzzyFilter,
-      //   sortingFn: fuzzySort
-      // },
+
       {
-        id: 'pm25',
-        header: 'PM 2.5',
-        footer: 'PM 2.5',
-        accessorKey: 'pm25',
+        id: 'rating',
+        header: 'Rating',
+        footer: 'Rating',
+        accessorKey: 'rating',
         dataType: 'text',
         meta: {
           className: 'cell-center'
         }        
       },
       {
-        id: 'pm10',
-        header: 'PM 10',
-        footer: 'PM 10',
-        accessorKey: 'pm10',
+        id: 'message',
+        header: 'Message',
+        footer: 'Message',
+        accessorKey: 'message',
         dataType: 'text',
         meta: {
           className: 'cell-center'
-        }
-      },
-      {
-        id: 'pollutionLevel',
-        header: 'Pollution Level',
-        accessorFn: (row) => row.aqi,
-        enableColumnFilter: false,
+        },
         cell: ({ getValue }) => {
-          const value = getValue() as number;
-          const level = getPollutantLevel(value);
-      
+          const value = getValue() as string;
           return (
-            <Chip
-              label={level}
-              color={
-                level === 'Good'
-                  ? 'success'
-                  : level === 'Moderate'
-                  ? 'info'
-                  : level === 'Unhealthy for Sensitive Groups'
-                  ? 'warning'
-                  : level === 'Unhealthy'
-                  ? 'error'
-                  : 'default'
-              }
-              size="small"
-              sx={{ borderRadius: '16px' }}
-            />
+            <div
+              style={{
+                maxWidth: '200px', // 👈 control column width
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}
+              title={value} // 👈 shows full text on hover
+            >
+              {value}
+            </div>
           );
         }
       },
-      {
-        id: 'status',
-        header: 'Status',
-        accessorKey: 'status',
-        enableColumnFilter: false,
-        cell: ({ getValue }) => {
-          const status = getValue() as string;
-          let color: 'default' | 'success' | 'error' | 'warning' | 'info' = 'default';
-          if (status === 'ONLINE') color = 'success';
-          if (status === 'OFFLINE') color = 'error';
       
-          return (
-            <Chip 
-              label={status.toLocaleLowerCase()} 
-              color={color} 
-              size="small" 
-              variant="outlined" 
-              sx={{ borderRadius: '16px' }} 
-            />
-          );
-        }
-      },
+    
+      // {
+      //   id: 'status',
+      //   header: 'Status',
+      //   accessorKey: 'status',
+      //   enableColumnFilter: false,
+      //   cell: ({ getValue }) => {
+      //     const status = getValue() as string;
+      //     let color: 'default' | 'success' | 'error' | 'warning' | 'info' = 'default';
+      //     if (status === 'ONLINE') color = 'success';
+      //     if (status === 'OFFLINE') color = 'error';
+      
+      //     return (
+      //       <Chip 
+      //         label={status.toLocaleLowerCase()} 
+      //         color={color} 
+      //         size="small" 
+      //         variant="outlined" 
+      //         sx={{ borderRadius: '16px' }} 
+      //       />
+      //     );
+      //   }
+      // },
 
       {
-        id: 'time',
-        header: 'Time',
-        footer: 'Time',
+        id: 'submitted_at',
+        header: 'submitted_at',
+        footer: 'submitted_at',
         enableColumnFilter: false,
-        accessorKey: 'timeStamp',
+        accessorKey: 'createdAt',
         dataType: 'text',
         meta: {
           className: 'cell-right'
@@ -648,7 +645,21 @@ const CurrentReadingTable = () => {
             hour12: true
           });
         }
-      }
+      },
+      {
+        id: 'expander',
+        enableGrouping: false,
+        header: () => null,
+        cell: ({ row }) => {
+          return row.getCanExpand() ? (
+            <IconButton color={row.getIsExpanded() ? 'primary' : 'secondary'} onClick={row.getToggleExpandedHandler()} size="small">
+              {row.getIsExpanded() ? <DownOutlined /> : <RightOutlined />}
+            </IconButton>
+          ) : (
+            <StopOutlined style={{ color: theme.palette.text.secondary }} />
+          );
+        }
+      },
       // {
       //   id: 'edit',
       //   header: 'Actions',
@@ -670,4 +681,4 @@ const CurrentReadingTable = () => {
   );
 };
 
-export default CurrentReadingTable;
+export default FeedbackTable;

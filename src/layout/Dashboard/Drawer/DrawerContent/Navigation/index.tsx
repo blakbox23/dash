@@ -32,7 +32,28 @@ const Navigation = () => {
   const [menuItems, setMenuItems] = useState<{ items: NavItemType[] }>({ items: [] });
 
   useLayoutEffect(() => {
-    setMenuItems(menuItem);
+    const role = localStorage.getItem("role") || "";
+
+    const filterByRole = (items: NavItemType[]): NavItemType[] => {
+      return items
+        .map((item) => {
+          if (item.children) {
+            const filteredChildren = filterByRole(item.children);
+            return {
+              ...item,
+              children: filteredChildren
+            };
+          }
+          return item;
+        })
+        .filter((item) => {
+          console.log(!item.allowedRoles || item.allowedRoles.includes(role))
+          return !item.allowedRoles || item.allowedRoles.includes(role);
+        });
+    };
+
+    const filtered = filterByRole(menuItem.items);
+    setMenuItems({items: filtered});
     // eslint-disable-next-line
   }, [menuItem]);
 

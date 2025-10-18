@@ -66,22 +66,29 @@ const AuthRegister = () => {
     <>
       <Formik
         initialValues={{
-          firstname: '',
-          lastname: '',
+          // firstname: '',
+          // lastname: '',
+          displayName: '',
           email: '',
           company: '',
           password: '',
           submit: null
         }}
         validationSchema={Yup.object().shape({
-          firstname: Yup.string().max(255).required('First Name is required'),
-          lastname: Yup.string().max(255).required('Last Name is required'),
+          // firstname: Yup.string().max(255).required('First Name is required'),
+          // lastname: Yup.string().max(255).required('Last Name is required'),
+          displayName: Yup.string().max(255).required(' Name is required'),
           email: Yup.string().email('Must be a valid email').max(255).required('Email is required'),
           password: Yup.string().max(255).required('Password is required')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
           try {
-            await register(values.email, values.password, values.firstname, values.lastname);
+            await register(
+              values.email, 
+              values.password, 
+              // values.firstname, 
+              // values.lastname);
+              values.displayName);
             if (scriptedRef.current) {
               setStatus({ success: true });
               setSubmitting(false);
@@ -111,28 +118,30 @@ const AuthRegister = () => {
         {({ errors, handleBlur, handleChange, handleSubmit, isSubmitting, touched, values }) => (
           <form noValidate onSubmit={handleSubmit}>
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid item xs={12}>
                 <Stack spacing={1}>
-                  <InputLabel htmlFor="firstname-signup">First Name*</InputLabel>
+                  <InputLabel htmlFor="firstname-signup">Full Name*</InputLabel>
                   <OutlinedInput
                     id="firstname-login"
                     type="firstname"
-                    value={values.firstname}
-                    name="firstname"
+                    // value={values.firstname}
+                    // name="firstname"
+                    value={values.displayName}
+                    name="displayName"
                     onBlur={handleBlur}
                     onChange={handleChange}
-                    placeholder="John"
+                    placeholder="John Doe"
                     fullWidth
-                    error={Boolean(touched.firstname && errors.firstname)}
+                    error={Boolean(touched.displayName && errors.displayName)}
                   />
                 </Stack>
-                {touched.firstname && errors.firstname && (
-                  <FormHelperText error id="helper-text-firstname-signup">
-                    {errors.firstname}
+                {touched.displayName && errors.displayName && (
+                  <FormHelperText error id="helper-text-displayName-signup">
+                    {errors.displayName}
                   </FormHelperText>
                 )}
               </Grid>
-              <Grid item xs={12} md={6}>
+              {/* <Grid item xs={12} md={6}>
                 <Stack spacing={1}>
                   <InputLabel htmlFor="lastname-signup">Last Name*</InputLabel>
                   <OutlinedInput
@@ -153,8 +162,8 @@ const AuthRegister = () => {
                     {errors.lastname}
                   </FormHelperText>
                 )}
-              </Grid>
-              <Grid item xs={12}>
+              </Grid> */}
+              {/* <Grid item xs={12}>
                 <Stack spacing={1}>
                   <InputLabel htmlFor="company-signup">Company</InputLabel>
                   <OutlinedInput
@@ -174,7 +183,7 @@ const AuthRegister = () => {
                     {errors.company}
                   </FormHelperText>
                 )}
-              </Grid>
+              </Grid> */}
               <Grid item xs={12}>
                 <Stack spacing={1}>
                   <InputLabel htmlFor="email-signup">Email Address*</InputLabel>

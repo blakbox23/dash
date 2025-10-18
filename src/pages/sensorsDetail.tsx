@@ -6,7 +6,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 // project imports
-import { getOneStation, Sensor } from 'api/maps-api';
+import { getOneStation, Sensor, Station } from 'api/maps-api';
 import ReportCard from 'components/cards/statistics/ReportCard';
 import UserCountCard from 'components/cards/statistics/UserCountCard';
 import TrendsChart from 'sections/trends/sensor-trends-chart';
@@ -15,7 +15,7 @@ function SensorsDetail() {
   const theme = useTheme();
   const { id: sensorId } = useParams<{ id: string }>();
 
-  const [station, setStation] = useState<Sensor | null>(null);
+  const [station, setStation] = useState<Station | null>(null);
 
 
   useEffect(() => {
@@ -48,7 +48,7 @@ function SensorsDetail() {
       <Grid container rowSpacing={4.5} columnSpacing={3} justifyContent="center" alignItems="center" sx={{ mb: 6 }}>
         <Grid item xs={12} sm={6} lg={4}>
           <ReportCard
-            primary={station.location}
+            primary={station?.name}
             secondary="Location"
             color={theme.palette.secondary.main}
             iconPrimary={EnvironmentOutlined}
@@ -57,7 +57,7 @@ function SensorsDetail() {
 
         <Grid item xs={12} sm={6} lg={4}>
           <ReportCard
-            primary={station.sensor_id}
+            primary={station?.sensorId}
             secondary="Sensor ID"
             color={theme.palette.success.dark}
             iconPrimary={ClockCircleOutlined}
@@ -75,11 +75,11 @@ function SensorsDetail() {
       </Grid>
       <Grid container rowSpacing={4.5} columnSpacing={3} justifyContent="center" alignItems="center" sx={{ mb: 6 }}>
         <Grid item xs={12} sm={6} lg={4}>
-          <UserCountCard primary="PM 2.5" secondary="78" iconPrimary={FileProtectOutlined} color={theme.palette.primary.light} />
+          <UserCountCard primary="PM 2.5" secondary={station.pm25?.toFixed(2) ?? "--"} iconPrimary={FileProtectOutlined} color={theme.palette.primary.light} />
         </Grid>
 
         <Grid item xs={12} sm={6} lg={4}>
-          <UserCountCard primary="PM 10" secondary="121" iconPrimary={FileProtectOutlined} color={theme.palette.primary.light} />
+          <UserCountCard primary="PM 10" secondary={station.pm10?.toFixed(2) ?? "--"} iconPrimary={FileProtectOutlined} color={theme.palette.primary.light} />
         </Grid>
 
         <Grid item xs={12} sm={6} lg={4}>
