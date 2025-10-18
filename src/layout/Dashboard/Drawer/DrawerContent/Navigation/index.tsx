@@ -34,8 +34,6 @@ const Navigation = () => {
   useLayoutEffect(() => {
     const role = localStorage.getItem("role") || "";
 
-    console.log(role)
-
     const filterByRole = (items: NavItemType[]): NavItemType[] => {
       return items
         .map((item) => {

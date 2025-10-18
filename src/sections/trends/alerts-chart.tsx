@@ -15,6 +15,7 @@ import {
 } from "@mui/material";
 import { useParams } from "react-router-dom";
 import { DownloadOutlined, WarningOutlined } from "@ant-design/icons";
+import { getAlerts } from "api/maps-api";
 
 // dummy fetch function (replace with API call)
 const getAlertsSummary = async (stationId: string, start: string, end: string) => {
@@ -73,6 +74,7 @@ export default function AlertsSummary({ stations }: AlertsSummaryProps) {
       try {
         const stationId = sensorId ?? station?.id ?? "1";
         const result = await getAlertsSummary(stationId, start, end);
+        const realAlerts = await getAlerts();
         setSummary(result);
       } catch (err) {
         console.error(err);

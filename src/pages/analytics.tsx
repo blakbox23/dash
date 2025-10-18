@@ -22,7 +22,9 @@ import {
   Typography,
   useTheme
 } from '@mui/material';
-import { dummyStations, getStations, Station, updateUserReportStations } from 'api/maps-api';
+import { getStations, Station, updateUserReportStations } from 'api/maps-api';
+import { openSnackbar } from 'api/snackbar';
+import FullReport from 'components/FullReport';
 import useAuth from 'hooks/useAuth';
 import { useEffect, useState } from 'react';
 import AlertsSummary from 'sections/trends/alerts-chart';
@@ -30,9 +32,9 @@ import AnalyticsTimeSeries from 'sections/trends/analytics-timeseries-chart';
 import AqiDistributionPieChart from 'sections/trends/api-pie-chart';
 import ComparisonChart from 'sections/trends/comparison-chart';
 import { ThemeMode } from 'types/config';
+import { SnackbarProps } from 'types/snackbar';
 
 function Analytics() {
-
   const { user } = useAuth();
 
   const [stations, setStations] = useState<Station[]>([]);
@@ -48,53 +50,77 @@ function Analytics() {
       }
     };
 
-    // Initial fetch
     fetchStations();
   }, []);
 
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
+  const [openSubscribeDialog, setOpenSubscribeDialog] = useState(false);
+  const [openReportDialog, setOpenReportDialog] = useState(false);
 
-  const [open, setOpen] = useState(false);
+  // ✅ new state for the report dialog
+  const [openReport, setOpenReport] = useState(false);
+  const [reportStart, setReportStart] = useState('');
+  const [reportEnd, setReportEnd] = useState('');
+  const [reportStation, setReportStation] = useState<Station>(stations[0]);
+  const [showPreview, setShowPreview] = useState(false);
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
-
+  
   const handleToggleStation = (id: string) => {
-    setSelectedStations((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
+    setSelectedStations((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
+    );
   };
 
-  const handleSubmit = async () => {
-    console.log('user', 'reportsStations');
-
+  const handleSubmitSubscribe = async () => {
     try {
-      const response = await updateUserReportStations(user?.id, selectedStations);
-      console.log(response.data)
-      // alert("Stations updated successfully!");
+      await updateUserReportStations(user?.id, selectedStations);
+      openSnackbar({ open: true, message: 'Stations updated!', variant: 'success' } as SnackbarProps);
     } catch (err) {
       console.error(err);
-      alert("Failed to update stations");
+      alert('Failed to update stations');
     }
-    
-    handleClose();
+    setOpenSubscribeDialog(false);
+  };
+
+  const handleGenerateReport = () => {
+    if (!reportStation || !reportStart || !reportEnd) return;
+    setShowPreview(true);
+    setOpenReportDialog(false);
   };
 
   return (
     <>
       <Grid container spacing={2.5} sx={{ mb: 12 }}>
-        {/* <Grid item xs={12}>
-      <WelcomeBanner />
-    </Grid> */}
         <div style={{ marginLeft: 'auto' }}>
           <Button
             variant="outlined"
             color="secondary"
-            onClick={handleOpen}
+            onClick={() => setOpenReportDialog(true)}
             sx={{
-              color: 'green',
-              borderColor: 'green',
+              color: 'white',
+              borderColor: 'blue',
+              backgroundColor: 'blue',
               '&:hover': {
                 color: 'white',
-                borderColor: 'green',
+                borderColor: 'transparent',
+                bgcolor: theme.palette.mode === ThemeMode.DARK ? 'primary.darker' : 'primary.main'
+              }
+            }}
+          >
+            Get full report
+          </Button>
+
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => setOpenSubscribeDialog(true)}
+            sx={{
+              color: 'blue',
+              borderColor: 'blue',
+              marginLeft: '1.5rem',
+              '&:hover': {
+                color: 'white',
+                borderColor: 'transparent',
                 bgcolor: theme.palette.mode === ThemeMode.DARK ? 'primary.darker' : 'primary.main'
               }
             }}
@@ -103,51 +129,77 @@ function Analytics() {
           </Button>
         </div>
 
-        <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
+        {/* ================= Subscribe Dialog ================= */}
+        <Dialog open={openSubscribeDialog} onClose={() => setOpenSubscribeDialog(false)} maxWidth="sm" fullWidth>
           <DialogTitle>Subscribe to Monthly Reports</DialogTitle>
-
           <DialogContent dividers>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Select the stations you want to receive monthly air quality reports for:
-            </Typography>
-
             <Autocomplete
               multiple
               options={stations}
               getOptionLabel={(option) => option.name}
               value={stations.filter((s) => selectedStations.includes(s.sensorId))}
               onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.sensorId))}
-              renderTags={(value, getTagProps) =>
-                value.map((option, index) => (
-                  <Chip
-                    label={option.name}
-                    {...getTagProps({ index })}
-                    key={option.id}
-                    sx={{
-                      borderRadius: 1,
-                      bgcolor: 'primary.light',
-                      color: 'primary.contrastText'
-                    }}
-                  />
-                ))
-              }
-              renderInput={(params) => (
-                <TextField {...params} label="Report Stations" placeholder="Search stations..." margin="normal" fullWidth />
-              )}
-              fullWidth
+              renderInput={(params) => <TextField {...params} label="Report Stations" placeholder="Search stations..." />}
             />
           </DialogContent>
-
           <DialogActions>
-            <Button onClick={handleClose} color="secondary">
-              Cancel
-            </Button>
-            <Button onClick={handleSubmit} variant="contained" disabled={selectedStations.length === 0}>
+            <Button onClick={() => setOpenSubscribeDialog(false)} color="secondary">Cancel</Button>
+            <Button onClick={handleSubmitSubscribe} variant="contained" disabled={selectedStations.length === 0}>
               Subscribe
             </Button>
           </DialogActions>
         </Dialog>
-        {/* Row 1 */}
+
+        {/* ================= Generate Full Report Dialog ================= */}
+        <Dialog open={openReportDialog} onClose={() => setOpenReportDialog(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Generate Full Report</DialogTitle>
+          <DialogContent dividers>
+            <TextField
+              fullWidth
+              label="Start Date"
+              type="date"
+              value={reportStart}
+              onChange={(e) => setReportStart(e.target.value)}
+              sx={{ mb: 2 }}
+              InputLabelProps={{ shrink: true }}
+            />
+            <TextField
+              fullWidth
+              label="End Date"
+              type="date"
+              value={reportEnd}
+              onChange={(e) => setReportEnd(e.target.value)}
+              sx={{ mb: 2 }}
+              InputLabelProps={{ shrink: true }}
+            />
+            <Autocomplete
+              options={stations}
+              getOptionLabel={(option) => option.name}
+              onChange={(_, value) => setReportStation(value ?? reportStation)}
+              renderInput={(params) => <TextField {...params} label="Select Station" placeholder="Search station..." />}
+            />
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenReportDialog(false)} color="secondary">Cancel</Button>
+            <Button onClick={handleGenerateReport} variant="contained" disabled={!reportStart || !reportEnd || !reportStation}>
+              Generate
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* ================= Show Full Report Preview ================= */}
+        {showPreview && (
+          <Grid item xs={12} sx={{ mt: 4 }}>
+            <FullReport
+              start={reportStart}
+              end={reportEnd}
+              station={reportStation}
+              onFinish={() => setShowPreview(false)} // hides preview after download
+            />
+          </Grid>
+        )}
+
+
         <Grid item xs={12} sm={12} lg={12} sx={{ mb: 6 }}>
           <Grid item>
             <Typography variant="h4" sx={{ mb: 1 }}>
@@ -157,9 +209,7 @@ function Analytics() {
           <AnalyticsTimeSeries stations={stations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
         </Grid>
 
-        {/* Row 2 */}
         <Grid container spacing={2} sx={{ mb: 6 }} alignItems="stretch">
-          {/* Left */}
           <Grid item xs={12} lg={7}>
             <Card sx={{ height: '100%', background: 'transparent', border: 'none' }}>
               <Typography variant="h4" sx={{ mb: 1 }}>
@@ -169,7 +219,6 @@ function Analytics() {
             </Card>
           </Grid>
 
-          {/* Right */}
           <Grid item xs={12} lg={5}>
             <Card sx={{ height: '100%', background: 'transparent', border: 'none' }}>
               <Typography variant="h4" sx={{ mb: 1 }}>
@@ -180,14 +229,13 @@ function Analytics() {
           </Grid>
         </Grid>
 
-        {/* Row 3 */}
         <Grid item xs={12} sm={12} lg={12}>
           <Grid item>
             <Typography variant="h4" sx={{ mb: 1 }}>
               Comparison chart
             </Typography>
           </Grid>
-          <ComparisonChart stations={dummyStations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
+          <ComparisonChart stations={stations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
         </Grid>
       </Grid>
     </>
