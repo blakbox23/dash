@@ -11,9 +11,6 @@ import {
   Button,
   TextField,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Chip,
   Box,
   CircularProgress,
@@ -21,6 +18,9 @@ import {
   Autocomplete
 } from '@mui/material';
 import { EditOutlined, LogoutOutlined } from '@ant-design/icons';
+import useAuth from 'hooks/useAuth';
+import { getStations } from 'api/maps-api';
+import axiosServices from 'utils/axios';
 
 interface Props {
   handleLogout: () => void;
@@ -32,34 +32,57 @@ interface Station {
 }
 
 const ProfileTab = ({ handleLogout }: Props) => {
+  const { user } = useAuth(); // assuming updateUser updates context
   const theme = useTheme();
+
+  const [stations, setStations] = useState<Station[]>([]);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [stations, setStations] = useState<Station[]>([]);
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
 
+  // fetch stations + populate user info
   useEffect(() => {
-    // Simulate fetching user data
-    setTimeout(() => {
-      setName('John Doe');
-      setEmail('john.doe@example.com');
-      setStations([
-        { id: '1', name: 'Kibera Station' },
-        { id: '2', name: 'Industrial Area Station' },
-        { id: '3', name: 'CBD Station' },
-        { id: '4', name: 'Westlands Station' }
-      ]);
-      setSelectedStations(['2', '4']);
-      setLoading(false);
-    }, 800);
-  }, []);
+    const fetchData = async () => {
+      try {
+        const stationsData = await getStations();
+        setStations(stationsData);
 
-  const handleSave = () => {
-    // TODO: send updated data to backend
-    console.log({ name, email, selectedStations });
-    setOpen(false);
+        if (user) {
+          setName(user.displayName || '');
+          setEmail(user.email || '');
+          setSelectedStations(user.reportStations || []);
+        }
+      } catch (err: any) {
+        console.error(err.message || 'Failed to load stations');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
+
+  const handleSave = async () => {
+    if (!user) return;
+    setSaving(true);
+    try {
+      const payload = {
+        displayName: name,
+        reportStations: selectedStations
+      };
+
+      const response = await axiosServices.patch(`/api/v1/users/${user.id}`, payload);
+      // updateUser?.(response.data); // refresh user context if available
+      setOpen(false);
+    } catch (err: any) {
+      console.error(err.message || 'Failed to update profile');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -126,7 +149,7 @@ const ProfileTab = ({ handleLogout }: Props) => {
                 variant="outlined"
                 margin="normal"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                disabled
               />
 
               <FormControl fullWidth margin="normal">
@@ -135,16 +158,27 @@ const ProfileTab = ({ handleLogout }: Props) => {
                   options={stations}
                   getOptionLabel={(option) => option.name}
                   value={stations.filter((s) => selectedStations.includes(s.id))}
-                  onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.id))}
+                  onChange={(_, newValue) =>
+                    setSelectedStations(newValue.map((s) => s.id))
+                  }
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
-                      <Chip label={option.name} {...getTagProps({ index })} key={option.id} sx={{ borderRadius: 1 }} />
+                      <Chip
+                        label={option.name}
+                        {...getTagProps({ index })}
+                        key={option.id}
+                        sx={{ borderRadius: 1 }}
+                      />
                     ))
                   }
                   renderInput={(params) => (
-                    <TextField {...params} label="Report Stations" placeholder="Add station..." margin="normal" />
+                    <TextField
+                      {...params}
+                      label="Report Stations"
+                      placeholder="Select stations..."
+                      margin="normal"
+                    />
                   )}
-                  fullWidth
                 />
               </FormControl>
             </>
@@ -155,8 +189,14 @@ const ProfileTab = ({ handleLogout }: Props) => {
           <Button onClick={() => setOpen(false)} variant="outlined">
             Cancel
           </Button>
-          <Button onClick={handleSave} variant="contained" color="primary" sx={{ borderRadius: 2 }}>
-            Save Changes
+          <Button
+            onClick={handleSave}
+            variant="contained"
+            color="primary"
+            sx={{ borderRadius: 2 }}
+            disabled={saving}
+          >
+            {saving ? <CircularProgress size={20} color="inherit" /> : 'Save Changes'}
           </Button>
         </DialogActions>
       </Dialog>

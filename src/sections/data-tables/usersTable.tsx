@@ -571,8 +571,7 @@ const UsersTable = () => {
         dataType: 'text',
         enableGrouping: false,
         enableColumnFilter: false
-        // filterFn: fuzzyFilter,
-        // sortingFn: fuzzySort
+   
       },
 
       {

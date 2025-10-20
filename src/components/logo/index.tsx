@@ -25,7 +25,7 @@ const LogoSection = ({ reverse, isIcon, sx, to }: Props) => {
 
   return (
     <ButtonBase disableRipple {...(isLoggedIn && { component: Link, to: !to ? APP_DEFAULT_PATH : to, sx })}>
-      {isIcon ? <LogoIcon /> : <Logo reverse={reverse} />}
+      {isIcon ? <LogoIcon /> :  <Logo reverse={reverse} />}
     </ButtonBase>
   );
 };

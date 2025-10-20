@@ -7,6 +7,7 @@ export type GuardProps = {
 };
 
 export type UserProfile = {
+  reportStations: never[];
   id?: string;
   email?: string;
   avatar?: string;

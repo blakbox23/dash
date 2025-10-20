@@ -11,10 +11,11 @@ import WelcomeImageArrow from 'assets/images/analytics/welcome-arrow.png';
 
 // types
 import { ThemeDirection, ThemeMode } from 'types/config';
+import { useNavigate } from 'react-router-dom';
 
-// ==============================|| ANALYTICS - WELCOME ||============================== //
 
 const WelcomeBanner = () => {
+  const navigate = useNavigate();
   const theme = useTheme();
 
   return (
@@ -49,8 +50,9 @@ const WelcomeBanner = () => {
                     bgcolor: theme.palette.mode === ThemeMode.DARK ? 'primary.darker' : 'primary.main'
                   }
                 }}
+                onClick={() => navigate('/analytics')}
               >
-                Get full report
+                View analytics
               </Button>
             </Box>
           </Stack>
@@ -58,9 +60,7 @@ const WelcomeBanner = () => {
         <Grid item sm={6} xs={12} sx={{ display: { xs: 'none', sm: 'initial' } }}>
           <Stack sx={{ position: 'relative', pr: { sm: 3, md: 8 } }} justifyContent="center" alignItems="flex-end">
             {/* <img src={WelcomeImage} alt="Welcome" /> */}
-            <Box sx={{ position: 'absolute', bottom: 0, right: '10%' }}>
-              {/* <img src={WelcomeImageArrow} alt="Welcome Arrow" /> */}
-            </Box>
+            <Box sx={{ position: 'absolute', bottom: 0, right: '10%' }}>{/* <img src={WelcomeImageArrow} alt="Welcome Arrow" /> */}</Box>
           </Stack>
         </Grid>
       </Grid>

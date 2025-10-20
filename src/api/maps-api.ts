@@ -191,7 +191,7 @@ export const getAqiDistribution = async (
 }> => {
   try {
     // 1️⃣ Fetch readings from backto
-    const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to=${to}`);
+    const response = await api.get(`/stations/${sensorId}/readings?from=${from}&to=${to}`);
     const rawReadings: Reading[] = response.data.data;
 
 
@@ -235,7 +235,7 @@ export const getAnalyticsTimeSeries = async (
   end: string,
 ) => {
 
-  const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}`);
+  const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}`);
   return response.data.data;
 };
 export const getOneStation = async (id: string) => {
@@ -243,7 +243,7 @@ export const getOneStation = async (id: string) => {
   return response.data;
 };
 export const getHistoricalData = async (sensorId: number, from: string, to: string) => {
-  const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to={to}`);
+  const response = await api.get(`/stations/${sensorId}/readings?from=${from}&to={to}`);
   return response.data;
 };
 export const getStationsCron = async () => {
@@ -256,40 +256,53 @@ export const getFeedback = async () => {
   return response.data.data;
 };
 
-export const getAlerts = async () => {
-  const response = await api.get(`/alerts/log `);
+export const getAlerts = async (sensorId: string | undefined, start: string, end: string) => {
+  // const response = await api.get(`/alerts/log `);
+  if(!sensorId) return;
+
+  console.log('getAlerts function called')
+
+  const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`)
 
   return response.data.data;
 };
 
-export const getAlertsSummary = async (stationId: string, start: string, end: string) => {
-  // Simulate network delay
-  await new Promise((r) => setTimeout(r, 150));
 
-  const levels = [
-    "Unhealthy for Sensitive Groups",
-    "Unhealthy",
-    "Very Unhealthy",
-    "Hazardous"
-  ];
+export const getAlertsSummary = async (sensorId: string, start: string, end: string) => {
+  try {
+    // ✅ Hit your real API endpoint
+    const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`)
 
-  // total alerts for this query
-  const total = Math.floor(Math.random() * 15) + 5; // between 5 and 20
+    const alerts = response.data.data;
 
-  // distribute alerts randomly across levels
-  let remaining = total;
-  const breakdown = levels.map((level, idx) => {
-    if (idx === levels.length - 1) {
-      // assign the remaining to last category
-      return { level, count: remaining };
+    if (!Array.isArray(alerts)) {
+      throw new Error("Invalid response format: expected an array");
     }
-    const count = Math.floor(Math.random() * (remaining + 1));
-    remaining -= count;
-    return { level, count };
-  });
 
-  return { total, breakdown };
+    // ✅ Define expected alert levels
+    const levels = [
+      "Unhealthy for Sensitive Groups",
+      "Unhealthy",
+      "Very Unhealthy",
+      "Hazardous"
+    ];
+
+    // ✅ Count occurrences per alertLevel
+    const breakdown = levels.map((level) => ({
+      level,
+      count: alerts.filter((a) => a.alertLevel === level).length
+    }));
+
+    // ✅ Compute total
+    const total = alerts.length;
+
+    return { total, breakdown };
+  } catch (error: any) {
+    console.error("Failed to fetch alerts summary:", error.message);
+    return { total: 0, breakdown: [] };
+  }
 };
+
 
 
 export const getUsers = async () => {
@@ -300,7 +313,7 @@ export const getUsers = async () => {
 export const updateUserStatus = async (userId: number, status: string) => {
   try {
     const response = await api.patch(`/users/${userId}`, { status });
-    return response.data.data; // assuming your API returns { data: { ...updatedUser } }
+    return response.data.data;
   } catch (error: any) {
     console.error('Failed to update user status:', error);
     throw error;

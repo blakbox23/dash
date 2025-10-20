@@ -22,7 +22,7 @@ const icons = { DashboardOutlinedIcon, SensorsOutlinedIcon, AnalyticsOutlinedIco
 
 const dashboard: NavItemType = {
   id: 'group-pages',
-  title: <FormattedMessage id="Air Quality Dashboard" />,
+  title: <FormattedMessage id="Nairobi County Air Quality Dashboard" />,
   type: 'group',
   children: [
 
