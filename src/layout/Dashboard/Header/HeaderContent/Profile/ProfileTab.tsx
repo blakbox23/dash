@@ -44,7 +44,7 @@ const ProfileTab = ({ handleLogout }: Props) => {
   const [email, setEmail] = useState('');
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
 
-  // fetch stations + populate user info
+  // Fetch stations + populate user info
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -54,7 +54,14 @@ const ProfileTab = ({ handleLogout }: Props) => {
         if (user) {
           setName(user.displayName || '');
           setEmail(user.email || '');
-          setSelectedStations(user.reportStations || []);
+
+          // Load saved stations (either from user object or localStorage)
+          const localStations = JSON.parse(localStorage.getItem('reportStations') || '[]');
+          const fromUser = Array.isArray(user.reportStations)
+            ? user.reportStations.map((s: any) => (typeof s === 'string' ? s : s.id))
+            : [];
+
+          setSelectedStations(fromUser.length ? fromUser : localStations);
         }
       } catch (err: any) {
         console.error(err.message || 'Failed to load stations');
@@ -72,11 +79,19 @@ const ProfileTab = ({ handleLogout }: Props) => {
     try {
       const payload = {
         displayName: name,
-        reportStations: selectedStations
+        reportStations: selectedStations, // expected to be array of IDs
+        role: user?.role
       };
 
       const response = await axiosServices.patch(`/api/v1/users/${user.id}`, payload);
-      // updateUser?.(response.data); // refresh user context if available
+
+      // Keep frontend in sync
+      localStorage.setItem('reportStations', JSON.stringify(selectedStations));
+
+
+      // Optionally update user context if your hook supports it
+      // updateUser?.(response.data);
+
       setOpen(false);
     } catch (err: any) {
       console.error(err.message || 'Failed to update profile');
@@ -158,9 +173,7 @@ const ProfileTab = ({ handleLogout }: Props) => {
                   options={stations}
                   getOptionLabel={(option) => option.name}
                   value={stations.filter((s) => selectedStations.includes(s.id))}
-                  onChange={(_, newValue) =>
-                    setSelectedStations(newValue.map((s) => s.id))
-                  }
+                  onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.id))}
                   renderTags={(value, getTagProps) =>
                     value.map((option, index) => (
                       <Chip

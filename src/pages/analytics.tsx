@@ -77,8 +77,7 @@ function Analytics() {
       openSnackbar({ open: true, message: 'Stations updated!', variant: 'success' } as SnackbarProps);
     } catch (err) {
       console.error(err);
-      alert('Failed to update stations');
-    }
+      openSnackbar({ open: true, message: 'Failed to update stations!', variant: 'error' } as SnackbarProps);    }
     setOpenSubscribeDialog(false);
   };
 
@@ -130,25 +129,48 @@ function Analytics() {
         </div>
 
         {/* ================= Subscribe Dialog ================= */}
-        <Dialog open={openSubscribeDialog} onClose={() => setOpenSubscribeDialog(false)} maxWidth="sm" fullWidth>
-          <DialogTitle>Subscribe to Monthly Reports</DialogTitle>
-          <DialogContent dividers>
-            <Autocomplete
-              multiple
-              options={stations}
-              getOptionLabel={(option) => option.name}
-              value={stations.filter((s) => selectedStations.includes(s.sensorId))}
-              onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.sensorId))}
-              renderInput={(params) => <TextField {...params} label="Report Stations" placeholder="Search stations..." />}
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setOpenSubscribeDialog(false)} color="secondary">Cancel</Button>
-            <Button onClick={handleSubmitSubscribe} variant="contained" disabled={selectedStations.length === 0}>
-              Subscribe
-            </Button>
-          </DialogActions>
-        </Dialog>
+        <Dialog
+  open={openSubscribeDialog}
+  onClose={() => setOpenSubscribeDialog(false)}
+  maxWidth="sm"
+  fullWidth
+>
+  <DialogTitle>Subscribe to Monthly Reports</DialogTitle>
+
+  <DialogContent dividers>
+    <Autocomplete
+      multiple
+      options={stations}
+      getOptionLabel={(option) => option.name}
+      // ✅ use id consistently for both value and mapping
+      value={stations.filter((s) => selectedStations.includes(s.id))}
+      onChange={(_, newValue) =>
+        setSelectedStations(newValue.map((s) => s.id))
+      }
+      renderInput={(params) => (
+        <TextField
+          {...params}
+          label="Report Stations"
+          placeholder="Search stations..."
+        />
+      )}
+    />
+  </DialogContent>
+
+  <DialogActions>
+    <Button onClick={() => setOpenSubscribeDialog(false)} color="secondary">
+      Cancel
+    </Button>
+    <Button
+      onClick={handleSubmitSubscribe}
+      variant="contained"
+      disabled={selectedStations.length === 0}
+    >
+      Subscribe
+    </Button>
+  </DialogActions>
+</Dialog>
+
 
         {/* ================= Generate Full Report Dialog ================= */}
         <Dialog open={openReportDialog} onClose={() => setOpenReportDialog(false)} maxWidth="sm" fullWidth>

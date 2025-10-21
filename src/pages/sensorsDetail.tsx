@@ -83,7 +83,7 @@ function SensorsDetail() {
         </Grid>
 
         <Grid item xs={12} sm={6} lg={4}>
-          <UserCountCard primary="Calculated AQI" secondary="78" iconPrimary={FileProtectOutlined} color={theme.palette.primary.main} />
+          <UserCountCard primary="Calculated AQI" secondary={station.aqi.toString()} iconPrimary={FileProtectOutlined} color={theme.palette.primary.main} />
         </Grid>
       </Grid>
 
