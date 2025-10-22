@@ -74,74 +74,6 @@ export type User = {
   role?: string ;
 }
 
-// export const dummyStations: Station[] = [
-//   {
-//     id: '1',
-//     sensorId: 'airqo_g5380',
-//     name: 'Nairobi CBD',
-//     aqi: 85,
-//     pm25: 23.4,
-//     pm10: 42.1,
-//     lat: -1.28333,
-//     lng: 36.81667,
-//     sensorType: 'BAM-1020'
-//   },
-//   {
-//     id: '2',
-//     sensorId: 'airqo_g5381',
-//     name: 'Westlands',
-//     aqi: 112,
-//     pm25: 37.2,
-//     pm10: 54.8,
-//     lat: -1.26495,
-//     lng: 36.80336,
-//     sensorType: 'MOD-PM'
-//   },
-//   {
-//     id: '3',
-//     sensorId: 'airqo_g5382',
-//     name: 'Industrial Area',
-//     aqi: 156,
-//     pm25: 65.1,
-//     pm10: 88.6,
-//     lat: -1.31255,
-//     lng: 36.84518,
-//     sensorType: 'BAM-1020'
-//   },
-//   {
-//     id: '4',
-//     sensorId: 'airqo_g5383',
-//     name: 'Kibera',
-//     aqi: 98,
-//     pm25: 28.9,
-//     pm10: 47.3,
-//     lat: -1.31361,
-//     lng: 36.78222,
-//     sensorType: 'MOD-PM'
-//   },
-//   {
-//     id: '5',
-//     sensorId: 'airqo_g5384',
-//     name: 'Gigiri',
-//     aqi: 62,
-//     pm25: 15.7,
-//     pm10: 32.4,
-//     lat: -1.22952,
-//     lng: 36.81854,
-//     sensorType: 'BAM-1020'
-//   },
-//   {
-//     id: '6',
-//     sensorId: 'airqo_g5385',
-//     name: 'Eastleigh',
-//     aqi: 134,
-//     pm25: 48.6,
-//     pm10: 72.9,
-//     lat: -1.28326,
-//     lng: 36.84616,
-//     sensorType: 'MOD-PM'
-//   }
-// ];
 
 export const updateUserReportStations = async (id?: string, reportStations?: string[]) => {
   if (!id || !reportStations) return;
@@ -209,9 +141,10 @@ export const getAqiDistribution = async (
   to: string;
   distribution: DistributionItem[];
 }> => {
+
   try {
     // 1️⃣ Fetch readings from backto
-    const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to=${to}`);
+    const response = await api.get(`/stations/${sensorId}/readings?from=${from}&to=${to}`);
     const rawReadings: Reading[] = response.data.data;
 
     if (!Array.isArray(rawReadings) || rawReadings.length === 0) {
@@ -249,17 +182,14 @@ export const getAqiDistribution = async (
   }
 };
 export const getAnalyticsTimeSeries = async (sensorId: string, start: string, end: string) => {
-  const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}`);
+  const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}`);
   return response.data.data;
 };
 export const getOneStation = async (id: string) => {
   const response = await api.get(`/stations/${id}`);
   return response.data;
 };
-export const getHistoricalData = async (sensorId: number, from: string, to: string) => {
-  const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to={to}`);
-  return response.data;
-};
+
 export const getStationsCron = async () => {
   const response = await api.get(`/sync/stations`);
   return response.data;
@@ -270,21 +200,21 @@ export const getFeedback = async () => {
   return response.data.data;
 };
 
-export const getAlerts = async (sensorId: string | undefined, start: string, end: string) => {
-  // const response = await api.get(`/alerts/log `);
-  if (!sensorId) return;
+// export const getAlerts = async (sensorId: string | undefined, start: string, end: string) => {
+//   // const response = await api.get(`/alerts/log `);
+//   if (!sensorId) return;
 
-  console.log('getAlerts function called');
+//   console.log('getAlerts function called');
 
-  const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}&alertLevel=101`);
+//   const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`);
 
-  return response.data.data;
-};
+//   return response.data.data;
+// };
 
 export const getAlertsSummary = async (sensorId: string, start: string, end: string) => {
   try {
     // ✅ Hit your real API endpoint
-    const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}&alertLevel=101`);
+    const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`);
 
     const alerts = response.data.data;
 
