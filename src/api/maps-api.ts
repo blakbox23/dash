@@ -4,7 +4,7 @@ import useAuth from 'hooks/useAuth';
 // import useSWR, { mutate } from 'swr';
 // import { fetcher } from 'utils/axios';
 
-const token = localStorage.getItem("serviceToken");
+const token = localStorage.getItem('serviceToken');
 
 const api = axios.create({
   baseURL: '/api/v1',
@@ -19,28 +19,29 @@ export const endpoints = {
   stations: '/stations'
 };
 
-  export interface Station {
-    id: string;
-    sensorId: string;
-    name: string;
-    aqi: number;
-    pm25: number;
-    pm10: number;
-    lat: number;
-    lng: number;
-    timeStamp?: string;
-    sensorType: string;
-  }
+export interface Station {
+  status: string;
+  id: string;
+  sensorId: string;
+  name: string;
+  aqi: number;
+  pm25: number;
+  pm10: number;
+  lat: number;
+  lng: number;
+  timeStamp?: string;
+  sensorType: string;
+}
 
-  export interface Sensor {
-    id: number;
-    sensor_id: string;
-    location: string;
-    description: string;
-    lat: number;
-    lng: number;
-    sensorType: string;
-  }
+export interface Sensor {
+  id: number;
+  sensor_id: string;
+  location: string;
+  description: string;
+  lat: number;
+  lng: number;
+  sensorType: string;
+}
 
 export interface HistoricalData {
   pm25: number;
@@ -65,6 +66,13 @@ export type DistributionItem = {
   category: string;
   value: number;
 };
+
+
+export type User = {
+  displayName: string;
+  reportStations: string[];
+  role?: string ;
+}
 
 // export const dummyStations: Station[] = [
 //   {
@@ -135,28 +143,40 @@ export type DistributionItem = {
 //   }
 // ];
 
-
 export const updateUserReportStations = async (id?: string, reportStations?: string[]) => {
-
-  if(!id || !reportStations) return
+  if (!id || !reportStations) return;
   if (!id) {
-    console.error("User not found in context");
-    throw new Error("User not found");
+    console.error('User not found in context');
+    throw new Error('User not found');
   }
 
   try {
     const response = await api.patch(`/users/${id}`, {
-      reportStations,
+      reportStations
     });
 
     return response.data;
   } catch (error: any) {
-    console.error("Failed to update user report stations:", error);
+    console.error('Failed to update user report stations:', error);
     throw error.response?.data || error;
   }
-
 };
 
+export const updateUser = async (id?: string, updatedUser?: User) => {
+  if (!id || !updatedUser) return;
+
+
+  try {
+    const response = await api.patch(`/users/${id}`, {
+      updatedUser
+    });
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Failed to update user report stations:', error);
+    throw error.response?.data || error;
+  }
+};
 
 const classifyAqi = (aqi: number): string => {
   if (aqi <= 50) return 'Good';
@@ -191,9 +211,8 @@ export const getAqiDistribution = async (
 }> => {
   try {
     // 1️⃣ Fetch readings from backto
-    const response = await api.get(`/stations/${sensorId}/readings?from=${from}&to=${to}`);
+    const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to=${to}`);
     const rawReadings: Reading[] = response.data.data;
-
 
     if (!Array.isArray(rawReadings) || rawReadings.length === 0) {
       return { sensorId, from, to, distribution: [] };
@@ -203,10 +222,10 @@ export const getAqiDistribution = async (
     const counts: Record<string, number> = {
       Good: 0,
       Moderate: 0,
-      "Unhealthy for Sensitive Groups": 0,
+      'Unhealthy for Sensitive Groups': 0,
       Unhealthy: 0,
-      "Very Unhealthy": 0,
-      Hazardous: 0,
+      'Very Unhealthy': 0,
+      Hazardous: 0
     };
 
     // 3️⃣ Count occurrences by AQI category
@@ -219,23 +238,18 @@ export const getAqiDistribution = async (
     const total = rawReadings.length;
     const distribution: DistributionItem[] = Object.entries(counts).map(([category, count]) => ({
       category,
-      value: parseFloat(((count / total) * 100).toFixed(2)),
+      value: parseFloat(((count / total) * 100).toFixed(2))
     }));
 
     // 5️⃣ Return extended result
     return { sensorId, from, to, distribution };
   } catch (error) {
-    console.error("Error fetching AQI distribution:", error);
+    console.error('Error fetching AQI distribution:', error);
     throw error;
   }
 };
-export const getAnalyticsTimeSeries = async (
-  sensorId: string,
-  start: string,
-  end: string,
-) => {
-
-  const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}`);
+export const getAnalyticsTimeSeries = async (sensorId: string, start: string, end: string) => {
+  const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}`);
   return response.data.data;
 };
 export const getOneStation = async (id: string) => {
@@ -243,7 +257,7 @@ export const getOneStation = async (id: string) => {
   return response.data;
 };
 export const getHistoricalData = async (sensorId: number, from: string, to: string) => {
-  const response = await api.get(`/stations/${sensorId}/readings?from=${from}&to={to}`);
+  const response = await api.get(`/stations/${sensorId}/readings/?from=${from}&to={to}`);
   return response.data;
 };
 export const getStationsCron = async () => {
@@ -258,34 +272,28 @@ export const getFeedback = async () => {
 
 export const getAlerts = async (sensorId: string | undefined, start: string, end: string) => {
   // const response = await api.get(`/alerts/log `);
-  if(!sensorId) return;
+  if (!sensorId) return;
 
-  console.log('getAlerts function called')
+  console.log('getAlerts function called');
 
-  const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`)
+  const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}&alertLevel=101`);
 
   return response.data.data;
 };
 
-
 export const getAlertsSummary = async (sensorId: string, start: string, end: string) => {
   try {
     // ✅ Hit your real API endpoint
-    const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`)
+    const response = await api.get(`/stations/${sensorId}/readings/?from=${start}&to=${end}&alertLevel=101`);
 
     const alerts = response.data.data;
 
     if (!Array.isArray(alerts)) {
-      throw new Error("Invalid response format: expected an array");
+      throw new Error('Invalid response format: expected an array');
     }
 
     // ✅ Define expected alert levels
-    const levels = [
-      "Unhealthy for Sensitive Groups",
-      "Unhealthy",
-      "Very Unhealthy",
-      "Hazardous"
-    ];
+    const levels = ['Unhealthy for Sensitive Groups', 'Unhealthy', 'Very Unhealthy', 'Hazardous'];
 
     // ✅ Count occurrences per alertLevel
     const breakdown = levels.map((level) => ({
@@ -298,12 +306,10 @@ export const getAlertsSummary = async (sensorId: string, start: string, end: str
 
     return { total, breakdown };
   } catch (error: any) {
-    console.error("Failed to fetch alerts summary:", error.message);
+    console.error('Failed to fetch alerts summary:', error.message);
     return { total: 0, breakdown: [] };
   }
 };
-
-
 
 export const getUsers = async () => {
   const response = await api.get(`/users`);
@@ -319,7 +325,6 @@ export const updateUserStatus = async (userId: number, status: string) => {
     throw error;
   }
 };
-
 
 // export function useGetStations(page: number = 0, size: number = 10) {
 //   const fetchWithParams = (key: string) => fetcher([key, { params: { page, size } }]);
@@ -348,11 +353,9 @@ export const updateUserStatus = async (userId: number, status: string) => {
 //   return memoizedValue;
 // }
 
-
-
 //user haina status
 //nimefanya endpoints zote zianze na /api
 
 //progress ya reports, > cron job ku tuma report kwa email
-                   //  >  endpoint ya time?
+//  >  endpoint ya time?
 //                     > format report ya kushow from the frontend

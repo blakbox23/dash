@@ -14,7 +14,7 @@ export default defineConfig({
     proxy: {
       // Proxy API calls during local dev
       '/api': {
-        target: 'https://161.97.134.211:4443', // 👈 backend server
+        target: 'https://xp-backend.sytes.net', // 👈 backend server
         changeOrigin: true,
         secure: false
       }

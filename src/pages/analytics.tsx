@@ -64,11 +64,8 @@ function Analytics() {
   const [reportStation, setReportStation] = useState<Station>(stations[0]);
   const [showPreview, setShowPreview] = useState(false);
 
-  
   const handleToggleStation = (id: string) => {
-    setSelectedStations((prev) =>
-      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
-    );
+    setSelectedStations((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
   };
 
   const handleSubmitSubscribe = async () => {
@@ -77,7 +74,8 @@ function Analytics() {
       openSnackbar({ open: true, message: 'Stations updated!', variant: 'success' } as SnackbarProps);
     } catch (err) {
       console.error(err);
-      openSnackbar({ open: true, message: 'Failed to update stations!', variant: 'error' } as SnackbarProps);    }
+      openSnackbar({ open: true, message: 'Failed to update stations!', variant: 'error' } as SnackbarProps);
+    }
     setOpenSubscribeDialog(false);
   };
 
@@ -129,48 +127,30 @@ function Analytics() {
         </div>
 
         {/* ================= Subscribe Dialog ================= */}
-        <Dialog
-  open={openSubscribeDialog}
-  onClose={() => setOpenSubscribeDialog(false)}
-  maxWidth="sm"
-  fullWidth
->
-  <DialogTitle>Subscribe to Monthly Reports</DialogTitle>
+        <Dialog open={openSubscribeDialog} onClose={() => setOpenSubscribeDialog(false)} maxWidth="sm" fullWidth>
+          <DialogTitle>Subscribe to Monthly Reports</DialogTitle>
 
-  <DialogContent dividers>
-    <Autocomplete
-      multiple
-      options={stations}
-      getOptionLabel={(option) => option.name}
-      // ✅ use id consistently for both value and mapping
-      value={stations.filter((s) => selectedStations.includes(s.id))}
-      onChange={(_, newValue) =>
-        setSelectedStations(newValue.map((s) => s.id))
-      }
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Report Stations"
-          placeholder="Search stations..."
-        />
-      )}
-    />
-  </DialogContent>
+          <DialogContent dividers>
+            <Autocomplete
+              multiple
+              options={stations}
+              getOptionLabel={(option) => option.name}
+              // ✅ use id consistently for both value and mapping
+              value={stations.filter((s) => selectedStations.includes(s.id))}
+              onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.id))}
+              renderInput={(params) => <TextField {...params} label="Report Stations" placeholder="Search stations..." />}
+            />
+          </DialogContent>
 
-  <DialogActions>
-    <Button onClick={() => setOpenSubscribeDialog(false)} color="secondary">
-      Cancel
-    </Button>
-    <Button
-      onClick={handleSubmitSubscribe}
-      variant="contained"
-      disabled={selectedStations.length === 0}
-    >
-      Subscribe
-    </Button>
-  </DialogActions>
-</Dialog>
-
+          <DialogActions>
+            <Button onClick={() => setOpenSubscribeDialog(false)} color="secondary">
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitSubscribe} variant="contained" disabled={selectedStations.length === 0}>
+              Subscribe
+            </Button>
+          </DialogActions>
+        </Dialog>
 
         {/* ================= Generate Full Report Dialog ================= */}
         <Dialog open={openReportDialog} onClose={() => setOpenReportDialog(false)} maxWidth="sm" fullWidth>
@@ -202,7 +182,9 @@ function Analytics() {
             />
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpenReportDialog(false)} color="secondary">Cancel</Button>
+            <Button onClick={() => setOpenReportDialog(false)} color="secondary">
+              Cancel
+            </Button>
             <Button onClick={handleGenerateReport} variant="contained" disabled={!reportStart || !reportEnd || !reportStation}>
               Generate
             </Button>
@@ -220,7 +202,6 @@ function Analytics() {
             />
           </Grid>
         )}
-
 
         <Grid item xs={12} sm={12} lg={12} sx={{ mb: 6 }}>
           <Grid item>

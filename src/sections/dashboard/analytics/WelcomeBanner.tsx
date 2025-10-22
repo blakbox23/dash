@@ -24,7 +24,7 @@ const WelcomeBanner = () => {
       sx={{
         background:
           theme.direction === ThemeDirection.RTL
-            ? `linear-gradient(60.38deg, ${theme.palette.primary.lighter} 114%, ${theme.palette.primary.light} 34.42%, ${theme.palette.primary.main} 60.95%, ${theme.palette.primary.dark} 84.83%, ${theme.palette.primary.darker} 104.37%)`
+            ? `linear-gradient(60.38deg, ${theme.palette.primary.lighter} 114%, ${theme.palette.primary.light} 34.42%, ${theme.palette.primary.main} 60.95%, ${theme.palette.primary.dark} 84.83%, ${theme.palette.primary.darker} 94.37%)`
             : `linear-gradient(250.38deg, ${theme.palette.primary.lighter} 2.39%, ${theme.palette.primary.light} 34.42%, ${theme.palette.primary.main} 60.95%, ${theme.palette.primary.dark} 84.83%, ${theme.palette.primary.darker} 104.37%)`
       }}
     >
@@ -59,8 +59,8 @@ const WelcomeBanner = () => {
         </Grid>
         <Grid item sm={6} xs={12} sx={{ display: { xs: 'none', sm: 'initial' } }}>
           <Stack sx={{ position: 'relative', pr: { sm: 3, md: 8 } }} justifyContent="center" alignItems="flex-end">
-            {/* <img src={WelcomeImage} alt="Welcome" /> */}
-            <Box sx={{ position: 'absolute', bottom: 0, right: '10%' }}>{/* <img src={WelcomeImageArrow} alt="Welcome Arrow" /> */}</Box>
+            <Box sx={{ position: 'absolute', bottom: 0, right: '10%' }}>
+              </Box>
           </Stack>
         </Grid>
       </Grid>

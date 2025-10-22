@@ -19,8 +19,8 @@ import {
 } from '@mui/material';
 import { EditOutlined, LogoutOutlined } from '@ant-design/icons';
 import useAuth from 'hooks/useAuth';
-import { getStations } from 'api/maps-api';
-import axiosServices from 'utils/axios';
+import { getStations, updateUser, User } from 'api/maps-api';
+import { toast, Toaster } from 'sonner';
 
 interface Props {
   handleLogout: () => void;
@@ -32,7 +32,7 @@ interface Station {
 }
 
 const ProfileTab = ({ handleLogout }: Props) => {
-  const { user } = useAuth(); // assuming updateUser updates context
+  const { user } = useAuth();
   const theme = useTheme();
 
   const [stations, setStations] = useState<Station[]>([]);
@@ -44,57 +44,66 @@ const ProfileTab = ({ handleLogout }: Props) => {
   const [email, setEmail] = useState('');
   const [selectedStations, setSelectedStations] = useState<string[]>([]);
 
-  // Fetch stations + populate user info
+  // --- Fetch stations once ---
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchStations = async () => {
       try {
-        const stationsData = await getStations();
-        setStations(stationsData);
-
-        if (user) {
-          setName(user.displayName || '');
-          setEmail(user.email || '');
-
-          // Load saved stations (either from user object or localStorage)
-          const localStations = JSON.parse(localStorage.getItem('reportStations') || '[]');
-          const fromUser = Array.isArray(user.reportStations)
-            ? user.reportStations.map((s: any) => (typeof s === 'string' ? s : s.id))
-            : [];
-
-          setSelectedStations(fromUser.length ? fromUser : localStations);
-        }
+        const data = await getStations();
+        setStations(data);
       } catch (err: any) {
         console.error(err.message || 'Failed to load stations');
+        toast.error('Failed to load stations');
       } finally {
         setLoading(false);
       }
     };
+    fetchStations();
+  }, []);
 
-    fetchData();
-  }, [user]);
+  // --- Populate fields when user or stations load ---
+  useEffect(() => {
+    if (!user || stations.length === 0) return;
 
+    setName(user.displayName || '');
+    setEmail(user.email || '');
+
+    const local = JSON.parse(localStorage.getItem('reportStations') || '[]');
+    const fromUser =
+      Array.isArray(user.reportStations) && user.reportStations.length > 0
+        ? user.reportStations.map((s: any) => (typeof s === 'string' ? s : s.id))
+        : [];
+
+    // Prefer user data > local storage
+    const chosen = fromUser.length > 0 ? fromUser : local;
+
+    // Validate IDs
+    const validIds = stations.map((s) => s.id);
+    const filtered = chosen.filter((id: string) => validIds.includes(id));
+
+    setSelectedStations(filtered);
+  }, [user, stations]);
+
+  // --- Save handler ---
   const handleSave = async () => {
     if (!user) return;
+
     setSaving(true);
+    const payload: User = {
+      displayName: name,
+      reportStations: selectedStations,
+      role: user.role
+    };
+
     try {
-      const payload = {
-        displayName: name,
-        reportStations: selectedStations, // expected to be array of IDs
-        role: user?.role
-      };
+      await updateUser(user.id, payload);
 
-      const response = await axiosServices.patch(`/api/v1/users/${user.id}`, payload);
-
-      // Keep frontend in sync
+      // Save locally
       localStorage.setItem('reportStations', JSON.stringify(selectedStations));
-
-
-      // Optionally update user context if your hook supports it
-      // updateUser?.(response.data);
-
+      toast.success('Profile updated successfully!');
       setOpen(false);
     } catch (err: any) {
       console.error(err.message || 'Failed to update profile');
+      toast.error(err.message || 'Failed to update profile');
     } finally {
       setSaving(false);
     }
@@ -102,8 +111,10 @@ const ProfileTab = ({ handleLogout }: Props) => {
 
   return (
     <>
+      <Toaster position="top-right" richColors />
+
       <List component="nav" sx={{ p: 0, '& .MuiListItemIcon-root': { minWidth: 32 } }}>
-        <ListItemButton onClick={() => setOpen(true)}>
+        <ListItemButton onClick={() => setOpen(true)} disabled={loading}>
           <ListItemIcon>
             <EditOutlined />
           </ListItemIcon>
@@ -151,6 +162,14 @@ const ProfileTab = ({ handleLogout }: Props) => {
             <>
               <TextField
                 fullWidth
+                label="Email"
+                variant="outlined"
+                margin="normal"
+                value={email}
+                disabled
+              />
+              <TextField
+                fullWidth
                 label="Full Name"
                 variant="outlined"
                 margin="normal"
@@ -158,18 +177,10 @@ const ProfileTab = ({ handleLogout }: Props) => {
                 onChange={(e) => setName(e.target.value)}
               />
 
-              <TextField
-                fullWidth
-                label="Email"
-                variant="outlined"
-                margin="normal"
-                value={email}
-                disabled
-              />
-
               <FormControl fullWidth margin="normal">
                 <Autocomplete
                   multiple
+                  disableCloseOnSelect
                   options={stations}
                   getOptionLabel={(option) => option.name}
                   value={stations.filter((s) => selectedStations.includes(s.id))}

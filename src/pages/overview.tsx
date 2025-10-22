@@ -2,11 +2,7 @@ import { useEffect, useState } from 'react';
 
 // material-ui
 import { useTheme } from '@mui/material/styles';
-import {
-  Grid,
-  SelectChangeEvent,
-  Typography
-} from '@mui/material';
+import { Grid, SelectChangeEvent, Typography } from '@mui/material';
 
 // project import
 import MainCard from 'components/MainCard';
@@ -22,6 +18,9 @@ import { getStations, getStationsCron, Station } from 'api/maps-api';
 import Legend from 'components/Legend';
 import CurrentReadingTable from 'sections/data-tables/CurrentReadingsTabletable';
 
+import SensorsOutlinedIcon from '@mui/icons-material/SensorsOutlined';
+import SensorsOffOutlinedIcon from '@mui/icons-material/SensorsOffOutlined';
+
 type PollutantType = 'aqi' | 'pm25' | 'pm10';
 
 // ==============================|| DASHBOARD - OVERVIEW ||============================== //
@@ -32,11 +31,29 @@ const DashboardAnalytics = () => {
   const [loading, setLoading] = useState(false);
   const [stations, setStations] = useState<Station[]>([]);
   const [selectedStation, setSelectedStation] = useState<Station | null>(null);
+
+  const [currentAlerts, setCurrentAlerts] = useState<number>(0);
+  const [averageAqi, setAverageAqi] = useState<number>(0);
+  const [offlineSensors, setOfflineSensors ] = useState<number>(0)
+
   useEffect(() => {
     const fetchStations = async () => {
       try {
         const stationsData = await getStations();
         setStations(stationsData);
+
+        // Calculate average AQI
+        const totalAqi = stationsData.reduce((sum: number, station: Station) => sum + (station.aqi || 0), 0);
+        const avgAqi = stationsData.length > 0 ? totalAqi / stationsData.length : 0;
+        setAverageAqi(avgAqi);
+
+        // Calculate current alerts (e.g. AQI > 100 or alertLevel !== "Good")
+        const alertsCount = stationsData.filter((station: Station) => station.aqi > 100).length;
+        setCurrentAlerts(alertsCount);
+
+        //offline sensors
+        const offlineCount = stationsData.filter((station: Station) => station.status === 'offline').length
+        setOfflineSensors(offlineCount)
       } catch (err: any) {
         console.log(err.message || 'Failed to load stations');
       } finally {
@@ -54,7 +71,7 @@ const DashboardAnalytics = () => {
         await getStationsCron();
       } catch (err: any) {
         console.log(err.message || 'Failed to load stations');
-      } 
+      }
     };
     // Initial fetch
     fetchStationsCron();
@@ -149,27 +166,17 @@ const DashboardAnalytics = () => {
           primary={stations.length}
           secondary="Active Sensors"
           color={theme.palette.secondary.main}
-          iconPrimary={BarChartOutlined}
+          iconPrimary={SensorsOutlinedIcon}
         />
       </Grid>
       <Grid item xs={12} lg={3} sm={6}>
-        <ReportCard
-          primary={50 - stations.length}
-          secondary="Offline sensors"
-          color={theme.palette.success.dark}
-          iconPrimary={FileTextOutlined}
-        />
+        <ReportCard primary={offlineSensors} secondary="Offline sensors" color={theme.palette.success.main} iconPrimary={SensorsOffOutlinedIcon} />
       </Grid>
       <Grid item xs={12} lg={3} sm={6}>
-        <ReportCard
-          primary="145"
-          secondary="Critical alerts in the last 24hrs"
-          color={theme.palette.error.main}
-          iconPrimary={CalendarOutlined}
-        />
+        <ReportCard primary={currentAlerts} secondary="Current alerts" color={theme.palette.error.main} iconPrimary={CalendarOutlined} />
       </Grid>
       <Grid item xs={12} lg={3} sm={6}>
-        <ReportCard primary="50µg/m³" secondary="Average AQI" color={theme.palette.primary.main} iconPrimary={DownloadOutlined} />
+        <ReportCard primary={`${averageAqi.toFixed(2)}µg/m³`} secondary="Average AQI" color={theme.palette.primary.main} iconPrimary={BarChartOutlined} />
       </Grid>
       <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />
 
@@ -200,7 +207,7 @@ const DashboardAnalytics = () => {
           </Grid>
           <Grid item />
         </Grid>
-        <MainCard sx={{ mt: 2 }} >
+        <MainCard sx={{ mt: 2 }}>
           <CurrentReadingTable />
         </MainCard>
       </Grid>

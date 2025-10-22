@@ -8,7 +8,7 @@
   "rewrites": [
     {
       "source": "/api/:path*",
-      "destination": "https://161.97.134.211:4443/api/:path*"
+      "destination": "https://xp-backend.sytes.net/api/:path*"
     },
     {
       "source": "/(.*)",
