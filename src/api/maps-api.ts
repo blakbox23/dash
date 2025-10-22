@@ -1,5 +1,6 @@
 import axios from 'axios';
 import useAuth from 'hooks/useAuth';
+import { parseCookies } from 'nookies';
 // import { useEffect, useMemo } from 'react';
 // import useSWR, { mutate } from 'swr';
 // import { fetcher } from 'utils/axios';
@@ -69,9 +70,10 @@ export type DistributionItem = {
 
 
 export type User = {
-  displayName: string;
-  reportStations: string[];
+  displayName?: string;
+  reportStations?: string[];
   role?: string ;
+  status?: string;
 }
 
 
@@ -94,21 +96,7 @@ export const updateUserReportStations = async (id?: string, reportStations?: str
   }
 };
 
-export const updateUser = async (id?: string, updatedUser?: User) => {
-  if (!id || !updatedUser) return;
 
-
-  try {
-    const response = await api.patch(`/users/${id}`, {
-      updatedUser
-    });
-
-    return response.data;
-  } catch (error: any) {
-    console.error('Failed to update user report stations:', error);
-    throw error.response?.data || error;
-  }
-};
 
 const classifyAqi = (aqi: number): string => {
   if (aqi <= 50) return 'Good';
@@ -253,6 +241,19 @@ export const updateUserStatus = async (userId: number, status: string) => {
   } catch (error: any) {
     console.error('Failed to update user status:', error);
     throw error;
+  }
+};
+
+export const updateUser = async (id?: string, updatedUser?: User) => {
+  if (!id || !updatedUser) return;
+  try {
+    const response = await api.patch(`/users/${id}`, {
+      ...updatedUser
+    });
+    return response.data;
+  } catch (error: any) {
+    console.error('Failed to update user report stations:', error);
+    throw error.response?.data || error;
   }
 };
 

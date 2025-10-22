@@ -36,6 +36,7 @@
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",
     "mui-datatables": "^4.3.0",
+    "nookies": "^2.5.2",
     "notistack": "^3.0.1",
     "process": "^0.11.10",
     "react": "^18.2.0",
