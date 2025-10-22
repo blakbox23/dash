@@ -84,7 +84,7 @@ import {
   UngroupOutlined
 } from '@ant-design/icons';
 
-import { getStations, getUsers, updateUserStatus } from 'api/maps-api';
+import { getStations, getUsers, updateUser, updateUserStatus } from 'api/maps-api';
 
 export type UsersTableDataProps = {
   id: number;
@@ -131,42 +131,49 @@ const EditAction = ({ row, table }: { row: Row<UsersTableDataProps>; table: Tabl
 
   const handleEditClick = async (e: MouseEvent<HTMLButtonElement>) => {
     const isEditing = meta?.selectedRow?.[row.id];
-  
-    if (meta?.setSelectedRow) {
-      meta.setSelectedRow((old: any) => ({
-        ...old,
-        [row.id]: !isEditing
-      }));
-    }
-  
+
+    // Toggle edit mode
+    meta?.setSelectedRow?.((old: any) => ({
+      ...old,
+      [row.id]: !isEditing
+    }));
+
+    // When saving
     if (isEditing) {
       const updatedRow = row.original;
       setSaving(true);
-  
+
       try {
-        const updated = await updateUserStatus(updatedRow.id, updatedRow.status);
-        if (meta?.updateData) meta.updateData(row.index, 'status', updated.status);
-        console.log('✅ Status updated successfully:', updated);
+        // ✅ Send both `status` and `role`
+        const updated = await updateUser(updatedRow.id.toString(), {
+          status: updatedRow.status,
+          role: updatedRow.role
+        });
+
+        // ✅ Update local table state for both fields
+        meta?.updateData?.(row.index, 'status', updated.status);
+        meta?.updateData?.(row.index, 'role', updated.role);
+
+        // ✅ Revert data safely (TypeScript-safe)
+        meta?.revertData?.(row.index, false);
+
+        console.log('✅ User updated successfully:', updated);
       } catch (error) {
-        console.error('❌ Failed to update user status:', error);
+        console.error('❌ Failed to update user:', error);
       } finally {
         setSaving(false);
       }
     }
   };
-  
 
   const handleCancelClick = () => {
-    if (meta?.revertData) meta.revertData(row.index, true);
-  
-    if (meta?.setSelectedRow) {
-      meta.setSelectedRow((old: any) => ({
-        ...old,
-        [row.id]: false
-      }));
-    }
+    // ✅ Optional chaining avoids TypeScript error
+    meta?.revertData?.(row.index, true);
+    meta?.setSelectedRow?.((old: any) => ({
+      ...old,
+      [row.id]: false
+    }));
   };
-  
 
   const isEditing = meta?.selectedRow?.[row.id];
 
@@ -181,18 +188,13 @@ const EditAction = ({ row, table }: { row: Row<UsersTableDataProps>; table: Tabl
       )}
       <Tooltip title={isEditing ? (saving ? 'Saving...' : 'Save') : 'Edit'}>
         <IconButton color={isEditing ? 'success' : 'primary'} onClick={handleEditClick} disabled={saving}>
-          {saving ? (
-            <StopOutlined spin />
-          ) : isEditing ? (
-            <SendOutlined />
-          ) : (
-            <EditTwoTone />
-          )}
+          {saving ? <StopOutlined spin /> : isEditing ? <SendOutlined /> : <EditTwoTone />}
         </IconButton>
       </Tooltip>
     </Stack>
   );
 };
+
 
 interface ReactTableProps {
   defaultColumns: ColumnDef<UsersTableDataProps>[];
@@ -563,16 +565,61 @@ const UsersTable = () => {
         }
       },
 
+      // {
+      //   id: 'role',
+      //   header: 'Role',
+      //   footer: 'Role',
+      //   accessorKey: 'role',
+      //   dataType: 'text',
+      //   enableGrouping: false,
+      //   enableColumnFilter: false
+   
+      // },
+
       {
         id: 'role',
         header: 'Role',
-        footer: 'Role',
         accessorKey: 'role',
-        dataType: 'text',
-        enableGrouping: false,
-        enableColumnFilter: false
-   
+        enableColumnFilter: false,
+        cell: ({ getValue, row, table }) => {
+          const meta = table.options.meta;
+          const isEditing = meta?.selectedRow?.[row.id];
+          const role = getValue() as string;
+      
+          const color = 'warning';
+      
+          if (isEditing) {
+            return (
+              <select
+                value={role}
+                onChange={(e) =>
+                  meta?.updateData(row.index, 'role', e.target.value)
+                }
+                style={{
+                  padding: '6px 10px',
+                  borderRadius: '6px',
+                  border: '1px solid #ccc',
+                  outline: 'none',
+                }}
+              >
+                <option value="researcher">Researcher</option>
+                <option value="admin">Admin</option>
+              </select>
+            );
+          }
+      
+          return (
+            <Chip
+              label={role}
+              color={color}
+              size="small"
+              variant="outlined"
+              sx={{ borderRadius: '16px', textTransform: 'capitalize' }}
+            />
+          );
+        },
       },
+      
 
       {
         id: 'status',

@@ -10,6 +10,7 @@ import authReducer from 'contexts/auth-reducer/auth';
 import Loader from 'components/Loader';
 import axiosServices from 'utils/axios';
 import { AuthProps, JWTContextType } from 'types/auth';
+import { destroyCookie, setCookie } from 'nookies';
 
 // ==============================|| INITIAL STATE ||============================== //
 
@@ -39,10 +40,17 @@ const verifyToken = (token: string | null): boolean => {
 const setSession = (accessToken?: string | null) => {
   if (accessToken) {
     localStorage.setItem('serviceToken', accessToken);
+    // setCookie(null, 'serviceToken', accessToken, {
+    //   path: '/',
+    //   maxAge: 60 * 60,
+    // })
     axiosServices.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
   } else {
     localStorage.removeItem('serviceToken');
     localStorage.removeItem('refreshToken');
+    // destroyCookie(null, 'serviceToken')
+    // destroyCookie(null, 'refreshToken')
+
     localStorage.removeItem('role');
     localStorage.removeItem('user');
     delete axiosServices.defaults.headers.common.Authorization;
@@ -125,6 +133,12 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
     localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('role', user.role);
+
+    // setCookie(null, 'refreshToken', refreshToken, {
+    //   path: '/',
+    //   maxAge: 60 * 60,
+    // })
+
 
     setSession(accessToken);
 
