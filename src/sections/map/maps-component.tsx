@@ -123,6 +123,13 @@ export default function MapComponent({
       marker.bindPopup(`
         <div class="p-2">
           <div class="font-semibold text-[#101828]">${station.name}</div>
+            ${
+              station.timeStamp
+                ? `<div class="text-xs text-[#98A2B3] mb-1">
+                    ${new Date(station.timeStamp).toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })}
+                  </div>`
+                : ""
+      }
           <div class="text-sm text-[#667085]">
             ${selectedPollutant.toUpperCase()}: ${value}${unit} - ${getPollutantLevel(value, selectedPollutant)}
           </div>
