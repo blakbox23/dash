@@ -27,7 +27,20 @@ export default function MapComponent({
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<L.Map | null>(null);
   const markerGroupRef = useRef<L.LayerGroup | null>(null);
+  const timeRef = useRef<HTMLSpanElement>(null);
 
+  useEffect(() => {
+    const updateTime = () => {
+      if (timeRef.current) {
+        timeRef.current.textContent = new Date().toLocaleString("en-KE", {
+          timeZone: "Africa/Nairobi",
+        });
+      }
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60_000);
+    return () => clearInterval(interval);
+  }, []);
   // Helper to create custom icon
   const createCustomIcon = (
     station: Station,
@@ -155,5 +168,12 @@ export default function MapComponent({
     onStationSelect,
   ]);
 
-  return <div ref={mapRef} style={{ height: "86vh", width: "100%" }} />;
+  return (
+    <div className="h-full">
+      <div className="flex items-center text-sm text-gray-700 mb-2">
+        <span ref={timeRef} className="ml-2 font-medium" />
+      </div>
+      <div ref={mapRef} style={{ height: "86vh", width: "100%" }} />
+    </div>
+  );
 }
