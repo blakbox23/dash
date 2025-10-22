@@ -14,7 +14,7 @@ import {
   TextField,
 } from "@mui/material";
 
-import { getAnalyticsTimeSeries, getHistoricalData, HistoricalData, Station } from "api/maps-api";
+import { getAnalyticsTimeSeries, HistoricalData, Station } from "api/maps-api";
 import { CheckOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 

@@ -207,7 +207,7 @@ export default function AnalyticsTimeSeries({ stations, pollutant }: TrendsChart
         </Box>
 
         {/* Chart */}
-        {historicalData.length > 1 ?
+        {historicalData.length > 0 ?
           <ReactApexChart options={options} series={series} type="line" height={400} />
         :
         <EmptyTable msg = 'No data for this sensor in the seleced period'/>

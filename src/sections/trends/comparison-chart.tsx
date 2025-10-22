@@ -14,7 +14,7 @@ import {
   TextField,
 } from "@mui/material";
 
-import { getAnalyticsTimeSeries,getHistoricalData, HistoricalData, Station } from "api/maps-api";
+import { getAnalyticsTimeSeries, HistoricalData, Station } from "api/maps-api";
 import { CheckOutlined } from "@ant-design/icons";
 import { useParams } from "react-router-dom";
 
@@ -89,7 +89,7 @@ export default function ComparisonChart({
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!start || !end) return;
+      if (!start || !end || !sensorId1 || !sensorId2) return;
       try {
         const res1 = await getAnalyticsTimeSeries(
           sensorId1 ?? "",
