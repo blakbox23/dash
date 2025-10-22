@@ -187,8 +187,8 @@ export default function ComparisonChart({
     },
     stroke: {
       curve: "smooth",
-      width: [3, 2],
-      dashArray: [0, 5],
+      width: [3, 3, 2],
+      dashArray: [0, 0, 5],
     },
     colors: [POLLUTANT_COLOR_MAP[selectedPollutant], "red"],
     markers: { size: 0 },
