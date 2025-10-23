@@ -203,6 +203,9 @@ export default function ComparisonChart({
         }`,
       },
       min: 0,
+      labels: {
+        formatter: (value: number) => Math.round(value).toString(),
+  },
     },
     tooltip: {
       shared: true,
