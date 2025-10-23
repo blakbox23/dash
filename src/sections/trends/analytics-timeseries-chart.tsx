@@ -123,7 +123,7 @@ export default function AnalyticsTimeSeries({ stations, pollutant }: TrendsChart
     ...(selectedPollutant !== 'aqi'
       ? [
           {
-            name: `WHO (${thresholdValue})`,
+            name: `WHO (${thresholdValue} μg/m³)`,
             data: Array(pollutantSeries.length).fill(thresholdValue),
           },
         ]
