@@ -40,10 +40,10 @@ const POLLUTANT_COLOR_MAP: Record<PollutantType, string> = {
 };
 
 // Example threshold values
-const THRESHOLD_MAP: Record<PollutantType, number> = {
-  aqi: 100,
-  pm25: 25,
-  pm10: 50,
+const THRESHOLD_MAP: Record<PollutantType, number | string> = {
+  aqi: '',
+  pm25: 15,
+  pm10: 45,
 };
 
 const pollutantOptions: PollutantOption[] = [
@@ -117,15 +117,21 @@ export default function TrendsChart({
   const series = [
     {
       name: `${currentPollutantOption.label}${
-        currentPollutantOption.unit ? ` (${currentPollutantOption.unit})` : ""
+        currentPollutantOption.unit ? ` (${currentPollutantOption.unit})` : ''
       }`,
       data: pollutantSeries,
     },
-    {
-      name: `Threshold (${thresholdValue})`,
-      data: Array(pollutantSeries.length).fill(thresholdValue),
-    },
+    // ✅ Only add WHO threshold series if pollutant is NOT AQI
+    ...(selectedPollutant !== 'aqi'
+      ? [
+          {
+            name: `WHO (${thresholdValue})`,
+            data: Array(pollutantSeries.length).fill(thresholdValue),
+          },
+        ]
+      : []),
   ];
+  
 
   const options: ApexCharts.ApexOptions = {
     chart: {
