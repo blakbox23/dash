@@ -34,13 +34,23 @@ export default function MapComponent({
       if (timeRef.current) {
         timeRef.current.textContent = new Date().toLocaleString("en-KE", {
           timeZone: "Africa/Nairobi",
+          hour12: false,
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
         });
+        
       }
     };
-    updateTime();
-    const interval = setInterval(updateTime, 60_000);
+  
+    updateTime(); // Initialize immediately
+    const interval = setInterval(updateTime, 1000); // 🔥 Update every second
     return () => clearInterval(interval);
   }, []);
+  
   // Helper to create custom icon
   const createCustomIcon = (
     station: Station,

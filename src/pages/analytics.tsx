@@ -64,6 +64,26 @@ function Analytics() {
   const [reportStation, setReportStation] = useState<Station>(stations[0]);
   const [showPreview, setShowPreview] = useState(false);
 
+    // --- Populate fields when user or stations load ---
+    useEffect(() => {
+      if (!user || stations.length === 0) return;
+  
+      const local = JSON.parse(localStorage.getItem('reportStations') || '[]');
+      const fromUser =
+        Array.isArray(user.reportStations) && user.reportStations.length > 0
+          ? user.reportStations.map((s: any) => (typeof s === 'string' ? s : s.id))
+          : [];
+  
+      // Prefer user data > local storage
+      const chosen = fromUser.length > 0 ? fromUser : local;
+  
+      // Validate IDs
+      const validIds = stations.map((s) => s.id);
+      const filtered = chosen.filter((id: string) => validIds.includes(id));
+  
+      setSelectedStations(filtered);
+    }, [user, stations]);
+
   const handleToggleStation = (id: string) => {
     setSelectedStations((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
   };
@@ -174,12 +194,34 @@ function Analytics() {
               sx={{ mb: 2 }}
               InputLabelProps={{ shrink: true }}
             />
-            <Autocomplete
-              options={stations}
-              getOptionLabel={(option) => option.name}
-              onChange={(_, value) => setReportStation(value ?? reportStation)}
-              renderInput={(params) => <TextField {...params} label="Select Station" placeholder="Search station..." />}
-            />
+            <FormControl fullWidth margin="normal">
+                <Autocomplete
+                  multiple
+                  disableCloseOnSelect
+                  options={stations}
+                  getOptionLabel={(option) => option.name}
+                  value={stations.filter((s) => selectedStations.includes(s.id))}
+                  onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.id))}
+                  renderTags={(value, getTagProps) =>
+                    value.map((option, index) => (
+                      <Chip
+                        label={option.name}
+                        {...getTagProps({ index })}
+                        key={option.id}
+                        sx={{ borderRadius: 1 }}
+                      />
+                    ))
+                  }
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Report Stations"
+                      placeholder="Select stations..."
+                      margin="normal"
+                    />
+                  )}
+                />
+              </FormControl>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenReportDialog(false)} color="secondary">
