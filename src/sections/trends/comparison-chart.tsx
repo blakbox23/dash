@@ -105,7 +105,7 @@ export default function ComparisonChart({
           Array.isArray(res1)
             ? res1.map((item) => ({
                 ...item,
-                date: item.timestamp,
+                date: item.timeStamp,
                 avg_aqi: item.aqi,
                 avg_pm25: item.pm25,
                 avg_pm10: item.pm10,
@@ -116,7 +116,7 @@ export default function ComparisonChart({
           Array.isArray(res2)
             ? res2.map((item) => ({
                 ...item,
-                date: item.timestamp,
+                date: item.timeStamp,
                 avg_aqi: item.aqi,
                 avg_pm25: item.pm25,
                 avg_pm10: item.pm10,
@@ -170,13 +170,13 @@ export default function ComparisonChart({
       name: `${stations.find((s) => s.sensorId === sensorId2)?.name ?? "Sensor 2"}`,
       data: pollutantSeries(data2),
     },
-    {
-      name: `Threshold (${thresholdValue})`,
-    data: data1.map((d) => ({
-      x: new Date(d.timeStamp),
-      y: thresholdValue,
-       })),
-    },
+    // {
+    //   name: `Threshold (${thresholdValue})`,
+    // data: data1.map((d) => ({
+    //   x: new Date(d.timeStamp),
+    //   y: thresholdValue,
+    //    })),
+    // },
   ];
 
   const options: ApexCharts.ApexOptions = {
@@ -187,8 +187,8 @@ export default function ComparisonChart({
     },
     stroke: {
       curve: "smooth",
-      width: [3, 3, 2],
-      dashArray: [0, 0, 5],
+      width: [3, 2],
+      dashArray: [0, 0],
     },
     colors: [POLLUTANT_COLOR_MAP[selectedPollutant], "red"],
     markers: { size: 0 },

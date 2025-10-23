@@ -3680,6 +3680,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/nookies@npm:^2.0.3":
+  version: 2.0.3
+  resolution: "@types/nookies@npm:2.0.3"
+  dependencies:
+    nookies: "npm:*"
+  checksum: 10c0/18dcde23325bb728fee59ff35aef8e0884ea554e402ebbe50572e653b608b1fc1b7382c624e03f78469b1f25ebd75bca24dfab5fd209974cab5fadeab6944a10
+  languageName: node
+  linkType: hard
+
 "@types/pako@npm:^2.0.3":
   version: 2.0.4
   resolution: "@types/pako@npm:2.0.4"
@@ -4165,6 +4174,7 @@ __metadata:
     "@types/leaflet": "npm:^1"
     "@types/lodash": "npm:^4.14.197"
     "@types/node": "npm:^20.5.0"
+    "@types/nookies": "npm:^2.0.3"
     "@types/react": "npm:^18.2.20"
     "@types/react-csv": "npm:^1.1.10"
     "@types/react-dom": "npm:^18.2.7"
@@ -9503,7 +9513,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nookies@npm:^2.5.2":
+"nookies@npm:*, nookies@npm:^2.5.2":
   version: 2.5.2
   resolution: "nookies@npm:2.5.2"
   dependencies:
