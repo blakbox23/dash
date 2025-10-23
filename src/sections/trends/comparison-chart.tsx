@@ -170,13 +170,7 @@ export default function ComparisonChart({
       name: `${stations.find((s) => s.sensorId === sensorId2)?.name ?? "Sensor 2"}`,
       data: pollutantSeries(data2),
     },
-    // {
-    //   name: `Threshold (${thresholdValue})`,
-    // data: data1.map((d) => ({
-    //   x: new Date(d.timeStamp),
-    //   y: thresholdValue,
-    //    })),
-    // },
+ 
   ];
 
   const options: ApexCharts.ApexOptions = {
@@ -204,10 +198,12 @@ export default function ComparisonChart({
       },
       min: 0,
     },
+
     tooltip: {
       shared: true,
       intersect: false,
     },
+
     legend: {
       position: "top",
       horizontalAlign: "right",
