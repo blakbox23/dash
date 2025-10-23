@@ -54,14 +54,14 @@ const dashboard: NavItemType = {
 
       breadcrumbs: true
     },
-    {
-      id: 'alerts',
-      title: <FormattedMessage id="Alerts" />,
-      type: 'item',
-      url: '/alerts',
-      icon: icons.WarningAmberOutlinedIcon,
-      breadcrumbs: false,
-    },
+    // {
+    //   id: 'alerts',
+    //   title: <FormattedMessage id="Alerts" />,
+    //   type: 'item',
+    //   url: '/alerts',
+    //   icon: icons.WarningAmberOutlinedIcon,
+    //   breadcrumbs: false,
+    // },
     {
       id: 'feedback',
       title: <FormattedMessage id="Feedback" />,

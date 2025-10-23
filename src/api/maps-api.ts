@@ -170,7 +170,7 @@ export const getAqiDistribution = async (
   }
 };
 export const getAnalyticsTimeSeries = async (sensorId: string, start: string, end: string) => {
-  const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}`);
+  const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&direction=asc&sort=timeStamp`);
   return response.data.data;
 };
 export const getOneStation = async (id: string) => {
@@ -201,27 +201,24 @@ export const getFeedback = async () => {
 
 export const getAlertsSummary = async (sensorId: string, start: string, end: string) => {
   try {
-    // ✅ Hit your real API endpoint
     const response = await api.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`);
-
     const alerts = response.data.data;
 
     if (!Array.isArray(alerts)) {
       throw new Error('Invalid response format: expected an array');
     }
 
-    // ✅ Define expected alert levels
+    // Define expected alert levels
     const levels = ['Unhealthy for Sensitive Groups', 'Unhealthy', 'Very Unhealthy', 'Hazardous'];
 
-    // ✅ Count occurrences per alertLevel
+    // Count occurrences per alertLevel
     const breakdown = levels.map((level) => ({
       level,
       count: alerts.filter((a) => a.alertLevel === level).length
     }));
 
-    // ✅ Compute total
+    // Compute total
     const total = alerts.length;
-
     return { total, breakdown };
   } catch (error: any) {
     console.error('Failed to fetch alerts summary:', error.message);
