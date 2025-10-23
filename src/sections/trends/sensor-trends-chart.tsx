@@ -40,10 +40,10 @@ const POLLUTANT_COLOR_MAP: Record<PollutantType, string> = {
 };
 
 // Example threshold values
-const THRESHOLD_MAP: Record<PollutantType, number> = {
-  aqi: 100,
-  pm25: 25,
-  pm10: 50,
+const THRESHOLD_MAP: Record<PollutantType, number | string> = {
+  aqi: '',
+  pm25: 15,
+  pm10: 45,
 };
 
 const pollutantOptions: PollutantOption[] = [
@@ -122,7 +122,7 @@ export default function TrendsChart({
       data: pollutantSeries,
     },
     {
-      name: `Threshold (${thresholdValue})`,
+      name: `WHO (${thresholdValue})`,
       data: Array(pollutantSeries.length).fill(thresholdValue),
     },
   ];
