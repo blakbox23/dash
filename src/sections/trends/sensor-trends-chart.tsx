@@ -44,6 +44,10 @@ const THRESHOLD_MAP: Record<PollutantType, number | string> = {
   aqi: '',
   pm25: 15,
   pm10: 45,
+const THRESHOLD_MAP: Record<PollutantType, number | string> = {
+  aqi: '',
+  pm25: 15,
+  pm10: 45,
 };
 
 const pollutantOptions: PollutantOption[] = [
@@ -121,15 +125,10 @@ export default function TrendsChart({
       }`,
       data: pollutantSeries,
     },
-    // ✅ Only add WHO threshold series if pollutant is NOT AQI
-    ...(selectedPollutant !== 'aqi'
-      ? [
-          {
-            name: `WHO (${thresholdValue})`,
-            data: Array(pollutantSeries.length).fill(thresholdValue),
-          },
-        ]
-      : []),
+    {
+      name: `WHO (${thresholdValue})`,
+      data: Array(pollutantSeries.length).fill(thresholdValue),
+    },
   ];
   
 

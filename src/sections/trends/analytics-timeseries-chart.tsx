@@ -33,9 +33,13 @@ const POLLUTANT_COLOR_MAP: Record<PollutantType, string> = {
   aqi: '#3b82f6',
   pm25: '#3b82f6',
   pm10: '#3b82f6'
+  pm25: '#3b82f6',
+  pm10: '#3b82f6'
 };
 
 // WHO and NEMA threshold presets
+const THRESHOLD_PRESETS: Record<'WHO' | 'NEMA', Record<PollutantType, number | string>> = {
+  WHO: { aqi: '', pm25: 15, pm10: 45 },
 const THRESHOLD_PRESETS: Record<'WHO' | 'NEMA', Record<PollutantType, number | string>> = {
   WHO: { aqi: '', pm25: 15, pm10: 45 },
   NEMA: { aqi: 100, pm25: 35, pm10: 70 }
@@ -57,6 +61,7 @@ export default function AnalyticsTimeSeries({ stations, pollutant }: TrendsChart
 
   // Threshold state
   const [thresholdPreset, setThresholdPreset] = useState<'WHO' | 'NEMA' | 'Custom'>('WHO');
+  const [thresholds, setThresholds] = useState<Record<PollutantType, number | string>>({
   const [thresholds, setThresholds] = useState<Record<PollutantType, number | string>>({
     ...THRESHOLD_PRESETS['WHO']
   });
@@ -94,6 +99,8 @@ export default function AnalyticsTimeSeries({ stations, pollutant }: TrendsChart
 
   const isAQI = selectedPollutant === 'aqi';
 
+  const isAQI = selectedPollutant === 'aqi';
+
   const currentPollutantOption = pollutantOptions.find((p) => p.value === selectedPollutant)!;
   const thresholdValue = thresholds[selectedPollutant];
 
@@ -119,15 +126,10 @@ export default function AnalyticsTimeSeries({ stations, pollutant }: TrendsChart
       }`,
       data: pollutantSeries,
     },
-    // ✅ Only add WHO threshold series if pollutant is NOT AQI
-    ...(selectedPollutant !== 'aqi'
-      ? [
-          {
-            name: `WHO (${thresholdValue})`,
-            data: Array(pollutantSeries.length).fill(thresholdValue),
-          },
-        ]
-      : []),
+    {
+      name: `WHO (${thresholdValue})`,
+      data: Array(pollutantSeries.length).fill(thresholdValue)
+    }
   ];
   
 
@@ -186,6 +188,7 @@ export default function AnalyticsTimeSeries({ stations, pollutant }: TrendsChart
 
           {/* Threshold Preset Selector */}
           {/* <FormControl sx={{ minWidth: 120 }}>
+          {/* <FormControl sx={{ minWidth: 120 }}>
             <InputLabel>Preset</InputLabel>
             <Select
               value={thresholdPreset}
@@ -197,8 +200,10 @@ export default function AnalyticsTimeSeries({ stations, pollutant }: TrendsChart
               <MenuItem value="Custom">Custom</MenuItem>
             </Select>
           </FormControl> */}
+          </FormControl> */}
 
           {/* Custom Threshold Input */}
+          {/* {thresholdPreset === 'Custom' && (
           {/* {thresholdPreset === 'Custom' && (
             <TextField
               label="Threshold"
@@ -213,6 +218,7 @@ export default function AnalyticsTimeSeries({ stations, pollutant }: TrendsChart
               InputLabelProps={{ shrink: true }}
               sx={{ width: 120 }}
             />
+          )} */}
           )} */}
         </Box>
 
