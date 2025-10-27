@@ -147,7 +147,7 @@ const FullReport: React.FC<FullReportProps> = ({ start, end, station, onFinish }
       >
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-          <img src="/public/assets/identity/nccg_logo.png" alt="NCCG logo" style={{ height: '100px', objectFit: 'contain', margin: 'auto' }} />
+          <img src="/assets/identity/nccg_logo.png" alt="NCCG logo" style={{ height: '100px', objectFit: 'contain', margin: 'auto' }} />
         </div>
 
         <Typography variant="h5" gutterBottom align="center">
@@ -171,13 +171,13 @@ const FullReport: React.FC<FullReportProps> = ({ start, end, station, onFinish }
               </CardContent>
             </Card>
           </Grid>
-          <Grid item xs={4}>
+          {/* <Grid item xs={4}>
             <Card>
               <CardContent>
                 <Typography>Dominant Pollutant: {overview.dominantPollutant}</Typography>
               </CardContent>
             </Card>
-          </Grid>
+          </Grid> */}
           <Grid item xs={4}>
             <Card>
               <CardContent>

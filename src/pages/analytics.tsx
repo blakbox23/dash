@@ -4,20 +4,13 @@ import {
   Box,
   Button,
   Card,
-  Checkbox,
   Chip,
-  Container,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   FormControl,
-  FormControlLabel,
-  FormGroup,
-  FormLabel,
   Grid,
-  Radio,
-  RadioGroup,
   TextField,
   Typography,
   useTheme
@@ -57,36 +50,35 @@ function Analytics() {
   const [openSubscribeDialog, setOpenSubscribeDialog] = useState(false);
   const [openReportDialog, setOpenReportDialog] = useState(false);
 
-  // ✅ new state for the report dialog
-  const [openReport, setOpenReport] = useState(false);
   const [reportStart, setReportStart] = useState('');
   const [reportEnd, setReportEnd] = useState('');
-  const [reportStation, setReportStation] = useState<Station>(stations[0]);
+  const [reportStation, setReportStation] = useState<Station | null>(null);
   const [showPreview, setShowPreview] = useState(false);
 
-    // --- Populate fields when user or stations load ---
-    useEffect(() => {
-      if (!user || stations.length === 0) return;
-  
-      const local = JSON.parse(localStorage.getItem('reportStations') || '[]');
-      const fromUser =
-        Array.isArray(user.reportStations) && user.reportStations.length > 0
-          ? user.reportStations.map((s: any) => (typeof s === 'string' ? s : s.id))
-          : [];
-  
-      // Prefer user data > local storage
-      const chosen = fromUser.length > 0 ? fromUser : local;
-  
-      // Validate IDs
-      const validIds = stations.map((s) => s.id);
-      const filtered = chosen.filter((id: string) => validIds.includes(id));
-  
-      setSelectedStations(filtered);
-    }, [user, stations]);
+  // --- Populate selected stations when user or stations load ---
+  useEffect(() => {
+    if (!user || stations.length === 0) return;
 
-  const handleToggleStation = (id: string) => {
-    setSelectedStations((prev) => (prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]));
-  };
+    const local = JSON.parse(localStorage.getItem('reportStations') || '[]');
+    const fromUser =
+      Array.isArray(user.reportStations) && user.reportStations.length > 0
+        ? user.reportStations.map((s: any) => (typeof s === 'string' ? s : s.id))
+        : [];
+
+    const chosen = fromUser.length > 0 ? fromUser : local;
+
+    // Validate IDs
+    const validIds = stations.map((s) => s.id);
+    const filtered = chosen.filter((id: string) => validIds.includes(id));
+
+    setSelectedStations(filtered);
+  }, [user, stations]);
+
+  useEffect(() => {
+    if (stations.length > 0 && !reportStation) {
+      setReportStation(stations[0]);
+    }
+  }, [stations]);
 
   const handleSubmitSubscribe = async () => {
     try {
@@ -146,22 +138,25 @@ function Analytics() {
           </Button>
         </div>
 
-        {/* ================= Subscribe Dialog ================= */}
+        {/* ================= Subscribe Dialog (multiple) ================= */}
         <Dialog open={openSubscribeDialog} onClose={() => setOpenSubscribeDialog(false)} maxWidth="sm" fullWidth>
           <DialogTitle>Subscribe to Monthly Reports</DialogTitle>
-
           <DialogContent dividers>
             <Autocomplete
               multiple
+              disableCloseOnSelect
               options={stations}
               getOptionLabel={(option) => option.name}
-              // ✅ use id consistently for both value and mapping
               value={stations.filter((s) => selectedStations.includes(s.id))}
               onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.id))}
-              renderInput={(params) => <TextField {...params} label="Report Stations" placeholder="Search stations..." />}
+              renderTags={(value, getTagProps) =>
+                value.map((option, index) => (
+                  <Chip label={option.name} {...getTagProps({ index })} key={option.id} sx={{ borderRadius: 1 }} />
+                ))
+              }
+              renderInput={(params) => <TextField {...params} label="Select stations" placeholder="Choose stations..." />}
             />
           </DialogContent>
-
           <DialogActions>
             <Button onClick={() => setOpenSubscribeDialog(false)} color="secondary">
               Cancel
@@ -172,7 +167,7 @@ function Analytics() {
           </DialogActions>
         </Dialog>
 
-        {/* ================= Generate Full Report Dialog ================= */}
+        {/* ================= Generate Full Report Dialog (single) ================= */}
         <Dialog open={openReportDialog} onClose={() => setOpenReportDialog(false)} maxWidth="sm" fullWidth>
           <DialogTitle>Generate Full Report</DialogTitle>
           <DialogContent dividers>
@@ -195,33 +190,16 @@ function Analytics() {
               InputLabelProps={{ shrink: true }}
             />
             <FormControl fullWidth margin="normal">
-                <Autocomplete
-                  multiple
-                  disableCloseOnSelect
-                  options={stations}
-                  getOptionLabel={(option) => option.name}
-                  value={stations.filter((s) => selectedStations.includes(s.id))}
-                  onChange={(_, newValue) => setSelectedStations(newValue.map((s) => s.id))}
-                  renderTags={(value, getTagProps) =>
-                    value.map((option, index) => (
-                      <Chip
-                        label={option.name}
-                        {...getTagProps({ index })}
-                        key={option.id}
-                        sx={{ borderRadius: 1 }}
-                      />
-                    ))
-                  }
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label="Report Stations"
-                      placeholder="Select stations..."
-                      margin="normal"
-                    />
-                  )}
-                />
-              </FormControl>
+              <Autocomplete
+                options={stations}
+                getOptionLabel={(option) => option.name}
+                value={stations.find((s) => s.id === reportStation?.id) || null}
+                onChange={(_, newValue) => setReportStation(newValue)}
+                renderInput={(params) => (
+                  <TextField {...params} label="Report Station" placeholder="Select a station..." margin="normal" />
+                )}
+              />
+            </FormControl>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setOpenReportDialog(false)} color="secondary">
@@ -234,7 +212,7 @@ function Analytics() {
         </Dialog>
 
         {/* ================= Show Full Report Preview ================= */}
-        {showPreview && (
+        {showPreview && reportStation && (
           <Grid item xs={12} sx={{ mt: 4 }}>
             <FullReport
               start={reportStart}
@@ -246,11 +224,9 @@ function Analytics() {
         )}
 
         <Grid item xs={12} sm={12} lg={12} sx={{ mb: 6 }}>
-          <Grid item>
-            <Typography variant="h4" sx={{ mb: 1 }}>
-              Time series chart
-            </Typography>
-          </Grid>
+          <Typography variant="h4" sx={{ mb: 1 }}>
+            Time series chart
+          </Typography>
           <AnalyticsTimeSeries stations={stations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
         </Grid>
 
@@ -275,11 +251,9 @@ function Analytics() {
         </Grid>
 
         <Grid item xs={12} sm={12} lg={12}>
-          <Grid item>
-            <Typography variant="h4" sx={{ mb: 1 }}>
-              Comparison chart
-            </Typography>
-          </Grid>
+          <Typography variant="h4" sx={{ mb: 1 }}>
+            Comparison chart
+          </Typography>
           <ComparisonChart stations={stations} pollutant={'aqi'} pollutantLabel={''} pollutantUnit={''} />
         </Grid>
       </Grid>

@@ -86,7 +86,7 @@ export const updateUserReportStations = async (id?: string, reportStations?: str
   }
 
   try {
-    const response = await axiosServices.patch(`/users/${id}`, {
+    const response = await axiosServices.patch(`users/${id}`, {
       reportStations
     });
 
@@ -133,7 +133,7 @@ export const getAqiDistribution = async (
 
   try {
     // 1️⃣ Fetch readings from backto
-    const response = await axiosServices.get(`/stations/${sensorId}/readings?from=${from}&to=${to}`);
+    const response = await axiosServices.get(`stations/${sensorId}/readings?from=${from}&to=${to}`);
     const rawReadings: Reading[] = response.data.data;
 
     if (!Array.isArray(rawReadings) || rawReadings.length === 0) {
@@ -171,38 +171,38 @@ export const getAqiDistribution = async (
   }
 };
 export const getAnalyticsTimeSeries = async (sensorId: string, start: string, end: string) => {
-  const response = await axiosServices.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&direction=asc&sort=timeStamp`);
+  const response = await axiosServices.get(`stations/${sensorId}/readings?from=${start}&to=${end}&direction=asc&sort=timeStamp`);
   return response.data.data;
 };
 export const getOneStation = async (id: string) => {
-  const response = await axiosServices.get(`/stations/${id}`);
+  const response = await axiosServices.get(`stations/${id}`);
   return response.data;
 };
 
 export const getStationsCron = async () => {
-  const response = await axiosServices.get(`/sync/stations`);
+  const response = await axiosServices.get(`sync/stations`);
   return response.data;
 };
 
 export const getFeedback = async () => {
-  const response = await axiosServices.get(`/feedback`);
+  const response = await axiosServices.get(`feedback`);
   return response.data.data;
 };
 
 // export const getAlerts = async (sensorId: string | undefined, start: string, end: string) => {
-//   // const response = await axiosServices.get(`/alerts/log `);
+//   // const response = await axiosServices.get(`alerts/log `);
 //   if (!sensorId) return;
 
 //   console.log('getAlerts function called');
 
-//   const response = await axiosServices.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`);
+//   const response = await axiosServices.get(`stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`);
 
 //   return response.data.data;
 // };
 
 export const getAlertsSummary = async (sensorId: string, start: string, end: string) => {
   try {
-    const response = await axiosServices.get(`/stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`);
+    const response = await axiosServices.get(`stations/${sensorId}/readings?from=${start}&to=${end}&alertLevel=101`);
     const alerts = response.data.data;
 
     if (!Array.isArray(alerts)) {
@@ -228,13 +228,13 @@ export const getAlertsSummary = async (sensorId: string, start: string, end: str
 };
 
 export const getUsers = async () => {
-  const response = await axiosServices.get(`/users`);
+  const response = await axiosServices.get(`users`);
   return response.data.data;
 };
 
 export const updateUserStatus = async (userId: number, status: string) => {
   try {
-    const response = await axiosServices.patch(`/users/${userId}`, { status });
+    const response = await axiosServices.patch(`users/${userId}`, { status });
     return response.data.data;
   } catch (error: any) {
     console.error('Failed to update user status:', error);
@@ -245,7 +245,7 @@ export const updateUserStatus = async (userId: number, status: string) => {
 export const updateUser = async (id?: string, updatedUser?: User) => {
   if (!id || !updatedUser) return;
   try {
-    const response = await axiosServices.patch(`/users/${id}`, {
+    const response = await axiosServices.patch(`users/${id}`, {
       ...updatedUser
     });
     return response.data;

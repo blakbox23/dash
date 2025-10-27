@@ -1,122 +1,87 @@
-import React, { createContext, useEffect, useReducer } from 'react';
+import React, { createContext, useEffect, useState } from 'react';
 import jwtDecode, { JwtPayload } from 'jwt-decode';
 import { Chance } from 'chance';
-
-// reducer - state management
-import { LOGIN, LOGOUT } from 'contexts/auth-reducer/actions';
-import authReducer from 'contexts/auth-reducer/auth';
-
-// project import
-import Loader from 'components/Loader';
 import axiosServices from 'utils/axios';
+import Loader from 'components/Loader';
 import { AuthProps, JWTContextType } from 'types/auth';
-import { destroyCookie, setCookie } from 'nookies';
-
-// ==============================|| INITIAL STATE ||============================== //
 
 const chance = new Chance();
 
-const initialState: AuthProps = {
-  isLoggedIn: false,
-  isInitialized: false,
-  user: null
-};
-
-// ==============================|| ENV CONFIG ||============================== //
-
-const API_BASE_URL = import.meta.env.VITE_APP_API_URL || 'http://localhost:4000';
-const AUTH_URL = `${API_BASE_URL}/auth`;
+const JWTContext = createContext<JWTContextType | null>(null);
 
 // ==============================|| HELPERS ||============================== //
 
-// verify if access token is valid
 const verifyToken = (token: string | null): boolean => {
   if (!token) return false;
   try {
     const decoded = jwtDecode<JwtPayload>(token);
-    if (!decoded.exp) return false;
-    return decoded.exp > Date.now() / 1000;
-  } catch (err) {
+    return decoded.exp ? decoded.exp > Date.now() / 1000 : false;
+  } catch {
     return false;
   }
 };
 
-// set or clear Authorization header
 const setSession = (accessToken?: string | null) => {
   if (accessToken) {
     localStorage.setItem('serviceToken', accessToken);
-    // setCookie(null, 'serviceToken', accessToken, {
-    //   path: '/',
-    //   maxAge: 60 * 60,
-    // })
     axiosServices.defaults.headers.common.Authorization = `Bearer ${accessToken}`;
   } else {
     localStorage.removeItem('serviceToken');
     localStorage.removeItem('refreshToken');
-    // destroyCookie(null, 'serviceToken')
-    // destroyCookie(null, 'refreshToken')
-
     localStorage.removeItem('role');
     localStorage.removeItem('user');
     delete axiosServices.defaults.headers.common.Authorization;
   }
 };
 
-// ==============================|| CONTEXT ||============================== //
-
-const JWTContext = createContext<JWTContextType | null>(null);
+// ==============================|| PROVIDER ||============================== //
 
 export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
-  const [state, dispatch] = useReducer(authReducer, initialState);
+  const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState<any>(null);
 
-  // ==============================|| INITIALIZE AUTH ||============================== //
+  // Initialize auth state
   useEffect(() => {
     const init = async () => {
       try {
         const accessToken = localStorage.getItem('serviceToken');
         const refreshToken = localStorage.getItem('refreshToken');
+        const savedUser = localStorage.getItem('user');
 
-        // 1️⃣ Access token still valid
         if (accessToken && verifyToken(accessToken)) {
           setSession(accessToken);
-          dispatch({
-            type: LOGIN,
-            payload: {
-              isLoggedIn: true,
-              user: JSON.parse(localStorage.getItem('user') || '{}')
+          setUser(savedUser ? JSON.parse(savedUser) : null);
+          setIsLoggedIn(true);
+        } else if (refreshToken) {
+          try {
+            const response = await axiosServices.post('https://xp-backend.sytes.net/auth/refresh', { refreshToken });
+            const { accessToken: newAccessToken, refreshToken: newRefreshToken, user } = response.data;
+
+            if (newAccessToken) {
+              localStorage.setItem('serviceToken', newAccessToken);
+              localStorage.setItem('refreshToken', newRefreshToken);
+              if (user) localStorage.setItem('user', JSON.stringify(user));
+
+              setSession(newAccessToken);
+              setUser(user);
+              setIsLoggedIn(true);
             }
-          });
-          return;
-        }
-
-        // 2️⃣ Attempt to refresh
-        if (refreshToken) {
-          const response = await axiosServices.post(`${AUTH_URL}/refresh`, { refreshToken });
-          const { accessToken: newAccessToken, refreshToken: newRefreshToken } = response.data;
-
-          if (newAccessToken) {
-            localStorage.setItem('serviceToken', newAccessToken);
-            localStorage.setItem('refreshToken', newRefreshToken);
-            setSession(newAccessToken);
-
-            dispatch({
-              type: LOGIN,
-              payload: {
-                isLoggedIn: true,
-                user: JSON.parse(localStorage.getItem('user') || '{}')
-              }
-            });
-            return;
+          } catch (refreshError) {
+            console.warn('Token refresh failed, logging out:', refreshError);
+            setSession(null);
+            setIsLoggedIn(false);
           }
+        } else {
+          setSession(null);
+          setIsLoggedIn(false);
         }
-
-        // 3️⃣ No valid tokens
-        setSession(null);
-        dispatch({ type: LOGOUT });
       } catch (error) {
         console.error('Auth initialization error:', error);
         setSession(null);
-        dispatch({ type: LOGOUT });
+        setIsLoggedIn(false);
+      } finally {
+        setIsInitialized(true);
       }
     };
 
@@ -126,9 +91,7 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
   // ==============================|| AUTH ACTIONS ||============================== //
 
   const login = async (email: string, password: string) => {
-    setSession();
-    const response = await axiosServices.post(`${AUTH_URL}`, { email, password });
-
+    const response = await axiosServices.post('https://xp-backend.sytes.net/auth', { email, password });
     const { token, user } = response.data;
     const { accessToken, refreshToken } = token;
 
@@ -136,49 +99,33 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
     localStorage.setItem('user', JSON.stringify(user));
     localStorage.setItem('role', user.role);
 
-    // setCookie(null, 'refreshToken', refreshToken, {
-    //   path: '/',
-    //   maxAge: 60 * 60,
-    // })
-
-
     setSession(accessToken);
-
-    dispatch({
-      type: LOGIN,
-      payload: {
-        isLoggedIn: true,
-        user
-      }
-    });
+    setUser(user);
+    setIsLoggedIn(true);
   };
 
   const register = async (email: string, password: string, displayName: string) => {
     const id = chance.bb_pin();
-    await axiosServices.post(`${AUTH_URL}/signup`, {
-      id,
-      email,
-      password,
-      displayName
-    });
+    await axiosServices.post('https://xp-backend.sytes.net/auth/signup', { id, email, password, displayName });
   };
 
   const logout = () => {
     setSession(null);
-    dispatch({ type: LOGOUT });
+    setUser(null);
+    setIsLoggedIn(false);
   };
 
   const resetPassword = async (email: string) => {};
   const updateProfile = () => {};
 
-  if (!state.isInitialized) {
-    return <Loader />;
-  }
+  if (!isInitialized) return <Loader />;
 
   return (
     <JWTContext.Provider
       value={{
-        ...state,
+        isInitialized,
+        isLoggedIn,
+        user,
         login,
         logout,
         register,
