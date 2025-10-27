@@ -1,7 +1,7 @@
 import axios, { AxiosRequestConfig } from 'axios';
 
 const axiosServices = axios.create({
-  baseURL: import.meta.env.VITE_APP_API_URL || 'http://localhost:3010/',
+  baseURL: import.meta.env.VITE_APP_API_URL || 'http://localhost:4000/',
 });
 
 // ==============================|| REQUEST INTERCEPTOR ||============================== //
@@ -30,7 +30,7 @@ axiosServices.interceptors.response.use(
       if (refreshToken) {
         try {
           const response = await axios.post(
-            `${import.meta.env.VITE_APP_API_URL || 'http://localhost:3010/'}auth/refresh`,
+            `${import.meta.env.VITE_APP_API_URL || 'http://localhost:4000/'}auth/refresh`,
             { refreshToken }
           );
 
