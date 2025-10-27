@@ -176,7 +176,7 @@ const DashboardAnalytics = () => {
         <ReportCard primary={currentAlerts} secondary="Current alerts" color={theme.palette.error.main} iconPrimary={CalendarOutlined} />
       </Grid>
       <Grid item xs={12} lg={3} sm={6}>
-        <ReportCard primary={`${averageAqi.toFixed(2)}µg/m³`} secondary="Average AQI" color={theme.palette.primary.main} iconPrimary={BarChartOutlined} />
+        <ReportCard primary={`${averageAqi.toFixed(2)}`} secondary="Average AQI" color={theme.palette.primary.main} iconPrimary={BarChartOutlined} />
       </Grid>
       <Grid item md={8} sx={{ display: { sm: 'none', md: 'block', lg: 'none' } }} />
 
