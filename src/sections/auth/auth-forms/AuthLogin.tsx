@@ -32,6 +32,7 @@ import { fetcher } from 'utils/axios';
 // assets
 import { EyeOutlined, EyeInvisibleOutlined } from '@ant-design/icons';
 import { preload } from 'swr';
+import { toast, Toaster } from 'sonner';
 
 // ============================|| JWT - LOGIN ||============================ //
 
@@ -52,6 +53,8 @@ const AuthLogin = ({ isDemo = false }: { isDemo?: boolean }) => {
 
   return (
     <>
+      <Toaster position="top-right" richColors />
+
       <Formik
         initialValues={{
           email: '',
@@ -63,18 +66,34 @@ const AuthLogin = ({ isDemo = false }: { isDemo?: boolean }) => {
           password: Yup.string().max(255).required('Password is required')
         })}
         onSubmit={async (values, { setErrors, setStatus, setSubmitting }) => {
+          const toastId = toast.loading('Logging in...');
           try {
             await login(values.email, values.password);
+            toast.success('Login successful!', { id: toastId });
             if (scriptedRef.current) {
               setStatus({ success: true });
               setSubmitting(false);
-              preload('api/menu/dashboard', fetcher); // load menu on login success
+              preload('api/menu/dashboard', fetcher);
             }
           } catch (err: any) {
             console.error(err);
+
+            let message = 'Login failed. Please try again.';
+            const status = err?.response?.status;
+            const backendMessage = err?.response?.data?.message || err?.message;
+
+            // Handle specific backend messages
+            if (status === 403 && backendMessage?.includes('pending approval')) {
+              message = 'Your account is pending approval by an administrator.';
+            } else if (backendMessage) {
+              message = backendMessage;
+            }
+
+            toast.error(message, { id: toastId });
+
             if (scriptedRef.current) {
               setStatus({ success: false });
-              setErrors({ submit: err.message });
+              setErrors({ submit: message });
               setSubmitting(false);
             }
           }

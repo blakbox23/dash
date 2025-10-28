@@ -24,6 +24,7 @@ import AlertsSummary from 'sections/trends/alerts-chart';
 import AnalyticsTimeSeries from 'sections/trends/analytics-timeseries-chart';
 import AqiDistributionPieChart from 'sections/trends/api-pie-chart';
 import ComparisonChart from 'sections/trends/comparison-chart';
+import { toast, Toaster } from 'sonner';
 import { ThemeMode } from 'types/config';
 import { SnackbarProps } from 'types/snackbar';
 
@@ -81,15 +82,18 @@ function Analytics() {
   }, [stations]);
 
   const handleSubmitSubscribe = async () => {
+    const toastId = toast.loading('Updating stations...');
     try {
       await updateUserReportStations(user?.id, selectedStations);
-      openSnackbar({ open: true, message: 'Stations updated!', variant: 'success' } as SnackbarProps);
+      toast.success('Stations updated!', { id: toastId });
     } catch (err) {
       console.error(err);
-      openSnackbar({ open: true, message: 'Failed to update stations!', variant: 'error' } as SnackbarProps);
+      toast.error('Failed to update stations!', { id: toastId });
+    } finally {
+      setOpenSubscribeDialog(false);
     }
-    setOpenSubscribeDialog(false);
   };
+  
 
   const handleGenerateReport = () => {
     if (!reportStation || !reportStart || !reportEnd) return;
@@ -99,6 +103,8 @@ function Analytics() {
 
   return (
     <>
+          <Toaster position="top-right" richColors />
+
       <Grid container spacing={2.5} sx={{ mb: 12 }}>
         <div style={{ marginLeft: 'auto' }}>
           <Button
