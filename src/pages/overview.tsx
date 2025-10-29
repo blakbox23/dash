@@ -142,18 +142,6 @@ const DashboardAnalytics = () => {
     return '#00e400'; // default – Good
   }
 
-  const [value, setValue] = useState('today');
-  const [slot, setSlot] = useState('week');
-  const [quantity, setQuantity] = useState('By volume');
-
-  const handleQuantity = (e: SelectChangeEvent) => {
-    setQuantity(e.target.value as string);
-  };
-
-  const handleChange = (event: React.MouseEvent<HTMLElement>, newAlignment: string) => {
-    if (newAlignment) setSlot(newAlignment);
-  };
-
   return (
     <Grid container rowSpacing={4.5} columnSpacing={3}>
       <Grid item xs={12}>

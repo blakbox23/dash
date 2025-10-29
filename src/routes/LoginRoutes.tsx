@@ -3,6 +3,8 @@ import { lazy } from 'react';
 // project import
 import AuthLayout from 'layout/Auth';
 import Loadable from 'components/Loadable';
+import PrivacyPolicy from 'pages/auth/privacy-policy';
+import TermsOfService from 'pages/auth/terms-of-service';
 
 // render - login
 const AuthLogin = Loadable(lazy(() => import('pages/auth/login')));
@@ -48,6 +50,14 @@ const LoginRoutes = {
         {
           path: 'code-verification',
           element: <AuthCodeVerification />
+        },
+        {
+          path: 'privacy-policy',
+          element: <PrivacyPolicy />
+        },
+        {
+          path: 'terms-of-service',
+          element: <TermsOfService />
         }
       ]
     }

@@ -1,9 +1,9 @@
-import { useEffect, useRef } from "react";
-import L, { divIcon } from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { Station } from "api/maps-api";
+import { useEffect, useRef } from 'react';
+import L, { divIcon } from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { Station } from 'api/maps-api';
 
-type PollutantType = "aqi" | "pm25" | "pm10";
+type PollutantType = 'aqi' | 'pm25' | 'pm10';
 
 interface MapComponentProps {
   stations: Station[];
@@ -22,7 +22,7 @@ export default function MapComponent({
   onStationSelect,
   getPollutantValue,
   getPollutantColor,
-  getPollutantLevel,
+  getPollutantLevel
 }: MapComponentProps) {
   const mapRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<L.Map | null>(null);
@@ -32,30 +32,26 @@ export default function MapComponent({
   useEffect(() => {
     const updateTime = () => {
       if (timeRef.current) {
-        timeRef.current.textContent = new Date().toLocaleString("en-KE", {
-          timeZone: "Africa/Nairobi",
+        timeRef.current.textContent = new Date().toLocaleString('en-KE', {
+          timeZone: 'Africa/Nairobi',
           hour12: false,
-          year: "numeric",
-          month: "short",
-          day: "numeric",
-          hour: "2-digit",
-          minute: "2-digit",
-          second: "2-digit",
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
         });
-        
       }
     };
-  
+
     updateTime(); // Initialize immediately
     const interval = setInterval(updateTime, 1000); // 🔥 Update every second
     return () => clearInterval(interval);
   }, []);
-  
+
   // Helper to create custom icon
-  const createCustomIcon = (
-    station: Station,
-    isSelected: boolean
-  ): L.DivIcon => {
+  const createCustomIcon = (station: Station, isSelected: boolean): L.DivIcon => {
     const value = getPollutantValue(station, selectedPollutant);
     const color = getPollutantColor(value, selectedPollutant);
     return divIcon({
@@ -75,14 +71,14 @@ export default function MapComponent({
           box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
           cursor: pointer;
           transition: all 0.2s;
-          ${isSelected ? "transform: scale(1.6); box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.2);" : ""}
+          ${isSelected ? 'transform: scale(1.6); box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.2);' : ''}
         ">
           ${value}
         </div>
       `,
-      className: "custom-marker",
+      className: 'custom-marker',
       iconSize: [32, 32],
-      iconAnchor: [16, 16],
+      iconAnchor: [16, 16]
     });
   };
 
@@ -95,9 +91,8 @@ export default function MapComponent({
       );
 
       // Add base map
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution:
-          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
       }).addTo(leafletMapRef.current);
 
       // Add group layer for markers
@@ -115,20 +110,16 @@ export default function MapComponent({
       const lng = parseFloat(String(station.lng));
 
       if (isNaN(lat) || isNaN(lng)) {
-        console.warn(
-          `Skipping station ${station.name || station.id} due to invalid coordinates`,
-          lat,
-          lng
-        );
+        console.warn(`Skipping station ${station.name || station.id} due to invalid coordinates`, lat, lng);
         return;
       }
 
       const marker = L.marker([lat, lng], {
-        icon: createCustomIcon(station, selectedStation?.id === station.id),
+        icon: createCustomIcon(station, selectedStation?.id === station.id)
       });
 
       const value = getPollutantValue(station, selectedPollutant);
-      const unit = selectedPollutant === "aqi" ? "" : "μg/m³";
+      const unit = selectedPollutant === 'aqi' ? '' : 'μg/m³';
 
       marker.bindPopup(`
         <div class="p-2">
@@ -136,10 +127,10 @@ export default function MapComponent({
             ${
               station.timeStamp
                 ? `<div class="text-xs text-[#98A2B3] mb-1">
-                    ${new Date(station.timeStamp).toLocaleString("en-KE", { timeZone: "Africa/Nairobi" })}
+                    ${new Date(station.timeStamp).toLocaleString('en-KE', { timeZone: 'Africa/Nairobi' })}
                   </div>`
-                : ""
-      }
+                : ''
+            }
           <div class="text-sm text-[#667085]">
             ${selectedPollutant.toUpperCase()}: ${value}${unit} - ${getPollutantLevel(value, selectedPollutant)}
           </div>
@@ -151,21 +142,13 @@ export default function MapComponent({
         </div>
       `);
 
-      marker.on("click", () => onStationSelect(station));
+      marker.on('click', () => onStationSelect(station));
       marker.addTo(markerGroupRef.current!);
     });
 
     // Center map on selected station (safely)
-    if (
-      selectedStation &&
-      typeof selectedStation.lat === "number" &&
-      typeof selectedStation.lng === "number"
-    ) {
-      leafletMapRef.current.setView(
-        [selectedStation.lat, selectedStation.lng],
-        13,
-        { animate: true }
-      );
+    if (selectedStation && typeof selectedStation.lat === 'number' && typeof selectedStation.lng === 'number') {
+      leafletMapRef.current.setView([selectedStation.lat, selectedStation.lng], 13, { animate: true });
     }
 
     // Cleanup function (only remove if component unmounts)
@@ -175,22 +158,14 @@ export default function MapComponent({
         leafletMapRef.current = null;
       }
     };
-  }, [
-    stations,
-    selectedStation,
-    selectedPollutant,
-    getPollutantValue,
-    getPollutantColor,
-    getPollutantLevel,
-    onStationSelect,
-  ]);
+  }, [stations, selectedStation, selectedPollutant, getPollutantValue, getPollutantColor, getPollutantLevel, onStationSelect]);
 
   return (
     <div className="h-full">
       <div className="flex items-center text-sm text-gray-700 mb-2">
         <span ref={timeRef} className="ml-2 font-medium" />
       </div>
-      <div ref={mapRef} style={{ height: "86vh", width: "100%" }} />
+      <div ref={mapRef} style={{ height: '86vh', width: '100%' }} />
     </div>
   );
 }

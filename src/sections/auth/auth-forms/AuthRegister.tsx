@@ -259,11 +259,11 @@ const AuthRegister = () => {
               <Grid item xs={12}>
                 <Typography variant="body2">
                   By Signing up, you agree to our &nbsp;
-                  <Link variant="subtitle2" component={RouterLink} to="#">
+                  <Link variant="subtitle2" component={RouterLink} to="/terms-of-service">
                     Terms of Service
                   </Link>
                   &nbsp; and &nbsp;
-                  <Link variant="subtitle2" component={RouterLink} to="#">
+                  <Link variant="subtitle2" component={RouterLink} to="/privacy-policy">
                     Privacy Policy
                   </Link>
                 </Typography>

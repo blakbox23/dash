@@ -5,66 +5,95 @@ import { useTheme } from '@mui/material/styles';
 // project import
 import MainCard from 'components/MainCard';
 
-//asset
-import WelcomeImage from 'assets/images/analytics/welcome-banner.png';
-import WelcomeImageArrow from 'assets/images/analytics/welcome-arrow.png';
-
 // types
-import { ThemeDirection, ThemeMode } from 'types/config';
+import { ThemeMode } from 'types/config';
 import { useNavigate } from 'react-router-dom';
-
 
 const WelcomeBanner = () => {
   const navigate = useNavigate();
   const theme = useTheme();
 
   return (
-    <MainCard
-      border={false}
+    <Box
       sx={{
-        background:
-          theme.direction === ThemeDirection.RTL
-            ? `linear-gradient(60.38deg, ${theme.palette.primary.lighter} 114%, ${theme.palette.primary.light} 34.42%, ${theme.palette.primary.main} 60.95%, ${theme.palette.primary.dark} 84.83%, ${theme.palette.primary.darker} 94.37%)`
-            : `linear-gradient(250.38deg, ${theme.palette.primary.lighter} 2.39%, ${theme.palette.primary.light} 34.42%, ${theme.palette.primary.main} 60.95%, ${theme.palette.primary.dark} 84.83%, ${theme.palette.primary.darker} 104.37%)`
+        borderRadius: '32px',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #2E8B57 0%, #20B2AA 100%)', // green-teal gradient
+        boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+        mb: 3
       }}
     >
-      <Grid container>
-        <Grid item md={6} sm={6} xs={12}>
-          <Stack spacing={2} sx={{ padding: 3.4 }}>
-            <Typography variant="h2" color={theme.palette.background.paper}>
-              Nairobi Air Quality Dashboard
-            </Typography>
-            <Typography variant="h6" color={theme.palette.background.paper}>
-              View complete statistics of air quality in Nairobi
-            </Typography>
-            <Box>
-              <Button
-                variant="outlined"
-                color="secondary"
+      <MainCard border={false} sx={{ background: 'transparent' }}>
+        <Grid container alignItems="center">
+          {/* Left section */}
+          <Grid item md={6} sm={6} xs={12}>
+            <Stack spacing={2} sx={{ padding: 4 }}>
+              <Typography
+                variant="h2"
                 sx={{
-                  color: theme.palette.background.paper,
-                  borderColor: theme.palette.background.paper,
-                  '&:hover': {
-                    color: 'background.paper',
-                    borderColor: theme.palette.background.paper,
-                    bgcolor: theme.palette.mode === ThemeMode.DARK ? 'primary.darker' : 'primary.main'
-                  }
+                  color: '#fff',
+                  fontWeight: 700,
+                  textShadow: '0 2px 4px rgba(0,0,0,0.2)'
                 }}
-                onClick={() => navigate('/analytics')}
               >
-                View analytics
-              </Button>
-            </Box>
-          </Stack>
-        </Grid>
-        <Grid item sm={6} xs={12} sx={{ display: { xs: 'none', sm: 'initial' } }}>
-          <Stack sx={{ position: 'relative', pr: { sm: 3, md: 8 } }} justifyContent="center" alignItems="flex-end">
-            <Box sx={{ position: 'absolute', bottom: 0, right: '10%' }}>
+                Nairobi Air Quality Dashboard
+              </Typography>
+
+              <Typography
+                variant="h6"
+                sx={{
+                  color: 'rgba(255,255,255,0.9)',
+                  fontWeight: 400
+                }}
+              >
+                View complete statistics of air quality in Nairobi
+              </Typography>
+
+              <Box>
+                <Button
+                  variant="outlined"
+                  sx={{
+                    color: '#fff',
+                    borderColor: '#fff',
+                    px: 3,
+                    py: 1,
+                    borderRadius: '12px',
+                    textTransform: 'none',
+                    fontWeight: 600,
+                    '&:hover': {
+                      bgcolor:
+                        theme.palette.mode === ThemeMode.DARK
+                          ? 'rgba(255,255,255,0.12)'
+                          : 'rgba(255,255,255,0.15)',
+                      color: '#fff',
+                      borderColor: '#fff'
+                    }
+                  }}
+                  onClick={() => navigate('/analytics')}
+                >
+                  View analytics
+                </Button>
               </Box>
-          </Stack>
+            </Stack>
+          </Grid>
+
+          {/* Right section (optional image or content area) */}
+          <Grid
+            item
+            sm={6}
+            xs={12}
+            sx={{ display: { xs: 'none', sm: 'initial' } }}
+          >
+            <Stack
+              sx={{ position: 'relative', pr: { sm: 3, md: 8 } }}
+              justifyContent="center"
+              alignItems="flex-end"
+            >
+            </Stack>
+          </Grid>
         </Grid>
-      </Grid>
-    </MainCard>
+      </MainCard>
+    </Box>
   );
 };
 
