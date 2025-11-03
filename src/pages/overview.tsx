@@ -193,11 +193,8 @@ const DashboardAnalytics = () => {
           <Grid item>
             <Typography variant="h5">Current reading</Typography>
           </Grid>
-          <Grid item />
         </Grid>
-        <MainCard sx={{ mt: 2 }}>
           <CurrentReadingTable />
-        </MainCard>
       </Grid>
 
       {/* row 4 */}

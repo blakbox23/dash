@@ -16,7 +16,8 @@ import useAuth from 'hooks/useAuth';
 
 // assets
 import avatar1 from 'assets/images/users/avatar-1.png';
-import { LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import { DownOutlined, LogoutOutlined, SettingOutlined, UserOutlined } from '@ant-design/icons';
+import ExpandMoreOutlinedIcon from '@mui/icons-material/ExpandMoreOutlined';
 
 // types
 import { ThemeMode } from 'types/config';
@@ -108,10 +109,13 @@ const Profile = () => {
         onClick={handleToggle}
       >
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ p: 0.5 }}>
-          <Avatar alt="profile user" src={avatar1} size="sm" />
-          <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
-            {user?.name}
-          </Typography>
+          {/* <Avatar alt="profile user" src={avatar1} size="sm" /> */}
+          {user && (
+            <Typography variant="subtitle1" sx={{ textTransform: 'capitalize' }}>
+              {user.displayName}
+            </Typography>
+          )}
+          <ExpandMoreOutlinedIcon />
         </Stack>
       </ButtonBase>
       <Popper
