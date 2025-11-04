@@ -142,8 +142,24 @@ export default function MapComponent({
         </div>
       `);
 
-      marker.on('click', () => onStationSelect(station));
+      // ✅ Open popup immediately on click
+      marker.on('click', () => {
+        onStationSelect(station);
+        marker.openPopup();
+      });
+
       marker.addTo(markerGroupRef.current!);
+
+       // ✅ Auto-open popup if station already selected
+       if (
+        selectedStation &&
+        selectedStation.id === station.id &&
+        typeof selectedStation.lat === 'number' &&
+        typeof selectedStation.lng === 'number'
+      ) {
+        marker.openPopup();
+      }
+      
     });
 
     // Center map on selected station (safely)
