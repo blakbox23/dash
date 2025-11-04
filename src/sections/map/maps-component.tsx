@@ -164,7 +164,7 @@ export default function MapComponent({
 
     // Center map on selected station (safely)
     if (selectedStation && typeof selectedStation.lat === 'number' && typeof selectedStation.lng === 'number') {
-      leafletMapRef.current.setView([selectedStation.lat, selectedStation.lng], 13, { animate: true });
+      leafletMapRef.current.setView([selectedStation.lat, selectedStation.lng], 12, { animate: true });
     }
 
     // Cleanup function (only remove if component unmounts)
