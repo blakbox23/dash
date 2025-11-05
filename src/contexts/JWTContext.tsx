@@ -9,6 +9,8 @@ const chance = new Chance();
 
 const JWTContext = createContext<JWTContextType | null>(null);
 
+const API_BASE_URL = import.meta.env.VITE_APP_AUTH_URL || 'https://xp-backend.sytes.net';
+
 // ==============================|| HELPERS ||============================== //
 
 const verifyToken = (token: string | null): boolean => {
@@ -55,7 +57,7 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
           setIsLoggedIn(true);
         } else if (refreshToken) {
           try {
-            const response = await axiosServices.post('https://xp-backend.sytes.net/auth/refresh', { refreshToken });
+            const response = await axiosServices.post(`${API_BASE_URL}/auth/refresh`, { refreshToken });
             const { accessToken: newAccessToken, refreshToken: newRefreshToken, user } = response.data;
 
             if (newAccessToken) {
@@ -91,7 +93,7 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
   // ==============================|| AUTH ACTIONS ||============================== //
 
   const login = async (email: string, password: string) => {
-    const response = await axiosServices.post('https://xp-backend.sytes.net/auth', { email, password });
+    const response = await axiosServices.post(`${API_BASE_URL}/auth`, { email, password });
     const { token, user } = response.data;
     const { accessToken, refreshToken } = token;
 
@@ -106,7 +108,7 @@ export const JWTProvider = ({ children }: { children: React.ReactElement }) => {
 
   const register = async (email: string, password: string, displayName: string) => {
     const id = chance.bb_pin();
-    await axiosServices.post('https://xp-backend.sytes.net/auth/signup', { id, email, password, displayName });
+    await axiosServices.post(`${API_BASE_URL}/auth/signup`, { id, email, password, displayName });
   };
 
   const logout = () => {
