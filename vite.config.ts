@@ -14,7 +14,8 @@ export default defineConfig(({ mode }) => {
   return {
     // 👇 Important: use '/dashboard/' explicitly for production
     // You can still override with VITE_APP_BASE_NAME if needed.
-    base: mode === 'development' ? '/' : env.VITE_APP_BASE_NAME || '/dashboard/',
+    // base: mode === 'development' ? '/' : env.VITE_APP_BASE_NAME || '/dashboard/',
+    base: '/',
 
     plugins: [react(), viteTsconfigPaths()],
 
